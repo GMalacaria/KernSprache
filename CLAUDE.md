@@ -78,13 +78,13 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 - Commit piccoli, ognuno con una sola modifica logica.
 
 ## Git: commit, branch e PR
-- **Conventional Commits**, controllati da commitlint (hook `commit-msg` installato da `pnpm install` e job in CI): `tipo(scope): descrizione`, in inglese, all'imperativo.
+- **Conventional Commits**, controllati da commitlint (hook `commit-msg` installato da `pnpm install`; in CI si controlla il titolo della PR): `tipo(scope): descrizione`, in inglese, all'imperativo.
   - Tipi: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`, `ci`, `build`, `style`, `revert`.
   - Scope ammessi: `web`, `db`, `functions`, `ai`, `push`, `ci`, `deps`, `docs` (facoltativo).
   - Esempi: `feat(ai): add tutor-chat edge function`, `fix(db): restrict ai_usage to own rows`.
 - **Branch:** `main` è sempre deployabile. Si lavora su branch brevi creati da `main`: `feat/<slug>`, `fix/<slug>`, `chore/<slug>`.
 - **PR:** piccole (un passo della roadmap o meno), titolo in formato Conventional Commits, template in `.github/pull_request_template.md`. Si fa merge solo con la CI verde, in **squash merge**: il titolo della PR diventa il commit su `main`.
-- **CI** (`.github/workflows/ci.yml`): commitlint su commit e titolo PR, lint + typecheck + build della PWA, migration + test RLS + controllo che `database.types.ts` sia aggiornato.
+- **CI** (`.github/workflows/ci.yml`): commitlint sul titolo della PR, lint + typecheck + build della PWA, migration + test RLS + controllo che `database.types.ts` sia aggiornato.
 - Schema: ogni modifica passa da una nuova migration (mai modificare quelle già su `main`), con test RLS se tocca tabelle utente.
 
 ## Regole per l'assistente IA (Claude Code)

@@ -10,22 +10,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  commits:
-    name: Commit messages
+  # With squash merge only the PR title lands on main; single commits are
+  # checked locally by the commit-msg hook.
+  pr-title:
+    name: PR title
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Lint commit messages
-        run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
       - name: Lint PR title
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
