@@ -60,13 +60,14 @@ Formato delle correzioni:
 
 ## Modello dati (essenziale)
 - `profiles`: id (= auth.uid), level (A1–B2), goal, reminder_time, timezone
-- `curriculum_topics`: id, level, order, slug, title
+- `curriculum_topics`: id, level, sort_order, slug, title
 - `sessions`: id, user_id, topic_id, kind (lesson|dialogue|review), started_at, ended_at
 - `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at
 - `vocab_items`: id, user_id, en, it, campi FSRS (due, stability, difficulty, reps, lapses, state, last_review)
 - `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at
+- `ai_usage`: user_id, function_name, model, token in/out/cache (scritta solo dalle Edge Functions con la service role)
 
-Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.uid()`.
+Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.uid()`. Il profilo viene creato da un trigger su `auth.users`. `curriculum_topics` è in sola lettura per gli utenti; `ai_usage` è in sola lettura (propri record). I test RLS (pgTAP) sono in `supabase/tests`.
 
 ## Convenzioni
 - TypeScript strict, niente `any`.
@@ -89,4 +90,20 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 5. Valutazione della pronuncia (es. Azure Pronunciation Assessment).
 
 ## Comandi
-Da completare dopo lo scaffolding (dev, build, lint, test, `supabase start`, deploy delle functions).
+Requisiti: Node 22, pnpm 10, Docker (per Supabase locale).
+
+```bash
+pnpm install
+pnpm db:start                 # avvia Supabase locale (stampa URL e chiavi)
+cp apps/web/.env.example apps/web/.env.local   # incolla la PUBLISHABLE_KEY
+pnpm dev                      # PWA su http://localhost:5173
+pnpm build                    # typecheck + build di produzione (con service worker)
+pnpm lint
+pnpm exec supabase test db    # test RLS (pgTAP)
+pnpm db:reset                 # riapplica migration e seed
+pnpm db:types                 # rigenera apps/web/src/lib/database.types.ts dopo una migration
+pnpm db:stop
+```
+- Email locali (magic link): Mailpit su http://127.0.0.1:54324.
+- Nuova migration: `pnpm exec supabase migration new <nome>`.
+- Deploy delle functions: da completare quando verranno create.
