@@ -77,6 +77,21 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 - I segreti vanno solo in `.env` o nei secret di Supabase; `.env` va nel `.gitignore`.
 - Commit piccoli, ognuno con una sola modifica logica.
 
+## Git: commit, branch e PR
+- **Conventional Commits**, controllati da commitlint (hook `commit-msg` installato da `pnpm install` e job in CI): `tipo(scope): descrizione`, in inglese, all'imperativo.
+  - Tipi: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`, `ci`, `build`, `style`, `revert`.
+  - Scope ammessi: `web`, `db`, `functions`, `ai`, `push`, `ci`, `deps`, `docs` (facoltativo).
+  - Esempi: `feat(ai): add tutor-chat edge function`, `fix(db): restrict ai_usage to own rows`.
+- **Branch:** `main` è sempre deployabile. Si lavora su branch brevi creati da `main`: `feat/<slug>`, `fix/<slug>`, `chore/<slug>`.
+- **PR:** piccole (un passo della roadmap o meno), titolo in formato Conventional Commits, template in `.github/pull_request_template.md`. Si fa merge solo con la CI verde, in **squash merge**: il titolo della PR diventa il commit su `main`.
+- **CI** (`.github/workflows/ci.yml`): commitlint su commit e titolo PR, lint + typecheck + build della PWA, migration + test RLS + controllo che `database.types.ts` sia aggiornato.
+- Schema: ogni modifica passa da una nuova migration (mai modificare quelle già su `main`), con test RLS se tocca tabelle utente.
+
+## Regole per l'assistente IA (Claude Code)
+- Permessi in `.claude/settings.json`: comandi di dev/test consentiti; lettura dei file `.env`, `supabase db push`, deploy delle functions e force push vietati.
+- Prima di committare: `pnpm lint`, `pnpm build` e, se cambia lo schema, `pnpm test:db` e `pnpm db:types`.
+- Non aprire PR, non fare push su `main` e non fare deploy senza richiesta esplicita.
+
 ## Costi
 - Obiettivo: meno di ~€15 al mese.
 - Limite di spesa mensile impostato nella console Anthropic.
@@ -99,7 +114,7 @@ cp apps/web/.env.example apps/web/.env.local   # incolla la PUBLISHABLE_KEY
 pnpm dev                      # PWA su http://localhost:5173
 pnpm build                    # typecheck + build di produzione (con service worker)
 pnpm lint
-pnpm exec supabase test db    # test RLS (pgTAP)
+pnpm test:db                  # test RLS (pgTAP)
 pnpm db:reset                 # riapplica migration e seed
 pnpm db:types                 # rigenera apps/web/src/lib/database.types.ts dopo una migration
 pnpm db:stop
