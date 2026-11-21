@@ -8,7 +8,8 @@ insert into auth.users (id, email) values
   ('22222222-2222-2222-2222-222222222222', 'bob@example.com');
 
 select is(
-  (select count(*) from public.profiles)::int, 2,
+  (select count(*) from public.profiles
+    where id in ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222'))::int, 2,
   'signup trigger creates a profile per user'
 );
 
