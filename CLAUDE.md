@@ -105,20 +105,41 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 5. Valutazione della pronuncia (es. Azure Pronunciation Assessment).
 
 ## Comandi
-Requisiti: Node 22, pnpm 10, Docker (per Supabase locale).
+Requisiti: Node 22, pnpm 10, Docker (per Supabase locale). Tutti i comandi si lanciano dalla root del repo.
 
+### Primo avvio
 ```bash
-pnpm install
-pnpm db:start                 # avvia Supabase locale (stampa URL e chiavi)
-cp apps/web/.env.example apps/web/.env.local   # incolla la PUBLISHABLE_KEY
-pnpm dev                      # PWA su http://localhost:5173
-pnpm build                    # typecheck + build di produzione (con service worker)
-pnpm lint
-pnpm test:db                  # test RLS (pgTAP)
-pnpm db:reset                 # riapplica migration e seed
-pnpm db:types                 # rigenera apps/web/src/lib/database.types.ts dopo una migration
-pnpm db:stop
+pnpm install                                   # dipendenze + hook git (commitlint)
+pnpm db:start                                  # avvia Supabase locale, stampa URL e chiavi
+cp apps/web/.env.example apps/web/.env.local   # incolla la PUBLISHABLE_KEY stampata da db:start
+pnpm dev                                       # PWA su http://localhost:5173
 ```
-- Email locali (magic link): Mailpit su http://127.0.0.1:54324.
-- Nuova migration: `pnpm exec supabase migration new <nome>`.
-- Deploy delle functions: da completare quando verranno create.
+
+### Sviluppo quotidiano
+| Comando | Cosa fa |
+|---|---|
+| `pnpm dev` | PWA in sviluppo su http://localhost:5173 (service worker attivo anche in dev) |
+| `pnpm build` | typecheck + build di produzione in `apps/web/dist` |
+| `pnpm --filter web preview` | serve la build su http://localhost:4173 |
+| `pnpm lint` | ESLint sulla PWA |
+| `pnpm typecheck` | solo controllo dei tipi |
+
+### Database (Supabase locale)
+| Comando | Cosa fa |
+|---|---|
+| `pnpm db:start` / `pnpm db:stop` | avvia / ferma lo stack locale |
+| `pnpm exec supabase status` | mostra URL e chiavi locali |
+| `pnpm exec supabase migration new <nome>` | crea una nuova migration in `supabase/migrations` |
+| `pnpm db:reset` | ricrea il DB applicando migration e `seed.sql` |
+| `pnpm test:db` | test RLS (pgTAP) in `supabase/tests` |
+| `pnpm db:types` | rigenera `apps/web/src/lib/database.types.ts` (da fare dopo ogni migration) |
+
+URL locali: API http://127.0.0.1:54321, Studio http://127.0.0.1:54323, Mailpit (email/magic link) http://127.0.0.1:54324, Postgres `postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
+
+### Git e qualità
+| Comando | Cosa fa |
+|---|---|
+| `pnpm exec commitlint --edit` | verifica l'ultimo messaggio di commit (lo fa già l'hook) |
+| `echo "feat(web): ..." \| pnpm exec commitlint` | verifica un titolo di PR prima di aprirla |
+
+Prima di una PR: `pnpm lint && pnpm build && pnpm test:db`.
