@@ -51,6 +51,26 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"lesson_contents": {
+                  Row: {
+                    "content": NonNullable<Json>,"created_at": string,"lesson_id": number,"prompt_version": string,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "content": NonNullable<Json>,"created_at"?: string,"lesson_id": number,"prompt_version": string,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"user_id": string
+                  }
+                  Update: {
+                    "content"?: NonNullable<Json>,"created_at"?: string,"lesson_id"?: number,"prompt_version"?: string,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lesson_contents_lesson_id_fkey"
+      columns: ["lesson_id"]
+isOneToOne: false
+      referencedRelation: "lessons"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"lesson_progress": {
                   Row: {
                     "completed_at": string,"lesson_id": number,"score": number,"user_id": string
