@@ -16,7 +16,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - **Backend:** Supabase (Auth, Postgres, Edge Functions in Deno, `pg_cron`).
 - **IA:** API di Google Gemini (credito di Google AI Studio) come provider predefinito, Anthropic come alternativa; si sceglie con `AI_PROVIDER`. Il provider viene chiamato **solo dalle Edge Functions**: la chiave API non deve mai arrivare al client.
 - **Voce:** da voce a testo tramite API di trascrizione (es. OpenAI); da testo a voce con `speechSynthesis` del browser nell'MVP, con un'API TTS come possibile alternativa.
-- **Spaced repetition:** `ts-fsrs`.
+- **Spaced repetition:** `ts-fsrs`, calcolato nel client (`src/lib/fsrs.ts`): la PWA aggiorna i campi FSRS delle proprie righe tramite RLS. Le carte sono le parole (`vocab_items`) e gli errori (`mistakes`).
 - **Push:** Web Push con chiavi VAPID, inviato da un'Edge Function richiamata da `pg_cron`.
 - **Hosting frontend:** Vercel, Netlify o Cloudflare Pages (piano gratuito).
 
@@ -62,7 +62,7 @@ Formato delle correzioni:
 - `profiles`: id (= auth.uid), level (A1–B2), goal, reminder_time, timezone
 - `curriculum_topics`: id, level, sort_order, slug, title
 - `sessions`: id, user_id, topic_id, kind (lesson|dialogue|review), started_at, ended_at
-- `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at
+- `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at, campi FSRS (gli errori sono anche carte di ripasso)
 - `vocab_items`: id, user_id, en, it, campi FSRS (due, stability, difficulty, reps, lapses, state, last_review)
 - `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at
 - `ai_usage`: user_id, function_name, model, token in/out/cache (scritta solo dalle Edge Functions con la service role)
@@ -84,12 +84,12 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
   - Esempi: `feat(ai): add tutor-chat edge function`, `fix(db): restrict ai_usage to own rows`.
 - **Branch:** `main` è sempre deployabile. Si lavora su branch brevi creati da `main`: `feat/<slug>`, `fix/<slug>`, `chore/<slug>`.
 - **PR:** piccole (un passo della roadmap o meno), titolo in formato Conventional Commits, template in `.github/pull_request_template.md`. Si fa merge solo con la CI verde, in **squash merge**: il titolo della PR diventa il commit su `main`.
-- **CI** (`.github/workflows/ci.yml`): commitlint sul titolo della PR, lint + typecheck + build della PWA, migration + test RLS + controllo che `database.types.ts` sia aggiornato.
+- **CI** (`.github/workflows/ci.yml`): commitlint sul titolo della PR, lint + test + typecheck + build della PWA, check + lint + test delle functions, migration + test RLS + controllo che `database.types.ts` sia aggiornato.
 - Schema: ogni modifica passa da una nuova migration (mai modificare quelle già su `main`), con test RLS se tocca tabelle utente.
 
 ## Regole per l'assistente IA (Claude Code)
 - Permessi in `.claude/settings.json`: comandi di dev/test consentiti; vietati la lettura dei file con segreti veri (`.env`, `.env.local`, `.env.*.local`, `.env.keys`, in qualsiasi cartella), `supabase db push`, `supabase secrets set`, deploy delle functions e force push. I template `.env.example` contengono solo segnaposto e si possono leggere e modificare.
-- Prima di committare: `pnpm lint`, `pnpm build`; se cambiano le functions `pnpm fn:check`, `pnpm fn:lint`, `pnpm fn:test`; se cambia lo schema `pnpm test:db` e `pnpm db:types`.
+- Prima di committare: `pnpm lint`, `pnpm test`, `pnpm build`; se cambiano le functions `pnpm fn:check`, `pnpm fn:lint`, `pnpm fn:test`; se cambia lo schema `pnpm test:db` e `pnpm db:types`.
 - Non aprire PR, non fare push su `main` e non fare deploy senza richiesta esplicita.
 
 ## Costi
@@ -125,6 +125,7 @@ pnpm dev                                       # PWA su http://localhost:5173
 | `pnpm --filter web preview` | serve la build su http://localhost:4173 |
 | `pnpm lint` | ESLint sulla PWA |
 | `pnpm typecheck` | solo controllo dei tipi |
+| `pnpm test` | test unitari della PWA (Vitest, `*.test.ts`) |
 
 ### Database (Supabase locale)
 | Comando | Cosa fa |
@@ -158,4 +159,4 @@ Variabili delle functions: `AI_PROVIDER` (`gemini` o `anthropic`), `GEMINI_API_K
 | `pnpm exec commitlint --edit` | verifica l'ultimo messaggio di commit (lo fa già l'hook) |
 | `echo "feat(web): ..." \| pnpm exec commitlint` | verifica un titolo di PR prima di aprirla |
 
-Prima di una PR: `pnpm lint && pnpm build && pnpm test:db && pnpm fn:check && pnpm fn:lint && pnpm fn:test`.
+Prima di una PR: `pnpm lint && pnpm test && pnpm build && pnpm test:db && pnpm fn:check && pnpm fn:lint && pnpm fn:test`.
