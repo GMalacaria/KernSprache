@@ -1,0 +1,62 @@
+import { describe, expect, it } from 'vitest'
+import { buildPath, nextLesson, type ChapterRow } from './progress'
+
+const lessons = (chapterId: number) =>
+  [1, 2, 3, 4].map((n) => ({ id: chapterId * 10 + n, sort_order: n, title: `L${chapterId}.${n}` }))
+
+const chapters: ChapterRow[] = [
+  { id: 2, level: 'A1', sort_order: 2, title: 'A1-2', description_it: '', lessons: lessons(2) },
+  { id: 1, level: 'A1', sort_order: 1, title: 'A1-1', description_it: '', lessons: lessons(1) },
+  { id: 3, level: 'A2', sort_order: 1, title: 'A2-1', description_it: '', lessons: lessons(3) },
+  { id: 4, level: 'A2', sort_order: 2, title: 'A2-2', description_it: '', lessons: lessons(4) },
+]
+
+const none = new Set<number>()
+
+describe('buildPath', () => {
+  it('starts a new A1 learner on the first chapter, first lesson', () => {
+    const path = buildPath({ chapters, level: 'A1', completedLessonIds: none, passedChapterIds: none })
+    expect(path.map((c) => [c.title, c.status])).toEqual([
+      ['A1-1', 'current'],
+      ['A1-2', 'locked'],
+      ['A2-1', 'locked'],
+      ['A2-2', 'locked'],
+    ])
+    expect(path[0]?.lessons.map((l) => l.status)).toEqual(['available', 'locked', 'locked', 'locked'])
+    expect(nextLesson(path)?.lesson.title).toBe('L1.1')
+  })
+
+  it('skips chapters below the placement level', () => {
+    const path = buildPath({ chapters, level: 'A2', completedLessonIds: none, passedChapterIds: none })
+    expect(path.map((c) => c.status)).toEqual(['skipped', 'skipped', 'current', 'locked'])
+    expect(path[0]?.lessons.every((l) => l.status === 'available')).toBe(true)
+    expect(nextLesson(path)?.lesson.title).toBe('L3.1')
+  })
+
+  it('unlocks lessons one after another and the test after the last one', () => {
+    const someDone = buildPath({ chapters, level: 'A1', completedLessonIds: new Set([11, 12]), passedChapterIds: none })
+    expect(someDone[0]?.lessons.map((l) => l.status)).toEqual(['done', 'done', 'available', 'locked'])
+    expect(someDone[0]?.testAvailable).toBe(false)
+
+    const allDone = buildPath({
+      chapters,
+      level: 'A1',
+      completedLessonIds: new Set([11, 12, 13, 14]),
+      passedChapterIds: none,
+    })
+    expect(allDone[0]?.testAvailable).toBe(true)
+    expect(allDone[0]?.completedLessons).toBe(4)
+    expect(nextLesson(allDone)).toBeNull()
+  })
+
+  it('moves to the next chapter only when the chapter test is passed', () => {
+    const path = buildPath({
+      chapters,
+      level: 'A1',
+      completedLessonIds: new Set([11, 12, 13, 14]),
+      passedChapterIds: new Set([1]),
+    })
+    expect(path.map((c) => c.status)).toEqual(['done', 'current', 'locked', 'locked'])
+    expect(nextLesson(path)?.lesson.title).toBe('L2.1')
+  })
+})

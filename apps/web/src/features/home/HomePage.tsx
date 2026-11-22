@@ -5,6 +5,8 @@ import { purposeLabel } from '../onboarding/purposes'
 import { useDueCount } from '../review/useDueCount'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyTimer } from '../study/useStudyTimer'
+import { nextLesson } from '../path/progress'
+import { usePath } from '../path/usePath'
 import { useProfile } from './useProfile'
 
 interface HomePageProps {
@@ -13,13 +15,25 @@ interface HomePageProps {
   onStartReview: () => void
   onEditGoals: () => void
   onRetakePlacement: () => void
+  onOpenPath: () => void
+  onOpenLesson: (lessonId: number) => void
 }
 
-export function HomePage({ user, onStartDialogue, onStartReview, onEditGoals, onRetakePlacement }: HomePageProps) {
+export function HomePage({
+  user,
+  onStartDialogue,
+  onStartReview,
+  onEditGoals,
+  onRetakePlacement,
+  onOpenPath,
+  onOpenLesson,
+}: HomePageProps) {
   const profile = useProfile(user.id)
   const dueCount = useDueCount()
   const timer = useStudyTimer()
   const recommended = timer.status.recommendedMode
+  const { path } = usePath(user.id)
+  const next = path ? nextLesson(path) : null
   const goalMinutes = profile.data?.daily_goal_minutes
 
   return (
@@ -56,6 +70,21 @@ export function HomePage({ user, onStartDialogue, onStartReview, onEditGoals, on
       )}
 
       <div className="stack">
+        {next ? (
+          <button type="button" className="primary-action" onClick={() => onOpenLesson(next.lesson.id)}>
+            Continua il percorso: {next.lesson.title}
+            <small>
+              {next.chapter.level} · {next.chapter.title}
+            </small>
+          </button>
+        ) : (
+          path && (
+            <p className="notice">Hai completato le lezioni del capitolo: la verifica arriva con il prossimo aggiornamento.</p>
+          )
+        )}
+        <button type="button" onClick={onOpenPath}>
+          Percorso
+        </button>
         <button type="button" onClick={() => onStartDialogue(recommended)}>
           {recommended === 'oral' ? 'Inizia un dialogo a voce' : 'Inizia un dialogo'}
         </button>
