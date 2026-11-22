@@ -73,14 +73,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"goal": string | null,"id": string,"level": Database["public"]['Enums']["cefr_level"],"reminder_time": string,"timezone": string,"updated_at": string
+                    "created_at": string,"daily_goal_minutes": number,"goal": string | null,"id": string,"level": Database["public"]['Enums']["cefr_level"],"reminder_time": string,"timezone": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"goal"?: string | null,"id": string,"level"?: Database["public"]['Enums']["cefr_level"],"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
+                    "created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id": string,"level"?: Database["public"]['Enums']["cefr_level"],"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"goal"?: string | null,"id"?: string,"level"?: Database["public"]['Enums']["cefr_level"],"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
+                    "created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id"?: string,"level"?: Database["public"]['Enums']["cefr_level"],"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -119,6 +119,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"study_days": {
+                  Row: {
+                    "completed_at": string | null,"day": string,"goal_minutes": number,"oral_seconds": number,"updated_at": string,"user_id": string,"written_seconds": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "completed_at"?: string | null,"day": string,"goal_minutes": number,"oral_seconds"?: number,"updated_at"?: string,"user_id"?: string,"written_seconds"?: number
+                  }
+                  Update: {
+                    "completed_at"?: string | null,"day"?: string,"goal_minutes"?: number,"oral_seconds"?: number,"updated_at"?: string,"user_id"?: string,"written_seconds"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"vocab_items": {
                   Row: {
                     "created_at": string,"difficulty": number,"due": string,"elapsed_days": number,"en": string,"id": string,"it": string,"lapses": number,"last_review": string | null,"learning_steps": number,"reps": number,"scheduled_days": number,"stability": number,"state": number,"user_id": string
@@ -139,10 +153,25 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            [_ in never]: never
+            "add_study_time":
+{ Args: { "p_day": string,"p_mode": Database["public"]['Enums']["study_mode"],"p_seconds": number }; Returns: {
+              "completed_at": string | null,
+"day": string,
+"goal_minutes": number,
+"oral_seconds": number,
+"updated_at": string,
+"user_id": string,
+"written_seconds": number
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "study_days"
+        isOneToOne: true
+        isSetofReturn: false
+      } }
           }
           Enums: {
-            "cefr_level": "A1"|"A2"|"B1"|"B2","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other","session_kind": "lesson"|"dialogue"|"review"
+            "cefr_level": "A1"|"A2"|"B1"|"B2","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -262,7 +291,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "cefr_level": ["A1", "A2", "B1", "B2"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other"],"session_kind": ["lesson", "dialogue", "review"]
+            "cefr_level": ["A1", "A2", "B1", "B2"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
           }
         }
 } as const
