@@ -73,14 +73,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"daily_goal_minutes": number,"goal": string | null,"id": string,"level": Database["public"]['Enums']["cefr_level"],"reminder_time": string,"timezone": string,"updated_at": string
+                    "created_at": string,"daily_goal_minutes": number,"goal": string | null,"id": string,"level": Database["public"]['Enums']["cefr_level"],"onboarded_at": string | null,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"reminder_time": string,"timezone": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id": string,"level"?: Database["public"]['Enums']["cefr_level"],"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
+                    "created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id": string,"level"?: Database["public"]['Enums']["cefr_level"],"onboarded_at"?: string | null,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id"?: string,"level"?: Database["public"]['Enums']["cefr_level"],"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
+                    "created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id"?: string,"level"?: Database["public"]['Enums']["cefr_level"],"onboarded_at"?: string | null,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -171,7 +171,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "cefr_level": "A1"|"A2"|"B1"|"B2","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
+            "cefr_level": "A1"|"A2"|"B1"|"B2","learning_purpose": "leisure"|"travel"|"work"|"love","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -291,7 +291,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "cefr_level": ["A1", "A2", "B1", "B2"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
+            "cefr_level": ["A1", "A2", "B1", "B2"],"learning_purpose": ["leisure", "travel", "work", "love"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
           }
         }
 } as const
