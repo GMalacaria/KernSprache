@@ -88,7 +88,7 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 - Schema: ogni modifica passa da una nuova migration (mai modificare quelle già su `main`), con test RLS se tocca tabelle utente.
 
 ## Regole per l'assistente IA (Claude Code)
-- Permessi in `.claude/settings.json`: comandi di dev/test consentiti; lettura dei file `.env`, `supabase db push`, deploy delle functions e force push vietati.
+- Permessi in `.claude/settings.json`: comandi di dev/test consentiti; vietati la lettura dei file con segreti veri (`.env`, `.env.local`, `.env.*.local`, `.env.keys`, in qualsiasi cartella), `supabase db push`, `supabase secrets set`, deploy delle functions e force push. I template `.env.example` contengono solo segnaposto e si possono leggere e modificare.
 - Prima di committare: `pnpm lint`, `pnpm build`; se cambiano le functions `pnpm fn:check`, `pnpm fn:lint`, `pnpm fn:test`; se cambia lo schema `pnpm test:db` e `pnpm db:types`.
 - Non aprire PR, non fare push su `main` e non fare deploy senza richiesta esplicita.
 
