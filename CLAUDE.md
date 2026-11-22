@@ -15,7 +15,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - **Frontend:** React + TypeScript + Vite, `vite-plugin-pwa` (manifest e service worker).
 - **Backend:** Supabase (Auth, Postgres, Edge Functions in Deno, `pg_cron`).
 - **IA:** API di Google Gemini (credito di Google AI Studio) come provider predefinito, Anthropic come alternativa; si sceglie con `AI_PROVIDER`. Il provider viene chiamato **solo dalle Edge Functions**: la chiave API non deve mai arrivare al client.
-- **Voce:** da voce a testo tramite API di trascrizione (es. OpenAI); da testo a voce con `speechSynthesis` del browser nell'MVP, con un'API TTS come possibile alternativa.
+- **Voce:** da voce a testo con Gemini (function `transcribe`, audio registrato con `MediaRecorder`: webm su Android/desktop, mp4 su iOS); da testo a voce con `speechSynthesis` del browser, con un'API TTS come possibile alternativa.
 - **Spaced repetition:** `ts-fsrs`, calcolato nel client (`src/lib/fsrs.ts`): la PWA aggiorna i campi FSRS delle proprie righe tramite RLS. Le carte sono le parole (`vocab_items`) e gli errori (`mistakes`).
 - **Push:** Web Push con chiavi VAPID, inviato da un'Edge Function richiamata da `pg_cron`.
 - **Hosting frontend:** Vercel, Netlify o Cloudflare Pages (piano gratuito).
@@ -35,7 +35,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
   /functions
     tutor-chat         dialogo + correzioni (output JSON)
     lesson             genera spiegazione + esercizi dell'argomento
-    transcribe         proxy verso l'API di trascrizione
+    transcribe         trascrizione letterale del parlato (Gemini), errori inclusi
     send-reminders     invio delle push (chiamata dal cron)
   /functions/_shared   client IA, prompt, schemi di validazione (zod)
 ```
@@ -82,7 +82,8 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
   - Tipi: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `chore`, `ci`, `build`, `style`, `revert`.
   - Scope ammessi: `web`, `db`, `functions`, `ai`, `push`, `ci`, `deps`, `docs` (facoltativo).
   - Esempi: `feat(ai): add tutor-chat edge function`, `fix(db): restrict ai_usage to own rows`.
-- **Branch:** `main` è sempre deployabile. Si lavora su branch brevi creati da `main`: `feat/<slug>`, `fix/<slug>`, `chore/<slug>`.
+- **Branch:** `main` è sempre deployabile. Si lavora su branch brevi con nomi parlanti, creati da `main`: `feat/<slug>`, `fix/<slug>`, `chore/<slug>` (es. `feat/oral-dialogue`). Niente nomi generati automaticamente.
+- **Autore dei commit:** l'utente (nome e email nella config git locale del repo). Nessun trailer `Co-Authored-By` con indirizzi di Anthropic.
 - **PR:** piccole (un passo della roadmap o meno), titolo in formato Conventional Commits, template in `.github/pull_request_template.md`. Si fa merge solo con la CI verde, in **squash merge**: il titolo della PR diventa il commit su `main`.
 - **CI** (`.github/workflows/ci.yml`): commitlint sul titolo della PR, lint + test + typecheck + build della PWA, check + lint + test delle functions, migration + test RLS + controllo che `database.types.ts` sia aggiornato.
 - Schema: ogni modifica passa da una nuova migration (mai modificare quelle già su `main`), con test RLS se tocca tabelle utente.
@@ -151,7 +152,7 @@ Deno è una dipendenza di sviluppo del progetto: non serve installarlo a parte.
 | `pnpm exec supabase secrets set --env-file supabase/functions/.env` | carica i secret sul progetto remoto (solo su richiesta esplicita) |
 | `pnpm exec supabase functions deploy <nome>` | deploy di una function (solo su richiesta esplicita) |
 
-Variabili delle functions: `AI_PROVIDER` (`gemini` o `anthropic`), `GEMINI_API_KEY` / `ANTHROPIC_API_KEY`, `AI_MODEL_FAST`, `AI_MODEL_SMART` (vedi `supabase/functions/.env.example`). `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` le fornisce Supabase.
+Variabili delle functions: `AI_PROVIDER` (`gemini` o `anthropic`), `GEMINI_API_KEY` / `ANTHROPIC_API_KEY`, `AI_MODEL_FAST`, `AI_MODEL_SMART`, `AI_MODEL_TRANSCRIBE` (sempre un modello Gemini, serve anche con `AI_PROVIDER=anthropic`) (vedi `supabase/functions/.env.example`). `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` le fornisce Supabase.
 
 ### Git e qualità
 | Comando | Cosa fa |
