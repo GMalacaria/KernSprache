@@ -54,3 +54,26 @@ button {
 }
 button:disabled { opacity: 0.6; cursor: default; }
 button.link { background: none; color: var(--accent); padding: 0.25rem; }
+
+textarea {
+  font: inherit; padding: 0.6rem 0.75rem; border-radius: 0.5rem; resize: vertical;
+  border: 1px solid var(--muted); background: var(--bg); color: var(--fg); flex: 1;
+}
+
+.turns { list-style: none; padding: 0; margin: 1rem 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.turn { display: flex; flex-direction: column; gap: 0.25rem; }
+.turn-user { align-items: flex-end; }
+.turn-assistant { align-items: flex-start; }
+.bubble { margin: 0; padding: 0.6rem 0.9rem; border-radius: 1rem; max-width: 85%; white-space: pre-wrap; }
+.turn-user .bubble { background: var(--accent); color: var(--bg); }
+.turn-assistant .bubble { background: var(--surface); }
+
+.corrections { list-style: none; padding: 0; margin: 0; max-width: 85%; font-size: 0.9rem; }
+.correction { border-left: 3px solid var(--error); padding: 0.25rem 0.75rem; margin-top: 0.25rem; }
+.correction p { margin: 0.1rem 0; }
+.correction del { color: var(--error); }
+.correction ins { text-decoration: none; font-weight: 600; }
+.correction-ok, .vocab { margin: 0; font-size: 0.85rem; color: var(--muted); }
+.tag { display: inline-block; margin-left: 0.4rem; padding: 0 0.4rem; border-radius: 0.4rem; background: var(--surface); font-size: 0.75rem; color: var(--muted); }
+
+.composer { position: sticky; bottom: 0; display: flex; gap: 0.5rem; align-items: flex-end; padding: 0.5rem 0; background: var(--bg); }

@@ -2,7 +2,7 @@ import type { User } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
 import { useProfile } from './useProfile'
 
-export function HomePage({ user }: { user: User }) {
+export function HomePage({ user, onStartDialogue }: { user: User; onStartDialogue: () => void }) {
   const profile = useProfile(user.id)
 
   return (
@@ -22,7 +22,9 @@ export function HomePage({ user }: { user: User }) {
         </p>
       )}
 
-      <p className="muted">La chat con il tutor arriva nel prossimo passo.</p>
+      <button type="button" onClick={onStartDialogue}>
+        Inizia un dialogo
+      </button>
     </main>
   )
 }
