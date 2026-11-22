@@ -88,3 +88,11 @@ textarea {
 .grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
 .grades button { display: flex; flex-direction: column; align-items: center; padding: 0.5rem 0.25rem; font-size: 0.9rem; }
 .grades small { opacity: 0.8; font-size: 0.75rem; }
+
+.segmented { display: inline-flex; border: 1px solid var(--accent); border-radius: 0.5rem; overflow: hidden; margin-bottom: 0.5rem; }
+.segmented button { border-radius: 0; background: transparent; color: var(--accent); padding: 0.35rem 1rem; }
+.segmented button[aria-pressed='true'] { background: var(--accent); color: var(--bg); }
+.listen { font-size: 0.85rem; }
+.voice-composer { position: sticky; bottom: 0; display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem 0; background: var(--bg); }
+.mic { min-width: 12rem; padding: 0.9rem 1.5rem; border-radius: 2rem; font-size: 1.05rem; }
+.mic.recording { background: var(--error); }

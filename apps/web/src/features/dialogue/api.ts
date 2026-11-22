@@ -1,4 +1,5 @@
 import { FunctionsHttpError } from '@supabase/supabase-js'
+import { blobToBase64 } from '../../lib/audio'
 import { supabase } from '../../lib/supabase'
 import type { TutorChatRequest, TutorChatResponse } from './types'
 
@@ -27,6 +28,16 @@ export async function sendTutorTurn(request: TutorChatRequest): Promise<TutorCha
   if (error) throw new Error(await errorMessage(error))
   if (!data) throw new Error(FALLBACK_ERROR)
   return data
+}
+
+/** Sends a recording to the transcribe function and returns the learner's words. */
+export async function transcribeAudio(audio: Blob): Promise<string> {
+  const { data, error } = await supabase.functions.invoke<{ text: string }>('transcribe', {
+    body: { audio_base64: await blobToBase64(audio), mime_type: audio.type },
+  })
+  if (error) throw new Error(await errorMessage(error))
+  if (!data?.text) throw new Error(FALLBACK_ERROR)
+  return data.text
 }
 
 export async function endSession(sessionId: string): Promise<void> {
