@@ -2,19 +2,22 @@ import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Grade } from 'ts-fsrs'
 import { formatInterval, previewDue } from '../../lib/fsrs'
+import { StudyPrompts } from '../study/StudyPrompts'
+import { StudyTimerBar } from '../study/StudyTimerBar'
+import { useStudyActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, GRADES, startReviewSession, type ReviewItem } from './api'
 
 // Cards graded "Again" come back in the same sitting once they are due again (minutes away).
 const REQUEUE_WITHIN_MS = 30 * 60_000
 
-export function ReviewPage({ onExit }: { onExit: () => void }) {
+export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onSwitchToOral?: () => void }) {
   const queryClient = useQueryClient()
   const due = useQuery({ queryKey: ['review', 'due-items'], queryFn: () => fetchDueItems(new Date()), staleTime: 0, gcTime: 0 })
 
-  async function exit(sessionId: Promise<string> | null) {
+  async function exit(sessionId: Promise<string> | null, next: () => void = onExit) {
     if (sessionId) await endReviewSession(await sessionId).catch(() => undefined)
     await queryClient.invalidateQueries({ queryKey: ['review'] })
-    onExit()
+    next()
   }
 
   if (due.isPending || due.isError) {
@@ -30,10 +33,23 @@ export function ReviewPage({ onExit }: { onExit: () => void }) {
       </main>
     )
   }
-  return <ReviewSession initialItems={due.data} onExit={(id) => void exit(id)} />
+  return (
+    <ReviewSession
+      initialItems={due.data}
+      onExit={(id) => void exit(id)}
+      onSwitchToOral={onSwitchToOral ? (id) => void exit(id, onSwitchToOral) : undefined}
+    />
+  )
 }
 
-function ReviewSession({ initialItems, onExit }: { initialItems: ReviewItem[]; onExit: (sessionId: Promise<string> | null) => void }) {
+interface ReviewSessionProps {
+  initialItems: ReviewItem[]
+  onExit: (sessionId: Promise<string> | null) => void
+  onSwitchToOral?: (sessionId: Promise<string> | null) => void
+}
+
+function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionProps) {
+  useStudyActivity('written')
   const [queue, setQueue] = useState(initialItems)
   const [revealed, setRevealed] = useState(false)
   const [done, setDone] = useState(0)
@@ -65,6 +81,12 @@ function ReviewSession({ initialItems, onExit }: { initialItems: ReviewItem[]; o
           {current ? 'Esci' : 'Chiudi'}
         </button>
       </header>
+
+      <StudyTimerBar />
+      <StudyPrompts
+        onSwitchToOral={onSwitchToOral ? () => onSwitchToOral(sessionId.current) : undefined}
+        onExit={() => onExit(sessionId.current)}
+      />
 
       {!current && (
         <section className="notice">

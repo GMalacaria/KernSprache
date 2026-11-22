@@ -7,7 +7,7 @@ export function useProfile(userId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('level, goal, reminder_time, timezone')
+        .select('level, goal, reminder_time, timezone, daily_goal_minutes')
         .eq('id', userId)
         .single()
       if (error) throw error

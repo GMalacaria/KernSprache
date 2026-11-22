@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { canRecord, canSpeak, speak, stopSpeaking } from '../../lib/audio'
+import { StudyPrompts } from '../study/StudyPrompts'
+import { StudyTimerBar } from '../study/StudyTimerBar'
+import { useStudyActivity } from '../study/useStudyTimer'
 import { endSession, sendTutorTurn } from './api'
 import { CorrectionList } from './CorrectionList'
 import type { DialogueTurn } from './types'
@@ -19,6 +22,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
   const queryClient = useQueryClient()
   const voiceAvailable = canRecord()
   const [mode, setMode] = useState<DialogueMode>(voiceAvailable ? initialMode : 'written')
+  const { markActivity } = useStudyActivity(mode)
   const [turns, setTurns] = useState<DialogueTurn[]>([])
   const [draft, setDraft] = useState('')
   const sessionId = useRef<string | undefined>(undefined)
@@ -94,6 +98,9 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
         </button>
       </header>
 
+      <StudyTimerBar />
+      <StudyPrompts onSwitchToOral={voiceAvailable ? () => setMode('oral') : undefined} onExit={() => finish.mutate()} />
+
       {voiceAvailable && (
         <div className="segmented" role="group" aria-label="Modalità">
           <button type="button" aria-pressed={mode === 'written'} onClick={() => setMode('written')}>
@@ -144,7 +151,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
       {send.isError && <p className="error">{send.error.message}</p>}
 
       {mode === 'oral' ? (
-        <VoiceComposer disabled={send.isPending} onTranscript={sendText} />
+        <VoiceComposer disabled={send.isPending} onTranscript={sendText} onActivity={markActivity} />
       ) : (
         <form onSubmit={onSubmit} className="composer">
           <textarea
