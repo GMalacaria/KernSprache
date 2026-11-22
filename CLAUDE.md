@@ -89,7 +89,7 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 
 ## Regole per l'assistente IA (Claude Code)
 - Permessi in `.claude/settings.json`: comandi di dev/test consentiti; lettura dei file `.env`, `supabase db push`, deploy delle functions e force push vietati.
-- Prima di committare: `pnpm lint`, `pnpm build` e, se cambia lo schema, `pnpm test:db` e `pnpm db:types`.
+- Prima di committare: `pnpm lint`, `pnpm build`; se cambiano le functions `pnpm fn:check`, `pnpm fn:lint`, `pnpm fn:test`; se cambia lo schema `pnpm test:db` e `pnpm db:types`.
 - Non aprire PR, non fare push su `main` e non fare deploy senza richiesta esplicita.
 
 ## Costi
@@ -112,6 +112,8 @@ Requisiti: Node 22, pnpm 10, Docker (per Supabase locale). Tutti i comandi si la
 pnpm install                                   # dipendenze + hook git (commitlint)
 pnpm db:start                                  # avvia Supabase locale, stampa URL e chiavi
 cp apps/web/.env.example apps/web/.env.local   # incolla la PUBLISHABLE_KEY stampata da db:start
+cp supabase/functions/.env.example supabase/functions/.env   # inserisci ANTHROPIC_API_KEY
+pnpm fn:serve                                  # Edge Functions su http://127.0.0.1:54321/functions/v1/
 pnpm dev                                       # PWA su http://localhost:5173
 ```
 
@@ -132,9 +134,23 @@ pnpm dev                                       # PWA su http://localhost:5173
 | `pnpm exec supabase migration new <nome>` | crea una nuova migration in `supabase/migrations` |
 | `pnpm db:reset` | ricrea il DB applicando migration e `seed.sql` |
 | `pnpm test:db` | test RLS (pgTAP) in `supabase/tests` |
-| `pnpm db:types` | rigenera `apps/web/src/lib/database.types.ts` (da fare dopo ogni migration) |
+| `pnpm db:types` | rigenera i tipi del DB per la PWA e per le functions (da fare dopo ogni migration) |
 
 URL locali: API http://127.0.0.1:54321, Studio http://127.0.0.1:54323, Mailpit (email/magic link) http://127.0.0.1:54324, Postgres `postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
+
+### Edge Functions (Deno)
+Deno è una dipendenza di sviluppo del progetto: non serve installarlo a parte.
+
+| Comando | Cosa fa |
+|---|---|
+| `pnpm fn:serve` | serve tutte le functions in locale, con le variabili di `supabase/functions/.env` |
+| `pnpm fn:check` | typecheck di ogni function |
+| `pnpm fn:lint` | `deno lint` + controllo formattazione (`pnpm exec deno fmt` in `supabase/functions` per formattare) |
+| `pnpm fn:test` | test unitari Deno (`*_test.ts`) |
+| `pnpm exec supabase secrets set --env-file supabase/functions/.env` | carica i secret sul progetto remoto (solo su richiesta esplicita) |
+| `pnpm exec supabase functions deploy <nome>` | deploy di una function (solo su richiesta esplicita) |
+
+Variabili delle functions: `ANTHROPIC_API_KEY`, `AI_MODEL_FAST` (Haiku), `AI_MODEL_SMART` (Sonnet). `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` le fornisce Supabase.
 
 ### Git e qualità
 | Comando | Cosa fa |
@@ -142,4 +158,4 @@ URL locali: API http://127.0.0.1:54321, Studio http://127.0.0.1:54323, Mailpit (
 | `pnpm exec commitlint --edit` | verifica l'ultimo messaggio di commit (lo fa già l'hook) |
 | `echo "feat(web): ..." \| pnpm exec commitlint` | verifica un titolo di PR prima di aprirla |
 
-Prima di una PR: `pnpm lint && pnpm build && pnpm test:db`.
+Prima di una PR: `pnpm lint && pnpm build && pnpm test:db && pnpm fn:check && pnpm fn:lint && pnpm fn:test`.
