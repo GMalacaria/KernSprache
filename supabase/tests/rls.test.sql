@@ -1,6 +1,6 @@
 -- RLS checks. Run with: pnpm exec supabase test db
 begin;
-select plan(9);
+select plan(10);
 
 -- Two users; the signup trigger creates their profiles.
 insert into auth.users (id, email) values
@@ -47,6 +47,15 @@ select throws_ok(
   $$ insert into public.mistakes (session_id, original, corrected, explanation_it)
      values ('aaaaaaaa-0000-0000-0000-000000000001', 'x', 'y', 'z') $$,
   '23503', null, 'mistakes cannot reference another user''s session'
+);
+
+-- Bob cannot reschedule Alice's review cards: his update matches no rows.
+update public.mistakes set due = now() + interval '1 year';
+select set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}', true);
+select is(
+  (select count(*) from public.mistakes where due > now() + interval '6 months')::int,
+  0,
+  'review updates only touch own mistakes'
 );
 
 select * from finish();

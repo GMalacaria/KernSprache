@@ -53,14 +53,14 @@ export type Database = {
                   ]
                 },"mistakes": {
                   Row: {
-                    "category": Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at": string,"explanation_it": string,"id": string,"original": string,"session_id": string | null,"user_id": string
+                    "category": Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at": string,"difficulty": number,"due": string,"elapsed_days": number,"explanation_it": string,"id": string,"lapses": number,"last_review": string | null,"learning_steps": number,"original": string,"reps": number,"scheduled_days": number,"session_id": string | null,"stability": number,"state": number,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at"?: string,"explanation_it": string,"id"?: string,"original": string,"session_id"?: string | null,"user_id"?: string
+                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at"?: string,"difficulty"?: number,"due"?: string,"elapsed_days"?: number,"explanation_it": string,"id"?: string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original": string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
                   }
                   Update: {
-                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected"?: string,"created_at"?: string,"explanation_it"?: string,"id"?: string,"original"?: string,"session_id"?: string | null,"user_id"?: string
+                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected"?: string,"created_at"?: string,"difficulty"?: number,"due"?: string,"elapsed_days"?: number,"explanation_it"?: string,"id"?: string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original"?: string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
                   }
                   Relationships: [
                     {
