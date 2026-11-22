@@ -37,19 +37,59 @@ export type Database = {
                   Relationships: [
                     
                   ]
-                },"curriculum_topics": {
+                },"chapters": {
                   Row: {
-                    "id": number,"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string
+                    "description_it": string,"grammar_focus": string,"id": number,"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "id"?: never,"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string
+                    "description_it"?: string,"grammar_focus"?: string,"id"?: never,"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string
                   }
                   Update: {
-                    "id"?: never,"level"?: Database["public"]['Enums']["cefr_level"],"slug"?: string,"sort_order"?: number,"title"?: string
+                    "description_it"?: string,"grammar_focus"?: string,"id"?: never,"level"?: Database["public"]['Enums']["cefr_level"],"slug"?: string,"sort_order"?: number,"title"?: string
                   }
                   Relationships: [
                     
+                  ]
+                },"lesson_progress": {
+                  Row: {
+                    "completed_at": string,"lesson_id": number,"score": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "completed_at"?: string,"lesson_id": number,"score": number,"user_id"?: string
+                  }
+                  Update: {
+                    "completed_at"?: string,"lesson_id"?: number,"score"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lesson_progress_lesson_id_fkey"
+      columns: ["lesson_id"]
+isOneToOne: false
+      referencedRelation: "lessons"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"lessons": {
+                  Row: {
+                    "chapter_id": number,"focus": string,"id": number,"slug": string,"sort_order": number,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "chapter_id": number,"focus": string,"id"?: never,"slug": string,"sort_order": number,"title": string
+                  }
+                  Update: {
+                    "chapter_id"?: number,"focus"?: string,"id"?: never,"slug"?: string,"sort_order"?: number,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lessons_chapter_id_fkey"
+      columns: ["chapter_id"]
+isOneToOne: false
+      referencedRelation: "chapters"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"mistakes": {
                   Row: {
@@ -115,21 +155,27 @@ isOneToOne: false
                   ]
                 },"sessions": {
                   Row: {
-                    "ended_at": string | null,"id": string,"kind": Database["public"]['Enums']["session_kind"],"started_at": string,"topic_id": number | null,"user_id": string
+                    "chapter_id": number | null,"ended_at": string | null,"id": string,"kind": Database["public"]['Enums']["session_kind"],"lesson_id": number | null,"started_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ended_at"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["session_kind"],"started_at"?: string,"topic_id"?: number | null,"user_id"?: string
+                    "chapter_id"?: number | null,"ended_at"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["session_kind"],"lesson_id"?: number | null,"started_at"?: string,"user_id"?: string
                   }
                   Update: {
-                    "ended_at"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["session_kind"],"started_at"?: string,"topic_id"?: number | null,"user_id"?: string
+                    "chapter_id"?: number | null,"ended_at"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["session_kind"],"lesson_id"?: number | null,"started_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
-      foreignKeyName: "sessions_topic_id_fkey"
-      columns: ["topic_id"]
+      foreignKeyName: "sessions_lesson_id_fkey"
+      columns: ["lesson_id"]
 isOneToOne: false
-      referencedRelation: "curriculum_topics"
+      referencedRelation: "lessons"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "sessions_topic_id_fkey"
+      columns: ["chapter_id"]
+isOneToOne: false
+      referencedRelation: "chapters"
       referencedColumns: ["id"]
     }
                   ]

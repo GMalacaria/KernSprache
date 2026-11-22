@@ -31,7 +31,7 @@ select throws_ok(
 );
 
 select throws_ok(
-  $$ insert into public.curriculum_topics (level, sort_order, slug, title) values ('A1', 99, 'x', 'x') $$,
+  $$ insert into public.chapters (level, sort_order, slug, title) values ('A1', 99, 'x', 'x') $$,
   '42501', null, 'curriculum is read-only for users'
 );
 
