@@ -1,10 +1,15 @@
+import { useState } from 'react'
 import { LoginPage } from './features/auth/LoginPage'
 import { useAuthSession } from './features/auth/useAuthSession'
+import { DialoguePage } from './features/dialogue/DialoguePage'
 import { HomePage } from './features/home/HomePage'
 import { InstallBanner } from './features/onboarding/InstallBanner'
 
+type View = 'home' | 'dialogue'
+
 export function App() {
   const session = useAuthSession()
+  const [view, setView] = useState<View>('home')
 
   return (
     <>
@@ -14,7 +19,11 @@ export function App() {
           <p>Caricamento…</p>
         </main>
       ) : session ? (
-        <HomePage user={session.user} />
+        view === 'dialogue' ? (
+          <DialoguePage onExit={() => setView('home')} />
+        ) : (
+          <HomePage user={session.user} onStartDialogue={() => setView('dialogue')} />
+        )
       ) : (
         <LoginPage />
       )}

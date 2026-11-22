@@ -1,7 +1,7 @@
 # English Tutor – CLAUDE.md
 
 App personale (PWA) per imparare l'inglese partendo dalle basi: grammatica, ascolto, dialogo, con un tutor IA che corregge e incentiva, e notifiche push sul telefono.
-Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice semplice e manutenibile, nessuna dipendenza dall'abbonamento a Claude (si usa l'API a consumo).
+Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice semplice e manutenibile, nessuna dipendenza da abbonamenti (si usano API a consumo).
 
 ## Obiettivi del prodotto
 - Lezioni brevi e strutturate (un argomento di grammatica alla volta), con un percorso da A1 a B2.
@@ -14,7 +14,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 ## Stack
 - **Frontend:** React + TypeScript + Vite, `vite-plugin-pwa` (manifest e service worker).
 - **Backend:** Supabase (Auth, Postgres, Edge Functions in Deno, `pg_cron`).
-- **IA:** API di Anthropic, chiamata **solo dalle Edge Functions**. La chiave API non deve mai arrivare al client.
+- **IA:** API di Google Gemini (credito di Google AI Studio) come provider predefinito, Anthropic come alternativa; si sceglie con `AI_PROVIDER`. Il provider viene chiamato **solo dalle Edge Functions**: la chiave API non deve mai arrivare al client.
 - **Voce:** da voce a testo tramite API di trascrizione (es. OpenAI); da testo a voce con `speechSynthesis` del browser nell'MVP, con un'API TTS come possibile alternativa.
 - **Spaced repetition:** `ts-fsrs`.
 - **Push:** Web Push con chiavi VAPID, inviato da un'Edge Function richiamata da `pg_cron`.
@@ -41,11 +41,11 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 ```
 
 ### Livello IA (`_shared/ai`)
-- Un'interfaccia `AiProvider` con implementazione Anthropic, così il provider resta sostituibile.
-- Selezione del modello per tipo di attività: un modello economico (Haiku) per esercizi e correzioni, uno più capace (Sonnet) per dialoghi e spiegazioni. I nomi dei modelli vanno nelle variabili d'ambiente, non nel codice.
+- Un'interfaccia `AiProvider` con due implementazioni, Gemini (`ai/gemini.ts`, SDK `@google/genai`) e Anthropic (`ai/anthropic.ts`). `AI_PROVIDER=gemini|anthropic` sceglie quale usare.
+- Selezione del modello per tipo di attività: un modello economico (`AI_MODEL_FAST`) per esercizi e correzioni, uno più capace (`AI_MODEL_SMART`) per dialoghi e spiegazioni. I nomi dei modelli vanno nelle variabili d'ambiente, non nel codice.
 - Il contesto lo costruisce il backend a ogni chiamata: livello dell'utente, argomento corrente, ultimi errori ricorrenti, parole in ripasso. Non si fa affidamento sulla memoria del modello.
-- Si usa il prompt caching sul system prompt.
-- Le risposte strutturate vengono validate con zod; se il JSON non è valido, si riprova una volta e poi si mostra un errore controllato.
+- Caching del system prompt: con Anthropic tramite `cache_control`; con Gemini il caching implicito riusa il prefisso stabile, quindi il prompt fisso va sempre prima del contesto variabile.
+- Le risposte strutturate (JSON con schema generato da zod) vengono validate con zod; se il JSON non è valido, si riprova una volta e poi si mostra un errore controllato.
 
 Formato delle correzioni:
 ```json
@@ -88,13 +88,13 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 - Schema: ogni modifica passa da una nuova migration (mai modificare quelle già su `main`), con test RLS se tocca tabelle utente.
 
 ## Regole per l'assistente IA (Claude Code)
-- Permessi in `.claude/settings.json`: comandi di dev/test consentiti; lettura dei file `.env`, `supabase db push`, deploy delle functions e force push vietati.
+- Permessi in `.claude/settings.json`: comandi di dev/test consentiti; vietati la lettura dei file con segreti veri (`.env`, `.env.local`, `.env.*.local`, `.env.keys`, in qualsiasi cartella), `supabase db push`, `supabase secrets set`, deploy delle functions e force push. I template `.env.example` contengono solo segnaposto e si possono leggere e modificare.
 - Prima di committare: `pnpm lint`, `pnpm build`; se cambiano le functions `pnpm fn:check`, `pnpm fn:lint`, `pnpm fn:test`; se cambia lo schema `pnpm test:db` e `pnpm db:types`.
 - Non aprire PR, non fare push su `main` e non fare deploy senza richiesta esplicita.
 
 ## Costi
 - Obiettivo: meno di ~€15 al mese.
-- Limite di spesa mensile impostato nella console Anthropic.
+- Limite di spesa / budget impostato nella console del provider (Google AI Studio o Anthropic).
 - Ogni chiamata IA registra i token usati (tabella `ai_usage`, opzionale) per monitorare la spesa.
 
 ## Roadmap
@@ -112,7 +112,7 @@ Requisiti: Node 22, pnpm 10, Docker (per Supabase locale). Tutti i comandi si la
 pnpm install                                   # dipendenze + hook git (commitlint)
 pnpm db:start                                  # avvia Supabase locale, stampa URL e chiavi
 cp apps/web/.env.example apps/web/.env.local   # incolla la PUBLISHABLE_KEY stampata da db:start
-cp supabase/functions/.env.example supabase/functions/.env   # inserisci ANTHROPIC_API_KEY
+cp supabase/functions/.env.example supabase/functions/.env   # inserisci GEMINI_API_KEY
 pnpm fn:serve                                  # Edge Functions su http://127.0.0.1:54321/functions/v1/
 pnpm dev                                       # PWA su http://localhost:5173
 ```
@@ -150,7 +150,7 @@ Deno è una dipendenza di sviluppo del progetto: non serve installarlo a parte.
 | `pnpm exec supabase secrets set --env-file supabase/functions/.env` | carica i secret sul progetto remoto (solo su richiesta esplicita) |
 | `pnpm exec supabase functions deploy <nome>` | deploy di una function (solo su richiesta esplicita) |
 
-Variabili delle functions: `ANTHROPIC_API_KEY`, `AI_MODEL_FAST` (Haiku), `AI_MODEL_SMART` (Sonnet). `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` le fornisce Supabase.
+Variabili delle functions: `AI_PROVIDER` (`gemini` o `anthropic`), `GEMINI_API_KEY` / `ANTHROPIC_API_KEY`, `AI_MODEL_FAST`, `AI_MODEL_SMART` (vedi `supabase/functions/.env.example`). `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` le fornisce Supabase.
 
 ### Git e qualità
 | Comando | Cosa fa |

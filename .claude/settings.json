@@ -26,11 +26,10 @@
       "Bash(pnpm fn:serve:*)"
     ],
     "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
-      "Read(./apps/web/.env.local)",
-      "Read(./supabase/.env)",
-      "Read(./supabase/functions/.env)",
+      "Read(**/.env)",
+      "Read(**/.env.local)",
+      "Read(**/.env.*.local)",
+      "Read(**/.env.keys)",
       "Bash(pnpm exec supabase db push:*)",
       "Bash(pnpm exec supabase functions deploy:*)",
       "Bash(git push --force:*)",
