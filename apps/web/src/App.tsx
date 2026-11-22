@@ -3,9 +3,10 @@ import { LoginPage } from './features/auth/LoginPage'
 import { useAuthSession } from './features/auth/useAuthSession'
 import { DialoguePage } from './features/dialogue/DialoguePage'
 import { HomePage } from './features/home/HomePage'
+import { ReviewPage } from './features/review/ReviewPage'
 import { InstallBanner } from './features/onboarding/InstallBanner'
 
-type View = 'home' | 'dialogue'
+type View = 'home' | 'dialogue' | 'review'
 
 export function App() {
   const session = useAuthSession()
@@ -21,8 +22,14 @@ export function App() {
       ) : session ? (
         view === 'dialogue' ? (
           <DialoguePage onExit={() => setView('home')} />
+        ) : view === 'review' ? (
+          <ReviewPage onExit={() => setView('home')} />
         ) : (
-          <HomePage user={session.user} onStartDialogue={() => setView('dialogue')} />
+          <HomePage
+            user={session.user}
+            onStartDialogue={() => setView('dialogue')}
+            onStartReview={() => setView('review')}
+          />
         )
       ) : (
         <LoginPage />

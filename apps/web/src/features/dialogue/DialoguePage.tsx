@@ -23,7 +23,7 @@ export function DialoguePage({ onExit }: { onExit: () => void }) {
         { id: `u${prev.length}`, role: 'user', content: userTurn?.content ?? '', corrections: res.corrections, newVocab: res.new_vocab },
         { id: `a${prev.length}`, role: 'assistant', content: res.reply },
       ])
-      void queryClient.invalidateQueries({ queryKey: ['vocab'] })
+      void queryClient.invalidateQueries({ queryKey: ['review'] })
     },
     onError: () => {
       // Drop the unanswered user turn and give the text back for a retry.
