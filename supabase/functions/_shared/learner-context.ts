@@ -1,0 +1,75 @@
+import type { Db } from './supabase.ts'
+
+export interface LearnerSnapshot {
+  level: string
+  goal: string | null
+  topicTitle: string | null
+  recentMistakes: { original: string; corrected: string; category: string }[]
+  reviewWords: string[]
+}
+
+const RECENT_MISTAKES = 30
+const MAX_EXAMPLES = 5
+const MAX_REVIEW_WORDS = 10
+
+/** Reads what the tutor needs to know about the learner. All queries run under RLS. */
+export async function loadLearnerSnapshot(
+  db: Db,
+  userId: string,
+  topicId: number | undefined,
+): Promise<LearnerSnapshot> {
+  const [profile, topic, mistakes, vocab] = await Promise.all([
+    db.from('profiles').select('level, goal').eq('id', userId).single(),
+    topicId === undefined
+      ? Promise.resolve({ data: null, error: null })
+      : db.from('curriculum_topics').select('title, slug').eq('id', topicId).maybeSingle(),
+    db
+      .from('mistakes')
+      .select('original, corrected, category')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(RECENT_MISTAKES),
+    db
+      .from('vocab_items')
+      .select('en')
+      .eq('user_id', userId)
+      .lte('due', new Date().toISOString())
+      .order('due', { ascending: true })
+      .limit(MAX_REVIEW_WORDS),
+  ])
+
+  for (const result of [profile, topic, mistakes, vocab]) {
+    if (result.error) throw result.error
+  }
+
+  return {
+    level: profile.data?.level ?? 'A1',
+    goal: profile.data?.goal ?? null,
+    topicTitle: topic.data ? `${topic.data.title} (${topic.data.slug})` : null,
+    recentMistakes: mistakes.data ?? [],
+    reviewWords: (vocab.data ?? []).map((v) => v.en),
+  }
+}
+
+/** Renders the snapshot as the per-request part of the system prompt. Pure, for testing. */
+export function renderLearnerContext(s: LearnerSnapshot): string {
+  const counts = new Map<string, number>()
+  for (const m of s.recentMistakes) counts.set(m.category, (counts.get(m.category) ?? 0) + 1)
+  const recurring = [...counts.entries()]
+    .filter(([, n]) => n >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .map(([category, n]) => `${category} (${n})`)
+
+  const lines = ['# Learner context', `- Level: ${s.level}`]
+  if (s.goal) lines.push(`- Goal: ${s.goal}`)
+  lines.push(`- Current topic: ${s.topicTitle ?? 'none, free conversation'}`)
+  lines.push(`- Recurring mistake types: ${recurring.length ? recurring.join(', ') : 'none yet'}`)
+  if (s.recentMistakes.length) {
+    lines.push('- Recent mistakes:')
+    for (const m of s.recentMistakes.slice(0, MAX_EXAMPLES)) {
+      lines.push(`  - "${m.original}" -> "${m.corrected}" [${m.category}]`)
+    }
+  }
+  lines.push(`- Words in review: ${s.reviewWords.length ? s.reviewWords.join(', ') : 'none'}`)
+  return lines.join('\n')
+}

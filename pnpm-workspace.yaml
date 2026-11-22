@@ -1,0 +1,7 @@
+packages:
+  - "apps/*"
+onlyBuiltDependencies:
+  - deno
+  - simple-git-hooks
+  - supabase
+  - esbuild
