@@ -1,4 +1,4 @@
-import { GeminiApiError, type GeminiContent, GoogleGenAI, z } from '../deps.ts'
+import { GeminiApiError, type GeminiContent, GoogleGenAI, ThinkingLevel, z } from '../deps.ts'
 import { requireEnv } from '../env.ts'
 import { modelForTask } from './models.ts'
 import { AiError, type AiProvider, type StructuredRequest, type StructuredResult, type TokenUsage } from './types.ts'
@@ -67,6 +67,8 @@ export class GeminiProvider implements AiProvider {
             responseMimeType: 'application/json',
             responseJsonSchema,
             maxOutputTokens: request.maxTokens ?? 4096,
+            // Short conversational turns: little reasoning keeps latency and cost down.
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
           },
         })
       } catch (err) {
