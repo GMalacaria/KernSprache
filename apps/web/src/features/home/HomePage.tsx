@@ -12,9 +12,10 @@ interface HomePageProps {
   onStartDialogue: (mode: DialogueMode) => void
   onStartReview: () => void
   onEditGoals: () => void
+  onRetakePlacement: () => void
 }
 
-export function HomePage({ user, onStartDialogue, onStartReview, onEditGoals }: HomePageProps) {
+export function HomePage({ user, onStartDialogue, onStartReview, onEditGoals, onRetakePlacement }: HomePageProps) {
   const profile = useProfile(user.id)
   const dueCount = useDueCount()
   const timer = useStudyTimer()
@@ -62,6 +63,12 @@ export function HomePage({ user, onStartDialogue, onStartReview, onEditGoals }: 
           Ripasso{dueCount.data !== undefined && ` (${dueCount.data} da fare)`}
         </button>
       </div>
+
+      <p>
+        <button type="button" className="link" onClick={onRetakePlacement}>
+          Rifai il test di livello
+        </button>
+      </p>
     </main>
   )
 }

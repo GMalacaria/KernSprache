@@ -14,7 +14,10 @@ interface OnboardingPageProps {
 
 const MAX_GOAL_CHARS = 200
 
-/** First-run questions: why the learner studies and how many minutes a day. */
+/**
+ * First-run questions: why the learner studies and how many minutes a day.
+ * Onboarding ends after the placement test (or skipping it), which sets onboarded_at.
+ */
 export function OnboardingPage({ userId, initial, editing = false, onDone }: OnboardingPageProps) {
   const queryClient = useQueryClient()
   const [purpose, setPurpose] = useState<LearningPurpose | null>(initial?.purpose ?? null)
@@ -29,7 +32,6 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
           purpose,
           goal: details.trim() || null,
           daily_goal_minutes: minutes,
-          ...(editing ? {} : { onboarded_at: new Date().toISOString() }),
         })
         .eq('id', userId)
       if (error) throw error
@@ -92,7 +94,7 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
         <p className="muted">Metà del tempo è scritto, metà orale.</p>
 
         <button type="submit" disabled={!purpose || save.isPending}>
-          {editing ? 'Salva' : 'Inizia'}
+          {editing ? 'Salva' : 'Avanti'}
         </button>
         {editing && (
           <button type="button" className="link" onClick={onDone}>
