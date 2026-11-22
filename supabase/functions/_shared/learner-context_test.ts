@@ -6,7 +6,12 @@ Deno.test('renderLearnerContext lists recurring mistake types and review words',
     level: 'A2',
     goal: null,
     purpose: 'travel',
-    topicTitle: 'Present simple (a1-present-simple)',
+    lesson: {
+      title: 'Lui e lei',
+      focus: 'third person -s',
+      chapterTitle: 'La mia giornata',
+      grammarFocus: 'present simple',
+    },
     recentMistakes: [
       { original: 'he go', corrected: 'he goes', category: 'verb_tense' },
       { original: 'she like', corrected: 'she likes', category: 'verb_tense' },
@@ -15,7 +20,10 @@ Deno.test('renderLearnerContext lists recurring mistake types and review words',
     reviewWords: ['kitchen', 'tired'],
   })
   assertStringIncludes(text, '- Level: A2')
-  assertStringIncludes(text, '- Current topic: Present simple (a1-present-simple)')
+  assertStringIncludes(
+    text,
+    '- Current lesson: "Lui e lei" - focus: third person -s (chapter "La mia giornata": present simple)',
+  )
   // Only categories seen at least twice count as recurring.
   assertStringIncludes(text, '- Recurring mistake types: verb_tense (2)\n')
   assertStringIncludes(text, '"in monday" -> "on Monday" [preposition]')
@@ -29,7 +37,7 @@ Deno.test('renderLearnerContext handles a brand-new learner', () => {
     level: 'A1',
     goal: 'parlare con i colleghi',
     purpose: null,
-    topicTitle: null,
+    lesson: null,
     recentMistakes: [],
     reviewWords: [],
   })

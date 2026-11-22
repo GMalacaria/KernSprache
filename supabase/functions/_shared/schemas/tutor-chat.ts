@@ -31,7 +31,8 @@ export const MAX_HISTORY_MESSAGES = 30
 /** Request body of the tutor-chat function. */
 export const tutorChatRequestSchema = z.object({
   session_id: z.uuid().optional(),
-  topic_id: z.number().int().positive().optional(),
+  /** Lesson whose dialogue step this conversation belongs to. */
+  lesson_id: z.number().int().positive().optional(),
   messages: z
     .array(
       z.object({
