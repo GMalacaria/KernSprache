@@ -25,14 +25,14 @@ export type Database = {
           Tables: {
             "ai_usage": {
                   Row: {
-                    "cache_creation_input_tokens": number,"cache_read_input_tokens": number,"created_at": string,"function_name": string,"id": number,"input_tokens": number,"model": string,"output_tokens": number,"user_id": string | null
+                    "cache_creation_input_tokens": number,"cache_read_input_tokens": number,"created_at": string,"function_name": string,"id": number,"input_tokens": number,"model": string,"output_tokens": number,"prompt_version": string | null,"user_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "cache_creation_input_tokens"?: number,"cache_read_input_tokens"?: number,"created_at"?: string,"function_name": string,"id"?: never,"input_tokens"?: number,"model": string,"output_tokens"?: number,"user_id"?: string | null
+                    "cache_creation_input_tokens"?: number,"cache_read_input_tokens"?: number,"created_at"?: string,"function_name": string,"id"?: never,"input_tokens"?: number,"model": string,"output_tokens"?: number,"prompt_version"?: string | null,"user_id"?: string | null
                   }
                   Update: {
-                    "cache_creation_input_tokens"?: number,"cache_read_input_tokens"?: number,"created_at"?: string,"function_name"?: string,"id"?: never,"input_tokens"?: number,"model"?: string,"output_tokens"?: number,"user_id"?: string | null
+                    "cache_creation_input_tokens"?: number,"cache_read_input_tokens"?: number,"created_at"?: string,"function_name"?: string,"id"?: never,"input_tokens"?: number,"model"?: string,"output_tokens"?: number,"prompt_version"?: string | null,"user_id"?: string | null
                   }
                   Relationships: [
                     
