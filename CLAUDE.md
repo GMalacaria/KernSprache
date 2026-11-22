@@ -10,6 +10,8 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - Ripasso con spaced repetition degli errori e delle parole nuove.
 - Notifiche: promemoria giornaliero, ripassi in scadenza, streak a rischio.
 - Tono del tutor: incoraggiante ma onesto, niente piaggeria né complimenti generici.
+- Obiettivo giornaliero in minuti scelto dall'utente (`profiles.daily_goal_minutes`). Il timer conta solo il tempo attivo nel dialogo e nel ripasso: app in primo piano, finestra attiva e un'interazione negli ultimi 2 minuti.
+- La giornata è divisa a metà: prima lo scritto (dialogo scritto e ripasso), poi l'orale (dialogo a voce). A metà si invita a passare all'orale; raggiunto l'obiettivo compare un banner di successo e l'esercizio si ferma finché l'utente non chiede di continuare.
 
 ## Stack
 - **Frontend:** React + TypeScript + Vite, `vite-plugin-pwa` (manifest e service worker).
@@ -59,11 +61,12 @@ Formato delle correzioni:
 ```
 
 ## Modello dati (essenziale)
-- `profiles`: id (= auth.uid), level (A1–B2), goal, reminder_time, timezone
+- `profiles`: id (= auth.uid), level (A1–B2), goal, reminder_time, timezone, daily_goal_minutes
 - `curriculum_topics`: id, level, sort_order, slug, title
 - `sessions`: id, user_id, topic_id, kind (lesson|dialogue|review), started_at, ended_at
 - `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at, campi FSRS (gli errori sono anche carte di ripasso)
 - `vocab_items`: id, user_id, en, it, campi FSRS (due, stability, difficulty, reps, lapses, state, last_review)
+- `study_days`: user_id, day (giorno locale), goal_minutes, written_seconds, oral_seconds, completed_at. Si scrive solo con la RPC `add_study_time` (incremento atomico, max 120 s per chiamata).
 - `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at
 - `ai_usage`: user_id, function_name, model, token in/out/cache (scritta solo dalle Edge Functions con la service role)
 
