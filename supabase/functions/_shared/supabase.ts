@@ -27,3 +27,12 @@ export async function requireUserId(db: Db): Promise<string> {
   if (error || !data.user) throw new HttpError(401, 'unauthorized', 'Sessione scaduta, accedi di nuovo')
   return data.user.id
 }
+
+/** Like requireUserId, but only for accounts the owner has approved (they spend AI credit). */
+export async function requireApprovedUser(db: Db): Promise<string> {
+  const userId = await requireUserId(db)
+  const { data, error } = await db.from('profiles').select('approved').eq('id', userId).single()
+  if (error) throw error
+  if (!data.approved) throw new HttpError(403, 'not_approved', 'Il tuo account non è ancora stato approvato.')
+  return userId
+}

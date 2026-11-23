@@ -7,14 +7,14 @@ import { ORAL_PROMPTS, WRITTEN_QUESTIONS } from '../_shared/placement/questions.
 import { combineLevels, scoreWritten } from '../_shared/placement/scoring.ts'
 import { PLACEMENT_ORAL_PROMPT_VERSION, PLACEMENT_ORAL_SYSTEM_PROMPT } from '../_shared/prompts/placement-oral.v1.ts'
 import { type OralAssessment, oralAssessmentSchema, placementRequestSchema } from '../_shared/schemas/placement.ts'
-import { adminClient, requireUserId, userClient } from '../_shared/supabase.ts'
+import { adminClient, requireApprovedUser, userClient } from '../_shared/supabase.ts'
 
 const FUNCTION_NAME = 'placement-test'
 
 Deno.serve(
   handle(async (req) => {
     const db = userClient(req)
-    const userId = await requireUserId(db)
+    const userId = await requireApprovedUser(db)
 
     const body = placementRequestSchema.safeParse(await req.json().catch(() => null))
     if (!body.success) throw new HttpError(400, 'bad_request', 'Richiesta non valida')
