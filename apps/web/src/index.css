@@ -166,3 +166,17 @@ select { font: inherit; padding: 0.4rem 0.5rem; border-radius: 0.5rem; border: 1
 .option.wrong { background: transparent; color: var(--error); border-color: var(--error); }
 .quiz-feedback { margin-top: 0.75rem; }
 .ok { color: var(--success); }
+
+.install-dialog {
+  width: calc(100% - 2rem);
+  max-width: 24rem;
+  padding: 1.25rem;
+  border: 1px solid var(--surface);
+  border-radius: 0.75rem;
+  background: var(--bg);
+  color: var(--fg);
+}
+.install-dialog::backdrop { background: rgb(0 0 0 / 0.45); }
+.install-dialog h2 { margin-top: 0; font-size: 1.15rem; }
+.install-steps { padding-left: 1.25rem; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
