@@ -43,6 +43,9 @@ export function HomePage({
   const next = path ? nextLesson(path) : null
   const testChapter = path ? chapterAwaitingTest(path) : null
   const goalMinutes = profile.data?.daily_goal_minutes
+  // With no lesson or test to continue, the dialogue becomes the main action.
+  const hasMainAction = Boolean(next || testChapter)
+  const secondary = 'secondary'
 
   return (
     <main className="page">
@@ -95,32 +98,30 @@ export function HomePage({
             </button>
           )
         )}
-        <button type="button" onClick={onOpenPath}>
+        <button type="button" className={secondary} onClick={onOpenPath}>
           Percorso
         </button>
-        <button type="button" onClick={() => onStartDialogue(recommended)}>
+        <button type="button" className={hasMainAction ? secondary : undefined} onClick={() => onStartDialogue(recommended)}>
           {recommended === 'oral' ? 'Inizia un dialogo a voce' : 'Inizia un dialogo'}
         </button>
-        <button type="button" onClick={onStartReview}>
+        <button type="button" className={secondary} onClick={onStartReview}>
           Ripasso{dueCount.data !== undefined && ` (${dueCount.data} da fare)`}
         </button>
       </div>
 
       <NotificationSettings userId={user.id} />
 
-      <p>
+      <div className="footer-links">
         <button type="button" className="link" onClick={onRetakePlacement}>
           Rifai il test di livello
         </button>
-      </p>
-      {onInstall && (
-        <p>
+        {onInstall && (
           <button type="button" className="link" onClick={onInstall}>
             Installa l'app
           </button>
-        </p>
-      )}
-      <ChangePassword />
+        )}
+        <ChangePassword />
+      </div>
     </main>
   )
 }

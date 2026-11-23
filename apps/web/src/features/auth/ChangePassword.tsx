@@ -6,14 +6,12 @@ export function ChangePassword() {
   const [open, setOpen] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  if (saved) return <p className="muted">Password aggiornata.</p>
+  if (saved) return <p className="muted" style={{ flexBasis: '100%' }}>Password aggiornata.</p>
   if (!open) {
     return (
-      <p>
-        <button type="button" className="link" onClick={() => setOpen(true)}>
-          Cambia password
-        </button>
-      </p>
+      <button type="button" className="link" onClick={() => setOpen(true)}>
+        Cambia password
+      </button>
     )
   }
   return (
