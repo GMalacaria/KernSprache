@@ -219,6 +219,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"reminder_log": {
+                  Row: {
+                    "day": string,"kind": string,"sent_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "day": string,"kind": string,"sent_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "day"?: string,"kind"?: string,"sent_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"sessions": {
                   Row: {
                     "chapter_id": number | null,"ended_at": string | null,"id": string,"kind": Database["public"]['Enums']["session_kind"],"lesson_id": number | null,"started_at": string,"user_id": string
@@ -294,7 +308,13 @@ isOneToOne: false
         to: "study_days"
         isOneToOne: true
         isSetofReturn: false
-      } }
+      } },
+"call_send_reminders":
+{ Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"register_push_subscription":
+{ Args: { "p_auth": string,"p_endpoint": string,"p_p256dh": string }; Returns: undefined
+                           }
           }
           Enums: {
             "cefr_level": "A1"|"A2"|"B1"|"B2","learning_purpose": "leisure"|"travel"|"work"|"love","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
