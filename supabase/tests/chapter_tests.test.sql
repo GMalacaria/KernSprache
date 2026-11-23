@@ -15,7 +15,7 @@ from public.chapters limit 1;
 
 insert into public.chapter_test_attempts (user_id, chapter_id, test_id, written_score, oral_score, score, passed, feedback)
 select '77777777-7777-7777-7777-777777777777', chapter_id, id, 80, 70, 75, true, '{}'
-from public.chapter_tests;
+from public.chapter_tests where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"77777777-7777-7777-7777-777777777777","role":"authenticated"}', true);
@@ -29,7 +29,7 @@ select throws_ok(
 select is((select count(*) from public.chapter_test_attempts)::int, 1, 'learners can read their own attempts');
 select throws_ok(
   $$ insert into public.chapter_test_attempts (user_id, chapter_id, test_id, written_score, oral_score, score, passed, feedback)
-     select user_id, chapter_id, test_id, 100, 100, 100, true, '{}' from public.chapter_test_attempts $$,
+     select user_id, chapter_id, test_id, 100, 100, 100, true, '{}' from public.chapter_test_attempts limit 1 $$,
   '42501', null, 'learners cannot write attempts (no self-declared pass)'
 );
 
