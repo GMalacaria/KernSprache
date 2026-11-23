@@ -1,0 +1,15 @@
+{
+  // Static hosting of the PWA on Cloudflare Workers.
+  // Workers Builds runs `pnpm run build`, then `npx wrangler deploy` on main
+  // and `npx wrangler preview` on the other branches.
+  // `name` must match the Worker created in the Cloudflare dashboard.
+  "name": "aitool-kernsprache",
+  "compatibility_date": "2026-11-23",
+  "assets": {
+    "directory": "./apps/web/dist",
+    // Single-page app: unknown paths serve index.html instead of a 404.
+    "not_found_handling": "single-page-application"
+  },
+  // Required by `wrangler preview`; assets and settings stay at the top level.
+  "previews": {}
+}

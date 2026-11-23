@@ -2,6 +2,7 @@ import type { User } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
 import type { DialogueMode } from '../dialogue/DialoguePage'
 import { NotificationSettings } from '../notifications/NotificationSettings'
+import { ChangePassword } from '../auth/ChangePassword'
 import { purposeLabel } from '../onboarding/purposes'
 import { useDueCount } from '../review/useDueCount'
 import { StudyTimerBar } from '../study/StudyTimerBar'
@@ -109,6 +110,7 @@ export function HomePage({
           Rifai il test di livello
         </button>
       </p>
+      <ChangePassword />
     </main>
   )
 }
