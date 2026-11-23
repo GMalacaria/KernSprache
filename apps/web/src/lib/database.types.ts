@@ -71,6 +71,20 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
+                },"placement_results": {
+                  Row: {
+                    "created_at": string,"final_level": Database["public"]['Enums']["cefr_level"],"id": string,"oral_feedback": Json | null,"oral_level": Database["public"]['Enums']["cefr_level"] | null,"oral_transcripts": NonNullable<Json>,"user_id": string,"written_answers": NonNullable<Json>,"written_correct": number,"written_level": Database["public"]['Enums']["cefr_level"],"written_total": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"final_level": Database["public"]['Enums']["cefr_level"],"id"?: string,"oral_feedback"?: Json | null,"oral_level"?: Database["public"]['Enums']["cefr_level"] | null,"oral_transcripts"?: NonNullable<Json>,"user_id": string,"written_answers": NonNullable<Json>,"written_correct": number,"written_level": Database["public"]['Enums']["cefr_level"],"written_total": number
+                  }
+                  Update: {
+                    "created_at"?: string,"final_level"?: Database["public"]['Enums']["cefr_level"],"id"?: string,"oral_feedback"?: Json | null,"oral_level"?: Database["public"]['Enums']["cefr_level"] | null,"oral_transcripts"?: NonNullable<Json>,"user_id"?: string,"written_answers"?: NonNullable<Json>,"written_correct"?: number,"written_level"?: Database["public"]['Enums']["cefr_level"],"written_total"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"profiles": {
                   Row: {
                     "created_at": string,"daily_goal_minutes": number,"goal": string | null,"id": string,"level": Database["public"]['Enums']["cefr_level"],"onboarded_at": string | null,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"reminder_time": string,"timezone": string,"updated_at": string

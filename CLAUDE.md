@@ -10,7 +10,8 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - Ripasso con spaced repetition degli errori e delle parole nuove.
 - Notifiche: promemoria giornaliero, ripassi in scadenza, streak a rischio.
 - Tono del tutor: incoraggiante ma onesto, niente piaggeria né complimenti generici.
-- Al primo accesso si sceglie lo scopo dello studio (svago, viaggi, lavoro, amore: uno solo, modificabile): orienta situazioni dei dialoghi, lessico ed esempi.
+- Al primo accesso si sceglie lo scopo dello studio (svago, viaggi, lavoro, amore: uno solo, modificabile), che orienta situazioni dei dialoghi, lessico ed esempi; poi c'è il test di livello (saltabile, si parte da A1), ripetibile dalla home.
+- Test di livello: metà scritto (16 domande fisse a scelta multipla, 4 per livello A1–B2, corrette sul server: un livello è superato con 3/4 e solo se lo sono anche quelli sotto) e metà orale (4 risposte a voce valutate dall'IA). Livello finale = media dei due arrotondata per difetto.
 - Obiettivo giornaliero in minuti scelto dall'utente (`profiles.daily_goal_minutes`). Il timer conta solo il tempo attivo nel dialogo e nel ripasso: app in primo piano, finestra attiva e un'interazione negli ultimi 2 minuti.
 - La giornata è divisa a metà: prima lo scritto (dialogo scritto e ripasso), poi l'orale (dialogo a voce). A metà si invita a passare all'orale; raggiunto l'obiettivo compare un banner di successo e l'esercizio si ferma finché l'utente non chiede di continuare.
 
@@ -39,6 +40,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
     tutor-chat         dialogo + correzioni (output JSON)
     lesson             genera spiegazione + esercizi dell'argomento
     transcribe         trascrizione letterale del parlato (Gemini), errori inclusi
+    placement-test     test di livello iniziale (domande e correzione dello scritto, valutazione dell'orale)
     send-reminders     invio delle push (chiamata dal cron)
   /functions/_shared   client IA, prompt, schemi di validazione (zod)
 ```
@@ -68,6 +70,7 @@ Formato delle correzioni:
 - `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at, campi FSRS (gli errori sono anche carte di ripasso)
 - `vocab_items`: id, user_id, en, it, campi FSRS (due, stability, difficulty, reps, lapses, state, last_review)
 - `study_days`: user_id, day (giorno locale), goal_minutes, written_seconds, oral_seconds, completed_at. Si scrive solo con la RPC `add_study_time` (incremento atomico, max 120 s per chiamata).
+- `placement_results`: risposte e livelli (scritto, orale, finale) di ogni test di livello; scritta solo dalla function `placement-test`.
 - `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at
 - `ai_usage`: user_id, function_name, model, token in/out/cache (scritta solo dalle Edge Functions con la service role)
 

@@ -7,10 +7,11 @@ import { HomePage } from './features/home/HomePage'
 import { useProfile } from './features/home/useProfile'
 import { InstallBanner } from './features/onboarding/InstallBanner'
 import { OnboardingPage } from './features/onboarding/OnboardingPage'
+import { PlacementTestPage } from './features/placement/PlacementTestPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { StudyTimerProvider } from './features/study/StudyTimerContext'
 
-type View = 'home' | 'dialogue' | 'review' | 'settings'
+type View = 'home' | 'dialogue' | 'review' | 'settings' | 'placement'
 
 export function App() {
   const session = useAuthSession()
@@ -62,8 +63,13 @@ function SignedInApp({ user }: { user: User }) {
     dailyGoalMinutes: profile.data.daily_goal_minutes,
   }
 
+  // First run: purpose and daily goal, then the placement test (or skip it).
   if (!profile.data.onboarded_at) {
-    return <OnboardingPage userId={user.id} initial={initial} onDone={() => setView('home')} />
+    return profile.data.purpose ? (
+      <PlacementTestPage userId={user.id} firstRun onDone={() => setView('home')} />
+    ) : (
+      <OnboardingPage userId={user.id} initial={initial} onDone={() => setView('home')} />
+    )
   }
 
   return (
@@ -72,6 +78,8 @@ function SignedInApp({ user }: { user: User }) {
         <DialoguePage initialMode={dialogueMode} onExit={() => setView('home')} />
       ) : view === 'review' ? (
         <ReviewPage onExit={() => setView('home')} onSwitchToOral={() => openDialogue('oral')} />
+      ) : view === 'placement' ? (
+        <PlacementTestPage userId={user.id} firstRun={false} onDone={() => setView('home')} />
       ) : view === 'settings' ? (
         <OnboardingPage userId={user.id} initial={initial} editing onDone={() => setView('home')} />
       ) : (
@@ -80,6 +88,7 @@ function SignedInApp({ user }: { user: User }) {
           onStartDialogue={openDialogue}
           onStartReview={() => setView('review')}
           onEditGoals={() => setView('settings')}
+          onRetakePlacement={() => setView('placement')}
         />
       )}
     </StudyTimerProvider>

@@ -132,3 +132,11 @@ select { font: inherit; padding: 0.4rem 0.5rem; border-radius: 0.5rem; border: 1
 .purpose:has(input:focus-visible) { outline: 2px solid var(--accent); }
 .purpose-icon { font-size: 1.6rem; }
 .purpose small { display: block; color: var(--muted); }
+
+.placement-progress { margin-bottom: 1rem; }
+.placement-progress small { color: var(--muted); }
+.question { text-align: center; margin: 1rem 0; }
+.options .option { background: var(--surface); color: var(--fg); border: 1px solid var(--muted); }
+.transcript { background: var(--surface); }
+.level-badge { font-size: 3rem; font-weight: 700; color: var(--accent); margin: 0.5rem 0; }
+.small-heading { font-size: 0.95rem; margin: 0.75rem 0 0.25rem; }
