@@ -4,7 +4,9 @@ App personale (PWA) per imparare l'inglese partendo dalle basi: grammatica, asco
 Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice semplice e manutenibile, nessuna dipendenza da abbonamenti (si usano API a consumo).
 
 ## Obiettivi del prodotto
-- Lezioni brevi e strutturate (un argomento di grammatica alla volta), con un percorso da A1 a B2.
+- Percorso a capitoli di difficoltà crescente (6 per livello, da A1 a B2), ognuno con 4 lezioni e una verifica finale. La struttura è fissa (migration); i capitoli sotto il livello del test sono superati, il capitolo in corso è il primo non superato, le lezioni si sbloccano in ordine.
+- Lezione: 6-8 minuti con inizio e fine (nel tempo giornaliero ne stanno una o più). Parti: grammatica, 5 parole nuove, 3 espressioni, 1 modo di dire, 3 verbi, ascolto e comprensione, lettura e comprensione, dialogo di 3 turni con il tutor. Parole ed espressioni finiscono nel ripasso.
+- Il contenuto di ogni lezione è generato dall'IA per livello e scopo dell'utente e salvato in `lesson_contents` (rigenerato se cambia lo scopo); le lezioni del capitolo in corso vengono preparate in anticipo, e aprendo l'ultima lezione di un capitolo si prepara il successivo.
 - Correzione di ogni errore: frase originale, correzione, spiegazione breve **in italiano**.
 - Dialoghi in inglese semplice, scritti e vocali.
 - Ripasso con spaced repetition degli errori e delle parole nuove.
@@ -38,7 +40,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
   /migrations          schema SQL + policy RLS
   /functions
     tutor-chat         dialogo + correzioni (output JSON)
-    lesson             genera spiegazione + esercizi dell'argomento
+    lesson             contenuto delle lezioni: generazione, salvataggio e preparazione anticipata di un capitolo
     transcribe         trascrizione letterale del parlato (Gemini), errori inclusi
     placement-test     test di livello iniziale (domande e correzione dello scritto, valutazione dell'orale)
     send-reminders     invio delle push (chiamata dal cron)
@@ -65,8 +67,11 @@ Formato delle correzioni:
 
 ## Modello dati (essenziale)
 - `profiles`: id (= auth.uid), level (A1–B2), purpose (`leisure|travel|work|love`, uno solo), goal (dettagli in parole dell'utente), onboarded_at, reminder_time, timezone, daily_goal_minutes
-- `curriculum_topics`: id, level, sort_order, slug, title
-- `sessions`: id, user_id, topic_id, kind (lesson|dialogue|review), started_at, ended_at
+- `chapters`: id, level, sort_order, slug, title, description_it, grammar_focus (sola lettura)
+- `lessons`: id, chapter_id, sort_order, slug, title, focus (sola lettura)
+- `lesson_progress`: user_id, lesson_id, score, completed_at
+- `lesson_contents`: user_id, lesson_id, purpose, content (JSON), prompt_version; scritta solo dalla function `lesson`
+- `sessions`: id, user_id, chapter_id, lesson_id, kind (lesson|dialogue|review), started_at, ended_at
 - `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at, campi FSRS (gli errori sono anche carte di ripasso)
 - `vocab_items`: id, user_id, en, it, campi FSRS (due, stability, difficulty, reps, lapses, state, last_review)
 - `study_days`: user_id, day (giorno locale), goal_minutes, written_seconds, oral_seconds, completed_at. Si scrive solo con la RPC `add_study_time` (incremento atomico, max 120 s per chiamata).
@@ -74,7 +79,7 @@ Formato delle correzioni:
 - `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at
 - `ai_usage`: user_id, function_name, model, token in/out/cache (scritta solo dalle Edge Functions con la service role)
 
-Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.uid()`. Il profilo viene creato da un trigger su `auth.users`. `curriculum_topics` è in sola lettura per gli utenti; `ai_usage` è in sola lettura (propri record). I test RLS (pgTAP) sono in `supabase/tests`.
+Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.uid()`. Il profilo viene creato da un trigger su `auth.users`. `chapters` e `lessons` sono in sola lettura per gli utenti; `ai_usage` è in sola lettura (propri record). I test RLS (pgTAP) sono in `supabase/tests`.
 
 ## Convenzioni
 - TypeScript strict, niente `any`.

@@ -140,3 +140,29 @@ select { font: inherit; padding: 0.4rem 0.5rem; border-radius: 0.5rem; border: 1
 .transcript { background: var(--surface); }
 .level-badge { font-size: 3rem; font-weight: 700; color: var(--accent); margin: 0.5rem 0; }
 .small-heading { font-size: 0.95rem; margin: 0.75rem 0 0.25rem; }
+
+.primary-action { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 0.9rem 1rem; }
+.primary-action small { opacity: 0.85; font-size: 0.8rem; }
+.level-section h2 { font-size: 1.1rem; margin: 1.25rem 0 0.5rem; }
+.chapters, .lessons { list-style: none; padding: 0; margin: 0; }
+.chapter { border: 1px solid var(--surface); border-radius: 0.75rem; padding: 0.75rem; margin-bottom: 0.5rem; }
+.chapter p { margin: 0.25rem 0; }
+.chapter-current { border-color: var(--accent); }
+.chapter-locked { opacity: 0.55; }
+.lesson-link { background: none; color: var(--fg); padding: 0.35rem 0; text-align: left; }
+.lesson-link:disabled { color: var(--muted); }
+.lesson-done { color: var(--success); }
+.lesson-intro { font-weight: 600; }
+.examples, .cards { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
+.card { background: var(--surface); border-radius: 0.75rem; padding: 0.6rem 0.8rem; }
+.verbs { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.verbs th, .verbs td { text-align: left; padding: 0.35rem; border-bottom: 1px solid var(--surface); }
+.passage { background: var(--surface); border-radius: 0.75rem; padding: 0.75rem; line-height: 1.6; }
+.passage h3 { margin-top: 0; }
+.next-step { margin-top: 1rem; width: 100%; }
+.quiz { margin-top: 1rem; }
+.quiz-prompt { font-weight: 600; }
+.option.right { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+.option.wrong { background: transparent; color: var(--error); border-color: var(--error); }
+.quiz-feedback { margin-top: 0.75rem; }
+.ok { color: var(--success); }

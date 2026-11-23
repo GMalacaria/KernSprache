@@ -28,7 +28,7 @@ export interface ChatMessage {
 
 export interface TutorChatRequest {
   session_id?: string
-  topic_id?: number
+  lesson_id?: number
   messages: ChatMessage[]
 }
 

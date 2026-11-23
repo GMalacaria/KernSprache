@@ -23,10 +23,10 @@ Deno.serve(
 
     const body = tutorChatRequestSchema.safeParse(await req.json().catch(() => null))
     if (!body.success) throw new HttpError(400, 'bad_request', 'Richiesta non valida')
-    const { topic_id: topicId } = body.data
+    const { lesson_id: lessonId } = body.data
 
-    const sessionId = await ensureSession(db, body.data.session_id, topicId)
-    const snapshot = await loadLearnerSnapshot(db, userId, topicId)
+    const sessionId = await ensureSession(db, body.data.session_id, lessonId)
+    const snapshot = await loadLearnerSnapshot(db, userId, lessonId)
 
     let result
     try {
@@ -81,7 +81,7 @@ function aiErrorMessage(err: AiError): string {
 }
 
 /** Reuses the caller's dialogue session or starts a new one (RLS guarantees ownership). */
-async function ensureSession(db: Db, sessionId: string | undefined, topicId: number | undefined): Promise<string> {
+async function ensureSession(db: Db, sessionId: string | undefined, lessonId: number | undefined): Promise<string> {
   if (sessionId) {
     const { data, error } = await db.from('sessions').select('id, ended_at').eq('id', sessionId).maybeSingle()
     if (error) throw error
@@ -91,7 +91,7 @@ async function ensureSession(db: Db, sessionId: string | undefined, topicId: num
   }
   const { data, error } = await db
     .from('sessions')
-    .insert({ kind: 'dialogue', topic_id: topicId ?? null })
+    .insert({ kind: 'dialogue', lesson_id: lessonId ?? null, chapter_id: await chapterOf(db, lessonId) })
     .select('id')
     .single()
   if (error) throw error
@@ -124,4 +124,11 @@ async function saveVocab(db: Db, userId: string, reply: TutorReply): Promise<voi
   const { error: insertError } = await db.from('vocab_items').insert(fresh)
   // 23505: a concurrent request inserted the same word; nothing to do.
   if (insertError && insertError.code !== '23505') throw insertError
+}
+
+async function chapterOf(db: Db, lessonId: number | undefined): Promise<number | null> {
+  if (lessonId === undefined) return null
+  const { data, error } = await db.from('lessons').select('chapter_id').eq('id', lessonId).maybeSingle()
+  if (error) throw error
+  return data?.chapter_id ?? null
 }

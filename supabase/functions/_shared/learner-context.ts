@@ -4,7 +4,8 @@ export interface LearnerSnapshot {
   level: string
   goal: string | null
   purpose: string | null
-  topicTitle: string | null
+  /** Lesson being practised, with its chapter, for content steering. */
+  lesson: { title: string; focus: string; chapterTitle: string; grammarFocus: string } | null
   recentMistakes: { original: string; corrected: string; category: string }[]
   reviewWords: string[]
 }
@@ -17,13 +18,15 @@ const MAX_REVIEW_WORDS = 10
 export async function loadLearnerSnapshot(
   db: Db,
   userId: string,
-  topicId: number | undefined,
+  lessonId: number | undefined,
 ): Promise<LearnerSnapshot> {
-  const [profile, topic, mistakes, vocab] = await Promise.all([
+  const [profile, lesson, mistakes, vocab] = await Promise.all([
     db.from('profiles').select('level, goal, purpose').eq('id', userId).single(),
-    topicId === undefined
-      ? Promise.resolve({ data: null, error: null })
-      : db.from('curriculum_topics').select('title, slug').eq('id', topicId).maybeSingle(),
+    lessonId === undefined ? Promise.resolve({ data: null, error: null }) : db
+      .from('lessons')
+      .select('title, focus, chapters (title, grammar_focus)')
+      .eq('id', lessonId)
+      .maybeSingle(),
     db
       .from('mistakes')
       .select('original, corrected, category')
@@ -39,7 +42,7 @@ export async function loadLearnerSnapshot(
       .limit(MAX_REVIEW_WORDS),
   ])
 
-  for (const result of [profile, topic, mistakes, vocab]) {
+  for (const result of [profile, lesson, mistakes, vocab]) {
     if (result.error) throw result.error
   }
 
@@ -47,7 +50,14 @@ export async function loadLearnerSnapshot(
     level: profile.data?.level ?? 'A1',
     goal: profile.data?.goal ?? null,
     purpose: profile.data?.purpose ?? null,
-    topicTitle: topic.data ? `${topic.data.title} (${topic.data.slug})` : null,
+    lesson: lesson.data
+      ? {
+        title: lesson.data.title,
+        focus: lesson.data.focus,
+        chapterTitle: lesson.data.chapters?.title ?? '',
+        grammarFocus: lesson.data.chapters?.grammar_focus ?? '',
+      }
+      : null,
     recentMistakes: mistakes.data ?? [],
     reviewWords: (vocab.data ?? []).map((v) => v.en),
   }
@@ -65,7 +75,11 @@ export function renderLearnerContext(s: LearnerSnapshot): string {
   const lines = ['# Learner context', `- Level: ${s.level}`]
   lines.push(`- Learning purpose: ${s.purpose ?? 'not specified'}`)
   if (s.goal) lines.push(`- In the learner's own words: ${s.goal}`)
-  lines.push(`- Current topic: ${s.topicTitle ?? 'none, free conversation'}`)
+  lines.push(
+    s.lesson
+      ? `- Current lesson: "${s.lesson.title}" - focus: ${s.lesson.focus} (chapter "${s.lesson.chapterTitle}": ${s.lesson.grammarFocus})`
+      : '- Current lesson: none, free conversation',
+  )
   lines.push(`- Recurring mistake types: ${recurring.length ? recurring.join(', ') : 'none yet'}`)
   if (s.recentMistakes.length) {
     lines.push('- Recent mistakes:')

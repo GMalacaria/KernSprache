@@ -6,12 +6,15 @@ import { DialoguePage, type DialogueMode } from './features/dialogue/DialoguePag
 import { HomePage } from './features/home/HomePage'
 import { useProfile } from './features/home/useProfile'
 import { InstallBanner } from './features/onboarding/InstallBanner'
+import { LessonPage } from './features/lesson/LessonPage'
+import { PathPage } from './features/path/PathPage'
+import { neighbours, usePath, usePrefetchCurrentChapter } from './features/path/usePath'
 import { OnboardingPage } from './features/onboarding/OnboardingPage'
 import { PlacementTestPage } from './features/placement/PlacementTestPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { StudyTimerProvider } from './features/study/StudyTimerContext'
 
-type View = 'home' | 'dialogue' | 'review' | 'settings' | 'placement'
+type View = 'home' | 'dialogue' | 'review' | 'settings' | 'placement' | 'path' | 'lesson'
 
 export function App() {
   const session = useAuthSession()
@@ -36,6 +39,14 @@ function SignedInApp({ user }: { user: User }) {
   const profile = useProfile(user.id)
   const [view, setView] = useState<View>('home')
   const [dialogueMode, setDialogueMode] = useState<DialogueMode>('written')
+  const [lessonId, setLessonId] = useState<number | null>(null)
+  const { path } = usePath(user.id)
+  usePrefetchCurrentChapter(profile.data?.onboarded_at ? path : undefined)
+
+  function openLesson(id: number) {
+    setLessonId(id)
+    setView('lesson')
+  }
 
   function openDialogue(mode: DialogueMode) {
     setDialogueMode(mode)
@@ -78,6 +89,17 @@ function SignedInApp({ user }: { user: User }) {
         <DialoguePage initialMode={dialogueMode} onExit={() => setView('home')} />
       ) : view === 'review' ? (
         <ReviewPage onExit={() => setView('home')} onSwitchToOral={() => openDialogue('oral')} />
+      ) : view === 'path' ? (
+        <PathPage userId={user.id} onOpenLesson={openLesson} onExit={() => setView('home')} />
+      ) : view === 'lesson' && lessonId !== null ? (
+        <LessonPage
+          key={lessonId}
+          userId={user.id}
+          lessonId={lessonId}
+          {...neighbours(path, lessonId)}
+          onOpenLesson={openLesson}
+          onExit={() => setView('path')}
+        />
       ) : view === 'placement' ? (
         <PlacementTestPage userId={user.id} firstRun={false} onDone={() => setView('home')} />
       ) : view === 'settings' ? (
@@ -89,6 +111,8 @@ function SignedInApp({ user }: { user: User }) {
           onStartReview={() => setView('review')}
           onEditGoals={() => setView('settings')}
           onRetakePlacement={() => setView('placement')}
+          onOpenPath={() => setView('path')}
+          onOpenLesson={openLesson}
         />
       )}
     </StudyTimerProvider>
