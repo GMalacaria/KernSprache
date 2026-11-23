@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { LoginPage } from './features/auth/LoginPage'
+import { PendingApprovalPage } from './features/auth/PendingApprovalPage'
+import { SetPasswordPage } from './features/auth/SetPasswordPage'
 import { useAuthSession } from './features/auth/useAuthSession'
 import { ChapterTestPage } from './features/chapter-test/ChapterTestPage'
 import { DialoguePage, type DialogueMode } from './features/dialogue/DialoguePage'
@@ -18,7 +20,7 @@ import { StudyTimerProvider } from './features/study/StudyTimerContext'
 type View = 'home' | 'dialogue' | 'review' | 'settings' | 'placement' | 'path' | 'lesson' | 'chapter-test'
 
 export function App() {
-  const session = useAuthSession()
+  const { session, recovering, endRecovery } = useAuthSession()
 
   return (
     <>
@@ -27,6 +29,8 @@ export function App() {
         <main className="page">
           <p>Caricamento…</p>
         </main>
+      ) : session && recovering ? (
+        <SetPasswordPage onDone={endRecovery} />
       ) : session ? (
         <SignedInApp user={session.user} />
       ) : (
@@ -72,6 +76,12 @@ function SignedInApp({ user }: { user: User }) {
       <main className="page">
         <p className="error">Impossibile caricare il profilo. Ricarica la pagina.</p>
       </main>
+    )
+  }
+
+  if (!profile.data.approved) {
+    return (
+      <PendingApprovalPage email={user.email} checking={profile.isFetching} onCheckAgain={() => void profile.refetch()} />
     )
   }
 

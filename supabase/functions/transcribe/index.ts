@@ -6,13 +6,13 @@ import { getTranscriber } from '../_shared/ai/transcriber.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
 import { TRANSCRIBE_PROMPT_VERSION } from '../_shared/prompts/transcribe.v1.ts'
 import { transcribeRequestSchema } from '../_shared/schemas/transcribe.ts'
-import { requireUserId, userClient } from '../_shared/supabase.ts'
+import { requireApprovedUser, userClient } from '../_shared/supabase.ts'
 
 const FUNCTION_NAME = 'transcribe'
 
 Deno.serve(
   handle(async (req) => {
-    const userId = await requireUserId(userClient(req))
+    const userId = await requireApprovedUser(userClient(req))
 
     const body = transcribeRequestSchema.safeParse(await req.json().catch(() => null))
     if (!body.success) throw new HttpError(400, 'bad_request', 'Registrazione non valida o troppo lunga')

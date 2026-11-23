@@ -193,14 +193,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"daily_goal_minutes": number,"goal": string | null,"id": string,"level": Database["public"]['Enums']["cefr_level"],"onboarded_at": string | null,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"reminder_time": string,"timezone": string,"updated_at": string
+                    "approved": boolean,"created_at": string,"daily_goal_minutes": number,"goal": string | null,"id": string,"level": Database["public"]['Enums']["cefr_level"],"onboarded_at": string | null,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"reminder_time": string,"timezone": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id": string,"level"?: Database["public"]['Enums']["cefr_level"],"onboarded_at"?: string | null,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
+                    "approved"?: boolean,"created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id": string,"level"?: Database["public"]['Enums']["cefr_level"],"onboarded_at"?: string | null,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id"?: string,"level"?: Database["public"]['Enums']["cefr_level"],"onboarded_at"?: string | null,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
+                    "approved"?: boolean,"created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id"?: string,"level"?: Database["public"]['Enums']["cefr_level"],"onboarded_at"?: string | null,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     

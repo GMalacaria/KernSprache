@@ -12,14 +12,14 @@ import {
   type TutorReply,
   tutorReplySchema,
 } from '../_shared/schemas/tutor-chat.ts'
-import { type Db, requireUserId, userClient } from '../_shared/supabase.ts'
+import { type Db, requireApprovedUser, userClient } from '../_shared/supabase.ts'
 
 const FUNCTION_NAME = 'tutor-chat'
 
 Deno.serve(
   handle(async (req) => {
     const db = userClient(req)
-    const userId = await requireUserId(db)
+    const userId = await requireApprovedUser(db)
 
     const body = tutorChatRequestSchema.safeParse(await req.json().catch(() => null))
     if (!body.success) throw new HttpError(400, 'bad_request', 'Richiesta non valida')

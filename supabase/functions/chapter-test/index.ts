@@ -24,7 +24,7 @@ import {
 } from '../_shared/schemas/chapter-test.ts'
 import { lessonContentSchema } from '../_shared/schemas/lesson.ts'
 import { z } from '../_shared/deps.ts'
-import { adminClient, type Db, requireUserId, userClient } from '../_shared/supabase.ts'
+import { adminClient, type Db, requireApprovedUser, userClient } from '../_shared/supabase.ts'
 
 const FUNCTION_NAME = 'chapter-test'
 
@@ -40,7 +40,7 @@ interface ChapterInfo {
 Deno.serve(
   handle(async (req) => {
     const db = userClient(req)
-    const userId = await requireUserId(db)
+    const userId = await requireApprovedUser(db)
 
     const body = chapterTestRequestSchema.safeParse(await req.json().catch(() => null))
     if (!body.success) throw new HttpError(400, 'bad_request', 'Richiesta non valida')
