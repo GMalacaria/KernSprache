@@ -107,9 +107,11 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 - Schema: ogni modifica passa da una nuova migration (mai modificare quelle già su `main`), con test RLS se tocca tabelle utente.
 
 ## Regole per l'assistente IA (Claude Code)
-- Permessi in `.claude/settings.json`: comandi di dev/test consentiti; vietati la lettura dei file con segreti veri (`.env`, `.env.local`, `.env.*.local`, `.env.keys`, in qualsiasi cartella), `supabase db push`, `supabase secrets set`, deploy delle functions e force push. I template `.env.example` contengono solo segnaposto e si possono leggere e modificare.
+- Permessi in `.claude/settings.json`: comandi di dev/test consentiti; vietati la lettura dei file con segreti veri (`.env`, `.env.local`, `.env.*.local`, `.env.keys`, in qualsiasi cartella) e il force push. I comandi di release (`supabase link`, `supabase db push`, `supabase functions deploy`, `supabase secrets set`, `wrangler deploy`) sono in modalità **chiedi conferma**: partono solo se l'utente li approva uno per uno. I template `.env.example` contengono solo segnaposto e si possono leggere e modificare.
+- Le credenziali di release (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`) stanno solo nelle variabili d'ambiente del terminale dell'utente: non vanno scritte in file del repo né in chat.
 - Prima di committare: `pnpm lint`, `pnpm test`, `pnpm build`; se cambiano le functions `pnpm fn:check`, `pnpm fn:lint`, `pnpm fn:test`; se cambia lo schema `pnpm test:db` e `pnpm db:types`.
 - Non aprire PR, non fare push su `main` e non fare deploy senza richiesta esplicita.
+- **Release** (solo su richiesta esplicita, in quest'ordine): 1) PR mergiate su `main` con la CI verde; 2) `pnpm lint && pnpm test && pnpm build && pnpm test:db && pnpm fn:check && pnpm fn:lint && pnpm fn:test`; 3) `pnpm exec supabase migration list` per vedere cosa manca in produzione, poi `pnpm exec supabase db push` mostrando prima l'elenco; 4) `pnpm exec supabase functions deploy <nome>` per le functions cambiate (`send-reminders` con `verify_jwt = false`, già in `config.toml`); 5) secret nuovi con `supabase secrets set` solo se servono; 6) il frontend si pubblica da Cloudflare dopo il merge su `main` (non fare `wrangler deploy` da locale: il build locale incorpora `apps/web/.env.local`). Le migration vanno applicate in ordine di timestamp: se una PR con una migration più vecchia arriva dopo, mergiarla prima.
 
 ## Costi
 - Obiettivo: meno di ~€15 al mese.
