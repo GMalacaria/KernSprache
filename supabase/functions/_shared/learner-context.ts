@@ -3,6 +3,7 @@ import type { Db } from './supabase.ts'
 export interface LearnerSnapshot {
   level: string
   goal: string | null
+  purpose: string | null
   topicTitle: string | null
   recentMistakes: { original: string; corrected: string; category: string }[]
   reviewWords: string[]
@@ -19,7 +20,7 @@ export async function loadLearnerSnapshot(
   topicId: number | undefined,
 ): Promise<LearnerSnapshot> {
   const [profile, topic, mistakes, vocab] = await Promise.all([
-    db.from('profiles').select('level, goal').eq('id', userId).single(),
+    db.from('profiles').select('level, goal, purpose').eq('id', userId).single(),
     topicId === undefined
       ? Promise.resolve({ data: null, error: null })
       : db.from('curriculum_topics').select('title, slug').eq('id', topicId).maybeSingle(),
@@ -45,6 +46,7 @@ export async function loadLearnerSnapshot(
   return {
     level: profile.data?.level ?? 'A1',
     goal: profile.data?.goal ?? null,
+    purpose: profile.data?.purpose ?? null,
     topicTitle: topic.data ? `${topic.data.title} (${topic.data.slug})` : null,
     recentMistakes: mistakes.data ?? [],
     reviewWords: (vocab.data ?? []).map((v) => v.en),
@@ -61,7 +63,8 @@ export function renderLearnerContext(s: LearnerSnapshot): string {
     .map(([category, n]) => `${category} (${n})`)
 
   const lines = ['# Learner context', `- Level: ${s.level}`]
-  if (s.goal) lines.push(`- Goal: ${s.goal}`)
+  lines.push(`- Learning purpose: ${s.purpose ?? 'not specified'}`)
+  if (s.goal) lines.push(`- In the learner's own words: ${s.goal}`)
   lines.push(`- Current topic: ${s.topicTitle ?? 'none, free conversation'}`)
   lines.push(`- Recurring mistake types: ${recurring.length ? recurring.join(', ') : 'none yet'}`)
   if (s.recentMistakes.length) {

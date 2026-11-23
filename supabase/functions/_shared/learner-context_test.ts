@@ -5,6 +5,7 @@ Deno.test('renderLearnerContext lists recurring mistake types and review words',
   const text = renderLearnerContext({
     level: 'A2',
     goal: null,
+    purpose: 'travel',
     topicTitle: 'Present simple (a1-present-simple)',
     recentMistakes: [
       { original: 'he go', corrected: 'he goes', category: 'verb_tense' },
@@ -19,18 +20,21 @@ Deno.test('renderLearnerContext lists recurring mistake types and review words',
   assertStringIncludes(text, '- Recurring mistake types: verb_tense (2)\n')
   assertStringIncludes(text, '"in monday" -> "on Monday" [preposition]')
   assertStringIncludes(text, '- Words in review: kitchen, tired')
-  assertEquals(text.includes('Goal:'), false)
+  assertStringIncludes(text, '- Learning purpose: travel')
+  assertEquals(text.includes("learner's own words"), false)
 })
 
 Deno.test('renderLearnerContext handles a brand-new learner', () => {
   const text = renderLearnerContext({
     level: 'A1',
-    goal: 'viaggiare',
+    goal: 'parlare con i colleghi',
+    purpose: null,
     topicTitle: null,
     recentMistakes: [],
     reviewWords: [],
   })
-  assertStringIncludes(text, '- Goal: viaggiare')
+  assertStringIncludes(text, "- In the learner's own words: parlare con i colleghi")
+  assertStringIncludes(text, '- Learning purpose: not specified')
   assertStringIncludes(text, 'none, free conversation')
   assertStringIncludes(text, 'Recurring mistake types: none yet')
   assertStringIncludes(text, 'Words in review: none')

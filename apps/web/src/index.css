@@ -123,3 +123,12 @@ textarea {
 
 .goal-setting { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
 select { font: inherit; padding: 0.4rem 0.5rem; border-radius: 0.5rem; border: 1px solid var(--muted); background: var(--bg); color: var(--fg); }
+
+.purposes { border: none; padding: 0; margin: 0 0 0.5rem; display: grid; gap: 0.5rem; }
+.purposes legend { font-weight: 600; margin-bottom: 0.5rem; }
+.purpose { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--muted); border-radius: 0.75rem; cursor: pointer; }
+.purpose.selected { border-color: var(--accent); background: var(--surface); }
+.purpose input { position: absolute; opacity: 0; pointer-events: none; }
+.purpose:has(input:focus-visible) { outline: 2px solid var(--accent); }
+.purpose-icon { font-size: 1.6rem; }
+.purpose small { display: block; color: var(--muted); }

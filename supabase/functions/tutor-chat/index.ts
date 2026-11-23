@@ -5,7 +5,7 @@ import { AiError, getAiProvider } from '../_shared/ai/index.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
 import { cleanReply } from '../_shared/tutor-reply.ts'
 import { loadLearnerSnapshot, renderLearnerContext } from '../_shared/learner-context.ts'
-import { TUTOR_CHAT_PROMPT_VERSION, TUTOR_CHAT_SYSTEM_PROMPT } from '../_shared/prompts/tutor-chat.v1.ts'
+import { TUTOR_CHAT_PROMPT_VERSION, TUTOR_CHAT_SYSTEM_PROMPT } from '../_shared/prompts/tutor-chat.v2.ts'
 import {
   MAX_HISTORY_MESSAGES,
   tutorChatRequestSchema,

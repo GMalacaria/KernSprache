@@ -23,8 +23,3 @@ export async function addStudyTime(day: string, mode: StudyMode, seconds: number
   if (error) throw error
   return data
 }
-
-export async function updateDailyGoal(userId: string, minutes: number): Promise<void> {
-  const { error } = await supabase.from('profiles').update({ daily_goal_minutes: minutes }).eq('id', userId)
-  if (error) throw error
-}
