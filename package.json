@@ -20,7 +20,8 @@
     "fn:serve": "supabase functions serve --env-file supabase/functions/.env",
     "fn:check": "cd supabase/functions && deno check */index.ts",
     "fn:lint": "cd supabase/functions && deno lint && deno fmt --check",
-    "fn:test": "cd supabase/functions && deno test --allow-env"
+    "fn:test": "cd supabase/functions && deno test --allow-env",
+    "push:keys": "cd supabase/functions && deno run _scripts/vapid-keys.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
