@@ -128,7 +128,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
             </p>
             {turn.role === 'assistant' && canSpeak() && (
               <button type="button" className="link listen" onClick={() => speak(turn.content)}>
-                🔊 Ascolta
+                Ascolta
               </button>
             )}
             {turn.corrections && <CorrectionList corrections={turn.corrections} />}

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { LEVELS, type ChapterView } from './progress'
 import { usePath } from './usePath'
 
@@ -17,10 +18,16 @@ const STATUS_LABEL: Record<ChapterView['status'], string> = {
 
 export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageProps) {
   const { path, isError } = usePath(userId)
+  const currentRef = useRef<HTMLLIElement>(null)
+
+  // Land on the chapter in progress instead of the top of a long list.
+  useEffect(() => {
+    if (path) currentRef.current?.scrollIntoView({ block: 'start' })
+  }, [path])
 
   return (
     <main className="page">
-      <header className="row">
+      <header className="row sticky-header">
         <h1>Percorso</h1>
         <button type="button" className="link" onClick={onExit}>
           Home
@@ -35,43 +42,69 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageP
             <ol className="chapters">
               {path
                 .filter((c) => c.level === level)
-                .map((chapter) => (
-                  <li key={chapter.id} className={`chapter chapter-${chapter.status}`}>
-                    <div className="row">
+                .map((chapter) => {
+                  const folded = chapter.status === 'skipped' || chapter.status === 'done'
+                  const header = (
+                    <>
                       <strong>{chapter.title}</strong>
                       <span className="tag">{STATUS_LABEL[chapter.status]}</span>
-                    </div>
-                    <p className="muted">{chapter.description_it}</p>
-                    {chapter.status !== 'locked' && (
-                      <ol className="lessons">
-                        {chapter.lessons.map((lesson) => (
-                          <li key={lesson.id}>
-                            <button
-                              type="button"
-                              className={`lesson-link lesson-${lesson.status}`}
-                              disabled={lesson.status === 'locked'}
-                              onClick={() => onOpenLesson(lesson.id)}
-                            >
-                              {lesson.status === 'done' ? '✓' : lesson.status === 'locked' ? '🔒' : '▶'} {lesson.title}
-                            </button>
-                          </li>
+                    </>
+                  )
+                  const body = (
+                    <>
+                      <p className="muted">{chapter.description_it}</p>
+                      {chapter.status !== 'locked' && (
+                        <ol className="lessons">
+                          {chapter.lessons.map((lesson) => (
+                            <li key={lesson.id}>
+                              <button
+                                type="button"
+                                className={`lesson-link lesson-${lesson.status}`}
+                                disabled={lesson.status === 'locked'}
+                                onClick={() => onOpenLesson(lesson.id)}
+                              >
+                                <span className="lesson-mark" aria-hidden="true">
+                                  {lesson.status === 'done' ? '✓' : lesson.status === 'locked' ? '–' : '›'}
+                                </span>
+                                {lesson.title}
+                                {lesson.status === 'locked' && <span className="visually-hidden"> (bloccata)</span>}
+                              </button>
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                      {chapter.status === 'current' &&
+                        (chapter.testAvailable ? (
+                          <button type="button" className="primary-action" onClick={() => onOpenTest(chapter.id)}>
+                            Verifica del capitolo
+                            <small>Scritto e orale: con 70 su 100 passi al capitolo successivo</small>
+                          </button>
+                        ) : (
+                          <p className="muted">
+                            Lezioni completate: {chapter.completedLessons} di {chapter.lessons.length}. Poi c'è la
+                            verifica del capitolo.
+                          </p>
                         ))}
-                      </ol>
-                    )}
-                    {chapter.status === 'current' &&
-                      (chapter.testAvailable ? (
-                        <button type="button" className="primary-action" onClick={() => onOpenTest(chapter.id)}>
-                          Verifica del capitolo
-                          <small>Scritto e orale: con 70 su 100 passi al capitolo successivo</small>
-                        </button>
-                      ) : (
-                        <p className="muted">
-                          Lezioni completate: {chapter.completedLessons} di {chapter.lessons.length}. Poi c'è la verifica
-                          del capitolo.
-                        </p>
-                      ))}
-                  </li>
-                ))}
+                    </>
+                  )
+                  return folded ? (
+                    <li key={chapter.id} className={`chapter chapter-${chapter.status} chapter-folded`}>
+                      <details>
+                        <summary>{header}</summary>
+                        {body}
+                      </details>
+                    </li>
+                  ) : (
+                    <li
+                      key={chapter.id}
+                      ref={chapter.status === 'current' ? currentRef : undefined}
+                      className={`chapter chapter-${chapter.status}`}
+                    >
+                      <div className="row">{header}</div>
+                      {body}
+                    </li>
+                  )
+                })}
             </ol>
           </section>
         ))}
