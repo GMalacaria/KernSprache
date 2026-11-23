@@ -21,14 +21,22 @@ export function notificationsBlocked(): boolean {
   return 'Notification' in window && Notification.permission === 'denied'
 }
 
+const SERVICE_WORKER_TIMEOUT_MS = 10_000
+
+/** The active service worker, or an error instead of waiting forever when it never registers. */
 async function registration(): Promise<ServiceWorkerRegistration> {
-  return navigator.serviceWorker.ready
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("L'app non è ancora pronta per le notifiche: ricarica la pagina e riprova.")), SERVICE_WORKER_TIMEOUT_MS),
+  )
+  return Promise.race([navigator.serviceWorker.ready, timeout])
 }
 
 /** The browser's current push subscription, if reminders are on for this device. */
 export async function currentSubscription(): Promise<PushSubscription | null> {
   if (pushSupport() !== 'ready') return null
-  return (await registration()).pushManager.getSubscription()
+  // getRegistration (not ready): without a registered service worker there is simply no subscription.
+  const reg = await navigator.serviceWorker.getRegistration()
+  return reg ? reg.pushManager.getSubscription() : null
 }
 
 function applicationServerKey(base64Url: string): Uint8Array<ArrayBuffer> {
