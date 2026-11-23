@@ -4,6 +4,7 @@ import { usePath } from './usePath'
 interface PathPageProps {
   userId: string
   onOpenLesson: (lessonId: number) => void
+  onOpenTest: (chapterId: number) => void
   onExit: () => void
 }
 
@@ -14,7 +15,7 @@ const STATUS_LABEL: Record<ChapterView['status'], string> = {
   locked: 'Bloccato',
 }
 
-export function PathPage({ userId, onOpenLesson, onExit }: PathPageProps) {
+export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageProps) {
   const { path, isError } = usePath(userId)
 
   return (
@@ -57,13 +58,18 @@ export function PathPage({ userId, onOpenLesson, onExit }: PathPageProps) {
                         ))}
                       </ol>
                     )}
-                    {chapter.status === 'current' && (
-                      <p className="muted">
-                        {chapter.testAvailable
-                          ? 'Hai finito le lezioni: la verifica del capitolo arriva con il prossimo aggiornamento.'
-                          : `Lezioni completate: ${chapter.completedLessons} di ${chapter.lessons.length}. Poi c'è la verifica del capitolo.`}
-                      </p>
-                    )}
+                    {chapter.status === 'current' &&
+                      (chapter.testAvailable ? (
+                        <button type="button" className="primary-action" onClick={() => onOpenTest(chapter.id)}>
+                          Verifica del capitolo
+                          <small>Scritto e orale: con 70 su 100 passi al capitolo successivo</small>
+                        </button>
+                      ) : (
+                        <p className="muted">
+                          Lezioni completate: {chapter.completedLessons} di {chapter.lessons.length}. Poi c'è la verifica
+                          del capitolo.
+                        </p>
+                      ))}
                   </li>
                 ))}
             </ol>

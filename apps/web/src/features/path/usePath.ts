@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useProfile } from '../home/useProfile'
 import { prefetchChapter } from '../lesson/api'
+import { fetchPassedChapterIds } from '../chapter-test/api'
 import { buildPath, type ChapterRow, type ChapterView } from './progress'
 
 async function fetchChapters(): Promise<ChapterRow[]> {
@@ -26,17 +27,20 @@ export function usePath(userId: string): { path: ChapterView[] | undefined; isEr
   const profile = useProfile(userId)
   const chapters = useQuery({ queryKey: ['chapters'], queryFn: fetchChapters, staleTime: Infinity })
   const completed = useQuery({ queryKey: ['lesson-progress'], queryFn: fetchCompletedLessonIds })
+  const passed = useQuery({ queryKey: ['passed-chapters'], queryFn: fetchPassedChapterIds })
 
-  if (!profile.data || !chapters.data || !completed.data) {
-    return { path: undefined, isError: profile.isError || chapters.isError || completed.isError }
+  if (!profile.data || !chapters.data || !completed.data || !passed.data) {
+    return {
+      path: undefined,
+      isError: profile.isError || chapters.isError || completed.isError || passed.isError,
+    }
   }
   return {
     path: buildPath({
       chapters: chapters.data,
       level: profile.data.level,
       completedLessonIds: new Set(completed.data),
-      // Chapter tests come next: until then no chapter counts as passed.
-      passedChapterIds: new Set(),
+      passedChapterIds: new Set(passed.data),
     }),
     isError: false,
   }
@@ -61,4 +65,10 @@ export function neighbours(
   if (!chapter) return {}
   const position = chapter.lessons.findIndex((l) => l.id === lessonId)
   return { nextLessonId: chapter.lessons[position + 1]?.id, nextChapterId: path[index + 1]?.id }
+}
+
+/** Chapter that follows the given one, to prepare its lessons once the chapter test is passed. */
+export function chapterAfter(path: ChapterView[] | undefined, chapterId: number): ChapterView | undefined {
+  const index = path?.findIndex((c) => c.id === chapterId) ?? -1
+  return index >= 0 ? path?.[index + 1] : undefined
 }

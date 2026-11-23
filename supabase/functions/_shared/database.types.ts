@@ -37,6 +37,52 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"chapter_test_attempts": {
+                  Row: {
+                    "chapter_id": number,"created_at": string,"feedback": NonNullable<Json>,"id": string,"oral_score": number,"passed": boolean,"score": number,"test_id": string,"user_id": string,"written_score": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "chapter_id": number,"created_at"?: string,"feedback": NonNullable<Json>,"id"?: string,"oral_score": number,"passed": boolean,"score": number,"test_id": string,"user_id": string,"written_score": number
+                  }
+                  Update: {
+                    "chapter_id"?: number,"created_at"?: string,"feedback"?: NonNullable<Json>,"id"?: string,"oral_score"?: number,"passed"?: boolean,"score"?: number,"test_id"?: string,"user_id"?: string,"written_score"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chapter_test_attempts_chapter_id_fkey"
+      columns: ["chapter_id"]
+isOneToOne: false
+      referencedRelation: "chapters"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chapter_test_attempts_test_id_fkey"
+      columns: ["test_id"]
+isOneToOne: false
+      referencedRelation: "chapter_tests"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"chapter_tests": {
+                  Row: {
+                    "chapter_id": number,"created_at": string,"id": string,"oral_tasks": NonNullable<Json>,"prompt_version": string,"questions": NonNullable<Json>,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "chapter_id": number,"created_at"?: string,"id"?: string,"oral_tasks": NonNullable<Json>,"prompt_version": string,"questions": NonNullable<Json>,"user_id": string
+                  }
+                  Update: {
+                    "chapter_id"?: number,"created_at"?: string,"id"?: string,"oral_tasks"?: NonNullable<Json>,"prompt_version"?: string,"questions"?: NonNullable<Json>,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chapter_tests_chapter_id_fkey"
+      columns: ["chapter_id"]
+isOneToOne: false
+      referencedRelation: "chapters"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"chapters": {
                   Row: {
                     "description_it": string,"grammar_focus": string,"id": number,"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string

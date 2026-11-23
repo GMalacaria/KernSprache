@@ -13,6 +13,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - Notifiche: promemoria giornaliero, ripassi in scadenza, streak a rischio.
 - Tono del tutor: incoraggiante ma onesto, niente piaggeria né complimenti generici.
 - Al primo accesso si sceglie lo scopo dello studio (svago, viaggi, lavoro, amore: uno solo, modificabile), che orienta situazioni dei dialoghi, lessico ed esempi; poi c'è il test di livello (saltabile, si parte da A1), ripetibile dalla home.
+- Verifica di fine capitolo: disponibile quando le 4 lezioni sono complete, sempre metà scritta (8 domande a scelta multipla, corrette sul server) e metà orale (2 consegne valutate dall'IA, scritte se il microfono manca). Punteggio = media dei due, si passa con 70/100; dopo un tentativo la verifica successiva è nuova. Superare l'ultimo capitolo di un livello alza `profiles.level`.
 - Test di livello: metà scritto (16 domande fisse a scelta multipla, 4 per livello A1–B2, corrette sul server: un livello è superato con 3/4 e solo se lo sono anche quelli sotto) e metà orale (4 risposte a voce valutate dall'IA). Livello finale = media dei due arrotondata per difetto.
 - Obiettivo giornaliero in minuti scelto dall'utente (`profiles.daily_goal_minutes`). Il timer conta solo il tempo attivo nel dialogo e nel ripasso: app in primo piano, finestra attiva e un'interazione negli ultimi 2 minuti.
 - La giornata è divisa a metà: prima lo scritto (dialogo scritto e ripasso), poi l'orale (dialogo a voce). A metà si invita a passare all'orale; raggiunto l'obiettivo compare un banner di successo e l'esercizio si ferma finché l'utente non chiede di continuare.
@@ -42,6 +43,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
     tutor-chat         dialogo + correzioni (output JSON)
     lesson             contenuto delle lezioni: generazione, salvataggio e preparazione anticipata di un capitolo
     transcribe         trascrizione letterale del parlato (Gemini), errori inclusi
+    chapter-test       verifica di fine capitolo: domande generate dall'IA, correzione dello scritto e valutazione dell'orale sul server
     placement-test     test di livello iniziale (domande e correzione dello scritto, valutazione dell'orale)
     send-reminders     invio delle push (chiamata dal cron)
   /functions/_shared   client IA, prompt, schemi di validazione (zod)
@@ -71,6 +73,8 @@ Formato delle correzioni:
 - `lessons`: id, chapter_id, sort_order, slug, title, focus (sola lettura)
 - `lesson_progress`: user_id, lesson_id, score, completed_at
 - `lesson_contents`: user_id, lesson_id, purpose, content (JSON), prompt_version; scritta solo dalla function `lesson`
+- `chapter_tests`: id, user_id, chapter_id, questions (con le risposte giuste), oral_tasks, prompt_version; nessun accesso per gli utenti, solo la function `chapter-test` (service role)
+- `chapter_test_attempts`: id, user_id, chapter_id, test_id, written_score, oral_score, score, passed, feedback; select dei propri record, scritta solo dalla function `chapter-test`
 - `sessions`: id, user_id, chapter_id, lesson_id, kind (lesson|dialogue|review), started_at, ended_at
 - `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at, campi FSRS (gli errori sono anche carte di ripasso)
 - `vocab_items`: id, user_id, en, it, campi FSRS (due, stability, difficulty, reps, lapses, state, last_review)

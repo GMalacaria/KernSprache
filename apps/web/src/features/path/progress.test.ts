@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildPath, nextLesson, type ChapterRow } from './progress'
+import { buildPath, chapterAwaitingTest, nextLesson, type ChapterRow } from './progress'
 
 const lessons = (chapterId: number) =>
   [1, 2, 3, 4].map((n) => ({ id: chapterId * 10 + n, sort_order: n, title: `L${chapterId}.${n}` }))
@@ -58,5 +58,14 @@ describe('buildPath', () => {
     })
     expect(path.map((c) => c.status)).toEqual(['done', 'current', 'locked', 'locked'])
     expect(nextLesson(path)?.lesson.title).toBe('L2.1')
+  })
+
+  it('offers the test only for the current chapter once all lessons are done', () => {
+    const base = { chapters, level: 'A1' as const, passedChapterIds: none }
+    expect(chapterAwaitingTest(buildPath({ ...base, completedLessonIds: new Set([11, 12]) }))).toBeNull()
+    const allDone = buildPath({ ...base, completedLessonIds: new Set([11, 12, 13, 14]) })
+    expect(chapterAwaitingTest(allDone)?.title).toBe('A1-1')
+    const passed = buildPath({ ...base, completedLessonIds: new Set([11, 12, 13, 14]), passedChapterIds: new Set([1]) })
+    expect(chapterAwaitingTest(passed)).toBeNull()
   })
 })
