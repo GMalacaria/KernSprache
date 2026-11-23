@@ -20,6 +20,8 @@ interface HomePageProps {
   onOpenPath: () => void
   onOpenLesson: (lessonId: number) => void
   onOpenTest: (chapterId: number) => void
+  /** Present when the app can be installed on this device. */
+  onInstall?: () => void
 }
 
 export function HomePage({
@@ -31,6 +33,7 @@ export function HomePage({
   onOpenPath,
   onOpenLesson,
   onOpenTest,
+  onInstall,
 }: HomePageProps) {
   const profile = useProfile(user.id)
   const dueCount = useDueCount()
@@ -110,6 +113,13 @@ export function HomePage({
           Rifai il test di livello
         </button>
       </p>
+      {onInstall && (
+        <p>
+          <button type="button" className="link" onClick={onInstall}>
+            Installa l'app
+          </button>
+        </p>
+      )}
       <ChangePassword />
     </main>
   )

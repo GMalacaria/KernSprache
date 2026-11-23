@@ -29,7 +29,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - **Hosting frontend:** Vercel, Netlify o Cloudflare Pages (piano gratuito).
 
 ## Vincoli di piattaforma
-- iOS: le notifiche push funzionano solo se la PWA è installata da **Safari → Condividi → Aggiungi a Home**. L'app deve mostrare istruzioni di installazione quando non gira in modalità standalone (`display-mode: standalone`) e chiedere il permesso per le notifiche solo dopo un'azione dell'utente.
+- iOS: le notifiche push funzionano solo se la PWA è installata da **Safari → Condividi → Aggiungi a Home**. L'app propone l'installazione **dopo l'accesso** (mai nella pagina di login), solo su schermi touch e mai se gira già in modalità standalone (`display-mode: standalone`): una volta per dispositivo, circa 4 secondi dopo che la home è pronta (`localStorage` `kernsprache.installOffered`), più la voce manuale "Installa l'app" nella home. Su Android/Chromium il pulsante "Installa" usa l'evento `beforeinstallprompt` conservato (`src/lib/install.ts`); su iOS non esiste un'API, quindi il dialogo (`InstallDialog`) mostra i passi Condividi → Aggiungi alla schermata Home e avvisa che al primo avvio dall'icona va rifatto l'accesso (lo storage della PWA su iOS è separato). Il permesso per le notifiche si chiede solo dopo un'azione dell'utente.
 - Supabase Free mette in pausa i progetti dopo 7 giorni di inattività: va bene con l'uso quotidiano.
 
 ## Architettura

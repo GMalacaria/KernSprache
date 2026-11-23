@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { LoginPage } from './features/auth/LoginPage'
 import { PendingApprovalPage } from './features/auth/PendingApprovalPage'
@@ -8,7 +8,8 @@ import { ChapterTestPage } from './features/chapter-test/ChapterTestPage'
 import { DialoguePage, type DialogueMode } from './features/dialogue/DialoguePage'
 import { HomePage } from './features/home/HomePage'
 import { useProfile } from './features/home/useProfile'
-import { InstallBanner } from './features/onboarding/InstallBanner'
+import { InstallDialog } from './features/onboarding/InstallDialog'
+import { markOffered, useInstallMode, wasOffered } from './lib/install'
 import { LessonPage } from './features/lesson/LessonPage'
 import { PathPage } from './features/path/PathPage'
 import { chapterAfter, neighbours, usePath, usePrefetchCurrentChapter } from './features/path/usePath'
@@ -17,6 +18,9 @@ import { PlacementTestPage } from './features/placement/PlacementTestPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { StudyTimerProvider } from './features/study/StudyTimerContext'
 
+/** The install offer appears a few seconds after the learner is in the app. */
+const INSTALL_OFFER_DELAY_MS = 4000
+
 type View = 'home' | 'dialogue' | 'review' | 'settings' | 'placement' | 'path' | 'lesson' | 'chapter-test'
 
 export function App() {
@@ -24,7 +28,6 @@ export function App() {
 
   return (
     <>
-      <InstallBanner />
       {session === undefined ? (
         <main className="page">
           <p>Caricamento…</p>
@@ -47,6 +50,20 @@ function SignedInApp({ user }: { user: User }) {
   const [lessonId, setLessonId] = useState<number | null>(null)
   const [testChapterId, setTestChapterId] = useState<number | null>(null)
   const { path } = usePath(user.id)
+  const installMode = useInstallMode()
+  const [installOpen, setInstallOpen] = useState(false)
+  const signedInAndReady = Boolean(profile.data?.approved && profile.data.onboarded_at)
+
+  // One offer per device, after sign-in (never on the login page) and once the app is usable.
+  useEffect(() => {
+    if (!signedInAndReady || installMode === null || wasOffered()) return
+    const id = window.setTimeout(() => {
+      if (document.querySelector('dialog[open]')) return
+      markOffered()
+      setInstallOpen(true)
+    }, INSTALL_OFFER_DELAY_MS)
+    return () => window.clearTimeout(id)
+  }, [signedInAndReady, installMode])
   usePrefetchCurrentChapter(profile.data?.onboarded_at ? path : undefined)
 
   function openLesson(id: number) {
@@ -140,8 +157,10 @@ function SignedInApp({ user }: { user: User }) {
           onOpenPath={() => setView('path')}
           onOpenLesson={openLesson}
           onOpenTest={openTest}
+          onInstall={installMode ? () => setInstallOpen(true) : undefined}
         />
       )}
+      <InstallDialog open={installOpen} mode={installMode} onClose={() => setInstallOpen(false)} />
     </StudyTimerProvider>
   )
 }
