@@ -12,6 +12,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - Ripasso con spaced repetition degli errori e delle parole nuove.
 - Notifiche: promemoria giornaliero, ripassi in scadenza, streak a rischio.
 - Tono del tutor: incoraggiante ma onesto, niente piaggeria né complimenti generici.
+- Accesso con email e password. Chi non ha un account si registra e resta **in attesa** finché il proprietario non lo approva da dashboard Supabase (Table Editor > `profiles` > `approved` = true): finché non è approvato vede solo la schermata "Account in attesa" e le Edge Functions che usano l'IA rifiutano le sue richieste. Il primo account di un database vuoto è approvato da solo (il proprietario; in locale il primo che si registra). Password dimenticata e cambio password dall'app. Su Supabase: registrazioni aperte, **"Confirm email" disattivato** (niente email alla registrazione), Site URL e Redirect URLs con l'indirizzo della PWA (servono per il link di reset).
 - Al primo accesso si sceglie lo scopo dello studio (svago, viaggi, lavoro, amore: uno solo, modificabile), che orienta situazioni dei dialoghi, lessico ed esempi; poi c'è il test di livello (saltabile, si parte da A1), ripetibile dalla home.
 - Verifica di fine capitolo: disponibile quando le 4 lezioni sono complete, sempre metà scritta (8 domande a scelta multipla, corrette sul server) e metà orale (2 consegne valutate dall'IA, scritte se il microfono manca). Punteggio = media dei due, si passa con 70/100; dopo un tentativo la verifica successiva è nuova. Superare l'ultimo capitolo di un livello alza `profiles.level`.
 - Test di livello: metà scritto (16 domande fisse a scelta multipla, 4 per livello A1–B2, corrette sul server: un livello è superato con 3/4 e solo se lo sono anche quelli sotto) e metà orale (4 risposte a voce valutate dall'IA). Livello finale = media dei due arrotondata per difetto.
@@ -68,7 +69,7 @@ Formato delle correzioni:
 ```
 
 ## Modello dati (essenziale)
-- `profiles`: id (= auth.uid), level (A1–B2), purpose (`leisure|travel|work|love`, uno solo), goal (dettagli in parole dell'utente), onboarded_at, reminder_time, timezone, daily_goal_minutes
+- `profiles`: id (= auth.uid), approved (solo il proprietario/service role può cambiarlo: trigger `protect_profile_approval`), level (A1–B2), purpose (`leisure|travel|work|love`, uno solo), goal (dettagli in parole dell'utente), onboarded_at, reminder_time, timezone, daily_goal_minutes
 - `chapters`: id, level, sort_order, slug, title, description_it, grammar_focus (sola lettura)
 - `lessons`: id, chapter_id, sort_order, slug, title, focus (sola lettura)
 - `lesson_progress`: user_id, lesson_id, score, completed_at
