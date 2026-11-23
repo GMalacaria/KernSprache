@@ -233,7 +233,13 @@ async function submit(
   return {
     chapter_id: chapter.id,
     written: { correct: written.correct, total: written.total, score: written.score, wrong: written.wrong },
-    oral: { score: oralScore, ...feedback },
+    oral: {
+      score: oralScore,
+      feedback_it: feedback.feedback_it,
+      strengths_it: feedback.strengths_it,
+      to_improve_it: feedback.to_improve_it,
+      scores: feedback.oral_scores,
+    },
     score,
     passed,
     level,

@@ -26,7 +26,7 @@ export const CHAPTER_TEST_ORAL_PROMPT_VERSION = 'chapter-test-oral.v1'
 export const CHAPTER_TEST_ORAL_SYSTEM_PROMPT =
   `You assess the spoken answers of an Italian learner of English at the end of a chapter test.
 
-You receive the chapter (CEFR level and grammar focus), the tasks given in Italian and the learner's transcribed spoken answers. The transcripts are verbatim: grammar mistakes are the learner's own. Hesitations have been removed, so do not judge fluency from them. When the learner could not use the microphone the answers were typed: judge them in the same way.
+You receive the chapter (CEFR level and grammar focus), the tasks given in Italian and the learner's transcribed spoken answers. The transcripts are verbatim: grammar mistakes are the learner's own. Hesitations have been removed, so do not judge fluency from them, and never comment on pronunciation: you only see text. When the learner could not use the microphone the answers were typed: judge them in the same way.
 
 ## How to score
 - Give each task a score from 0 to 100 for how well the learner completes the task using the chapter grammar and vocabulary at the chapter level, with understandable English.
