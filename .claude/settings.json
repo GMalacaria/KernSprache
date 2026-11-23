@@ -23,17 +23,22 @@
       "Bash(pnpm fn:check:*)",
       "Bash(pnpm fn:lint:*)",
       "Bash(pnpm fn:test:*)",
-      "Bash(pnpm fn:serve:*)"
+      "Bash(pnpm fn:serve:*)",
+      "Bash(pnpm exec supabase migration list:*)"
     ],
     "deny": [
       "Read(**/.env)",
       "Read(**/.env.local)",
       "Read(**/.env.*.local)",
       "Read(**/.env.keys)",
+      "Bash(git push --force:*)"
+    ],
+    "ask": [
+      "Bash(pnpm exec supabase link:*)",
       "Bash(pnpm exec supabase db push:*)",
       "Bash(pnpm exec supabase functions deploy:*)",
-      "Bash(git push --force:*)",
-      "Bash(pnpm exec supabase secrets set:*)"
+      "Bash(pnpm exec supabase secrets set:*)",
+      "Bash(npx wrangler deploy:*)"
     ]
   }
 }
