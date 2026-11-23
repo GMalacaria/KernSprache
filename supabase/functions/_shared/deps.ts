@@ -9,3 +9,4 @@ export {
   GoogleGenAI,
   ThinkingLevel,
 } from 'npm:@google/genai@3.6.1'
+export * as webpush from 'jsr:@negrel/webpush@0.5.0'

@@ -10,7 +10,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - Correzione di ogni errore: frase originale, correzione, spiegazione breve **in italiano**.
 - Dialoghi in inglese semplice, scritti e vocali.
 - Ripasso con spaced repetition degli errori e delle parole nuove.
-- Notifiche: promemoria giornaliero, ripassi in scadenza, streak a rischio.
+- Notifiche: al massimo una al giorno all'ora scelta dall'utente (ora locale del suo fuso): serie a rischio (almeno 2 giorni di fila), altrimenti ripassi in scadenza, altrimenti l'obiettivo del giorno; nessuna se l'obiettivo è già raggiunto. Si attivano dalla home, solo dopo un clic.
 - Tono del tutor: incoraggiante ma onesto, niente piaggeria né complimenti generici.
 - Al primo accesso si sceglie lo scopo dello studio (svago, viaggi, lavoro, amore: uno solo, modificabile), che orienta situazioni dei dialoghi, lessico ed esempi; poi c'è il test di livello (saltabile, si parte da A1), ripetibile dalla home.
 - Verifica di fine capitolo: disponibile quando le 4 lezioni sono complete, sempre metà scritta (8 domande a scelta multipla, corrette sul server) e metà orale (2 consegne valutate dall'IA, scritte se il microfono manca). Punteggio = media dei due, si passa con 70/100; dopo un tentativo la verifica successiva è nuova. Superare l'ultimo capitolo di un livello alza `profiles.level`.
@@ -24,7 +24,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - **IA:** API di Google Gemini (credito di Google AI Studio) come provider predefinito, Anthropic come alternativa; si sceglie con `AI_PROVIDER`. Il provider viene chiamato **solo dalle Edge Functions**: la chiave API non deve mai arrivare al client.
 - **Voce:** da voce a testo con Gemini (function `transcribe`, audio registrato con `MediaRecorder`: webm su Android/desktop, mp4 su iOS); da testo a voce con `speechSynthesis` del browser, con un'API TTS come possibile alternativa.
 - **Spaced repetition:** `ts-fsrs`, calcolato nel client (`src/lib/fsrs.ts`): la PWA aggiorna i campi FSRS delle proprie righe tramite RLS. Le carte sono le parole (`vocab_items`) e gli errori (`mistakes`).
-- **Push:** Web Push con chiavi VAPID, inviato da un'Edge Function richiamata da `pg_cron`.
+- **Push:** Web Push con chiavi VAPID (`jsr:@negrel/webpush`, Web Crypto nativa in Deno), inviato da `send-reminders` richiamata ogni ora da `pg_cron`. Chiavi: `pnpm push:keys` (`VAPID_KEYS` e `CRON_SECRET` nei secret delle functions, `VITE_VAPID_PUBLIC_KEY` nella PWA). Il job legge `project_url` e `reminders_secret` da Vault: finché non esistono non fa nulla.
 - **Hosting frontend:** Vercel, Netlify o Cloudflare Pages (piano gratuito).
 
 ## Vincoli di piattaforma
@@ -45,7 +45,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
     transcribe         trascrizione letterale del parlato (Gemini), errori inclusi
     chapter-test       verifica di fine capitolo: domande generate dall'IA, correzione dello scritto e valutazione dell'orale sul server
     placement-test     test di livello iniziale (domande e correzione dello scritto, valutazione dell'orale)
-    send-reminders     invio delle push (chiamata dal cron)
+    send-reminders     promemoria giornaliero via Web Push (chiamata ogni ora da pg_cron con x-cron-secret, senza JWT utente)
   /functions/_shared   client IA, prompt, schemi di validazione (zod)
 ```
 
@@ -80,7 +80,8 @@ Formato delle correzioni:
 - `vocab_items`: id, user_id, en, it, campi FSRS (due, stability, difficulty, reps, lapses, state, last_review)
 - `study_days`: user_id, day (giorno locale), goal_minutes, written_seconds, oral_seconds, completed_at. Si scrive solo con la RPC `add_study_time` (incremento atomico, max 120 s per chiamata).
 - `placement_results`: risposte e livelli (scritto, orale, finale) di ogni test di livello; scritta solo dalla function `placement-test`.
-- `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at
+- `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at; si registra con la RPC `register_push_subscription` (un endpoint passa a chi ha fatto l'accesso sul dispositivo)
+- `reminder_log`: user_id, day (giorno locale), kind; una riga al giorno per utente, scritta solo da `send-reminders`
 - `ai_usage`: user_id, function_name, model, token in/out/cache (scritta solo dalle Edge Functions con la service role)
 
 Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.uid()`. Il profilo viene creato da un trigger su `auth.users`. `chapters` e `lessons` sono in sola lettura per gli utenti; `ai_usage` è in sola lettura (propri record). I test RLS (pgTAP) sono in `supabase/tests`.

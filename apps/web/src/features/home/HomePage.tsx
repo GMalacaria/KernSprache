@@ -1,6 +1,7 @@
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
 import type { DialogueMode } from '../dialogue/DialoguePage'
+import { NotificationSettings } from '../notifications/NotificationSettings'
 import { purposeLabel } from '../onboarding/purposes'
 import { useDueCount } from '../review/useDueCount'
 import { StudyTimerBar } from '../study/StudyTimerBar'
@@ -100,6 +101,8 @@ export function HomePage({
           Ripasso{dueCount.data !== undefined && ` (${dueCount.data} da fare)`}
         </button>
       </div>
+
+      <NotificationSettings userId={user.id} />
 
       <p>
         <button type="button" className="link" onClick={onRetakePlacement}>
