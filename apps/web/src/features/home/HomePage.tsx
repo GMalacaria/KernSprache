@@ -5,7 +5,7 @@ import { purposeLabel } from '../onboarding/purposes'
 import { useDueCount } from '../review/useDueCount'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyTimer } from '../study/useStudyTimer'
-import { nextLesson } from '../path/progress'
+import { chapterAwaitingTest, nextLesson } from '../path/progress'
 import { usePath } from '../path/usePath'
 import { useProfile } from './useProfile'
 
@@ -17,6 +17,7 @@ interface HomePageProps {
   onRetakePlacement: () => void
   onOpenPath: () => void
   onOpenLesson: (lessonId: number) => void
+  onOpenTest: (chapterId: number) => void
 }
 
 export function HomePage({
@@ -27,6 +28,7 @@ export function HomePage({
   onRetakePlacement,
   onOpenPath,
   onOpenLesson,
+  onOpenTest,
 }: HomePageProps) {
   const profile = useProfile(user.id)
   const dueCount = useDueCount()
@@ -34,6 +36,7 @@ export function HomePage({
   const recommended = timer.status.recommendedMode
   const { path } = usePath(user.id)
   const next = path ? nextLesson(path) : null
+  const testChapter = path ? chapterAwaitingTest(path) : null
   const goalMinutes = profile.data?.daily_goal_minutes
 
   return (
@@ -78,8 +81,13 @@ export function HomePage({
             </small>
           </button>
         ) : (
-          path && (
-            <p className="notice">Hai completato le lezioni del capitolo: la verifica arriva con il prossimo aggiornamento.</p>
+          testChapter && (
+            <button type="button" className="primary-action" onClick={() => onOpenTest(testChapter.id)}>
+              Verifica del capitolo: {testChapter.title}
+              <small>
+                {testChapter.level} · scritto e orale, per passare al capitolo successivo
+              </small>
+            </button>
           )
         )}
         <button type="button" onClick={onOpenPath}>

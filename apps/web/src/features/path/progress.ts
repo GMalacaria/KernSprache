@@ -95,3 +95,8 @@ export function nextLesson(path: ChapterView[]): { chapter: ChapterView; lesson:
   const lesson = chapter.lessons.find((l) => l.status === 'available')
   return lesson ? { chapter, lesson } : null
 }
+
+/** The chapter whose lessons are all done but whose test is still to be taken. */
+export function chapterAwaitingTest(path: ChapterView[]): ChapterView | null {
+  return path.find((c) => c.testAvailable) ?? null
+}

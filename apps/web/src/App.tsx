@@ -2,19 +2,20 @@ import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { LoginPage } from './features/auth/LoginPage'
 import { useAuthSession } from './features/auth/useAuthSession'
+import { ChapterTestPage } from './features/chapter-test/ChapterTestPage'
 import { DialoguePage, type DialogueMode } from './features/dialogue/DialoguePage'
 import { HomePage } from './features/home/HomePage'
 import { useProfile } from './features/home/useProfile'
 import { InstallBanner } from './features/onboarding/InstallBanner'
 import { LessonPage } from './features/lesson/LessonPage'
 import { PathPage } from './features/path/PathPage'
-import { neighbours, usePath, usePrefetchCurrentChapter } from './features/path/usePath'
+import { chapterAfter, neighbours, usePath, usePrefetchCurrentChapter } from './features/path/usePath'
 import { OnboardingPage } from './features/onboarding/OnboardingPage'
 import { PlacementTestPage } from './features/placement/PlacementTestPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { StudyTimerProvider } from './features/study/StudyTimerContext'
 
-type View = 'home' | 'dialogue' | 'review' | 'settings' | 'placement' | 'path' | 'lesson'
+type View = 'home' | 'dialogue' | 'review' | 'settings' | 'placement' | 'path' | 'lesson' | 'chapter-test'
 
 export function App() {
   const session = useAuthSession()
@@ -40,12 +41,18 @@ function SignedInApp({ user }: { user: User }) {
   const [view, setView] = useState<View>('home')
   const [dialogueMode, setDialogueMode] = useState<DialogueMode>('written')
   const [lessonId, setLessonId] = useState<number | null>(null)
+  const [testChapterId, setTestChapterId] = useState<number | null>(null)
   const { path } = usePath(user.id)
   usePrefetchCurrentChapter(profile.data?.onboarded_at ? path : undefined)
 
   function openLesson(id: number) {
     setLessonId(id)
     setView('lesson')
+  }
+
+  function openTest(chapterId: number) {
+    setTestChapterId(chapterId)
+    setView('chapter-test')
   }
 
   function openDialogue(mode: DialogueMode) {
@@ -90,7 +97,7 @@ function SignedInApp({ user }: { user: User }) {
       ) : view === 'review' ? (
         <ReviewPage onExit={() => setView('home')} onSwitchToOral={() => openDialogue('oral')} />
       ) : view === 'path' ? (
-        <PathPage userId={user.id} onOpenLesson={openLesson} onExit={() => setView('home')} />
+        <PathPage userId={user.id} onOpenLesson={openLesson} onOpenTest={openTest} onExit={() => setView('home')} />
       ) : view === 'lesson' && lessonId !== null ? (
         <LessonPage
           key={lessonId}
@@ -98,6 +105,15 @@ function SignedInApp({ user }: { user: User }) {
           lessonId={lessonId}
           {...neighbours(path, lessonId)}
           onOpenLesson={openLesson}
+          onExit={() => setView('path')}
+        />
+      ) : view === 'chapter-test' && testChapterId !== null ? (
+        <ChapterTestPage
+          key={testChapterId}
+          userId={user.id}
+          chapterId={testChapterId}
+          chapterTitle={path?.find((c) => c.id === testChapterId)?.title ?? ''}
+          nextChapterId={chapterAfter(path, testChapterId)?.id}
           onExit={() => setView('path')}
         />
       ) : view === 'placement' ? (
@@ -113,6 +129,7 @@ function SignedInApp({ user }: { user: User }) {
           onRetakePlacement={() => setView('placement')}
           onOpenPath={() => setView('path')}
           onOpenLesson={openLesson}
+          onOpenTest={openTest}
         />
       )}
     </StudyTimerProvider>
