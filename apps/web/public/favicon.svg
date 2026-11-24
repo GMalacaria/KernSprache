@@ -1,4 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#1f4e79"/>
-  <text x="256" y="330" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="230" font-weight="700" fill="#ffffff">En</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Kern Sprache: the "K" of the Kern family (aiTool) in cobalt, with a lemon speech bubble holding an "S".
+       Source of every PWA icon: run "pnpm icons" in apps/web after changing it. -->
+  <defs>
+    <linearGradient id="stem" x1="0%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#1A34A8" />
+      <stop offset="100%" stop-color="#0B1660" />
+    </linearGradient>
+    <linearGradient id="leg" x1="15%" y1="15%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#132A8A" />
+      <stop offset="50%" stop-color="#2446D8" />
+      <stop offset="100%" stop-color="#8EA2FF" />
+    </linearGradient>
+    <linearGradient id="fold" x1="0%" y1="20%" x2="100%" y2="80%">
+      <stop offset="0%" stop-color="#2446D8" />
+      <stop offset="55%" stop-color="#6F86F5" />
+      <stop offset="100%" stop-color="#B7C3FF" />
+    </linearGradient>
+    <linearGradient id="arm" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#162E96" />
+      <stop offset="48%" stop-color="#3355E0" />
+      <stop offset="100%" stop-color="#9DAEFF" />
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3A5AE6" />
+      <stop offset="55%" stop-color="#7E93FA" />
+      <stop offset="100%" stop-color="#C3CDFF" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="#F3F5FB" />
+
+  <!-- The K (same paths as aiTool), scaled to leave room for the bubble. -->
+  <g transform="translate(40 40) scale(0.8)">
+    <path d="M 106,120 C 106,84 128,64 164,64 L 204,64 L 204,350 L 106,350 Z" fill="url(#stem)" />
+    <path d="M 222,282 L 296,216 L 424,448 L 324,448 C 296,448 282,438 264,414 L 198,326 Z" fill="url(#leg)" />
+    <path d="M 204,196 L 278,244 C 294,234 312,235 326,246 L 234,346 L 198,318 Z" fill="url(#fold)" />
+    <path d="M 218,180 L 284,88 C 298,70 312,64 338,64 L 424,64 L 316,218 C 304,234 290,240 268,240 L 234,240 C 212,240 204,226 204,206 C 204,196 209,189 218,180 Z" fill="url(#arm)" />
+    <path d="M 106,338 C 106,315 118,298 138,274 L 204,195 L 204,376 L 166,426 C 150,444 136,448 122,448 C 110,448 106,438 106,422 Z" fill="url(#ribbon)" />
+  </g>
+
+  <!-- Speech bubble: a background-coloured outline first, so it stands apart from the K. -->
+  <g fill="#F3F5FB" stroke="#F3F5FB" stroke-width="28" stroke-linejoin="round">
+    <circle cx="390" cy="390" r="86" />
+    <path d="M 347,464 L 296,476 L 309,419 Z" />
+  </g>
+  <g fill="#FFD84D">
+    <circle cx="390" cy="390" r="86" />
+    <path d="M 347,464 L 296,476 L 309,419 Z" />
+  </g>
+
+  <!-- The "S", drawn as a stroke (no font needed) and centred on the bubble. -->
+  <path d="M 419,354 C 407,338 373,336 360,352 C 347,368 362,382 390,390 C 420,398 435,414 421,430 C 407,446 371,444 359,428"
+    fill="none" stroke="#101A33" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
 </svg>
