@@ -8,6 +8,7 @@ import { SideMenu } from './SideMenu'
 export interface AppMenuActions {
   onGoHome: () => void
   onOpenPath: () => void
+  onOpenProfile: () => void
   onEditGoals: () => void
   onRetakePlacement: () => void
   /** Present when the app can be installed on this device. */
@@ -19,7 +20,7 @@ interface AppMenuProps {
   onClose: () => void
   userId: string
   /** The screen the menu is opened from. */
-  current: 'home' | 'path'
+  current: 'home' | 'path' | 'profile'
   actions: AppMenuActions
 }
 
@@ -31,7 +32,7 @@ export function AppMenu({ open, onClose, userId, current, actions }: AppMenuProp
     onClose()
     action()
   }
-  const item = (screen: 'home' | 'path', label: string, action: () => void) => (
+  const item = (screen: 'home' | 'path' | 'profile', label: string, action: () => void) => (
     <button
       type="button"
       className="menu-item"
@@ -47,6 +48,7 @@ export function AppMenu({ open, onClose, userId, current, actions }: AppMenuProp
       <nav className="side-menu-nav" aria-label="Sezioni">
         {item('home', 'Home', actions.onGoHome)}
         {item('path', 'Percorso', actions.onOpenPath)}
+        {item('profile', 'Profilo', actions.onOpenProfile)}
         <button type="button" className="menu-item" onClick={run(actions.onEditGoals)}>
           Obiettivo e scopo
         </button>
