@@ -20,6 +20,7 @@
   /* The two halves of the daily goal: written in cobalt, oral in terracotta (both readable as text). */
   --written: var(--accent);
   --oral: #c2410c;
+  --on-oral: #ffffff;
   --radius-control: 1rem;
   --radius-panel: 1.25rem;
   --display: 'Fredoka Variable', 'Nunito Variable', system-ui, sans-serif;
@@ -44,6 +45,7 @@
     --success: #6fdcae;
     --success-bg: #0d3a2a;
     --oral: #fb923c;
+    --on-oral: #0b1020;
   }
 }
 
@@ -404,7 +406,19 @@ button .emoji { margin-right: 0.15em; }
   padding-bottom: 0;
   overflow: hidden;
 }
-.page.lesson > header, .page.lesson > .placement-progress { flex: none; }
+.page.lesson > header, .page.lesson > .placement-progress, .page.lesson > .part-tabs { flex: none; }
+/* Back arrow before the title: leaving keeps the point reached, so it is not an "exit". */
+.lesson-header { display: flex; align-items: center; gap: 0.35rem; }
+.lesson-header h1 { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.back-button {
+  flex: none; display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; min-height: 0;
+  margin-left: -0.6rem; padding: 0; border-radius: 999px; background: transparent; color: var(--accent); box-shadow: none;
+}
+.back-button:hover { background: var(--track); }
+/* Written | Oral switch of a lesson: the two halves use the colours of the daily goal. */
+.part-tabs { align-self: flex-start; margin: 0.5rem 0 0.25rem; }
+.part-tabs button[aria-pressed='true']:first-child { background: var(--written); }
+.part-tabs button[aria-pressed='true']:last-child { background: var(--oral); color: var(--on-oral); }
 .lesson-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 2rem; }
 .lesson-body > section, .lesson-body > .stack { margin-top: 1.25rem; }
 .lesson-body .quiz { margin-top: 0; }

@@ -1,5 +1,15 @@
 import { FunctionsHttpError } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
+import {
+  combineStats,
+  otherPart,
+  parseStats,
+  partDone,
+  statsScore,
+  type LessonPart,
+  type LessonProgressRow,
+  type PartStats,
+} from './parts'
 import type { LessonStatsRow } from './stats'
 import type { LessonResponse } from './types'
 
@@ -28,11 +38,53 @@ export function prefetchChapter(chapterId: number): void {
   void supabase.functions.invoke('lesson', { body: { action: 'prefetch', chapter_id: chapterId } }).catch(() => undefined)
 }
 
-export async function completeLesson(lessonId: number, score: number): Promise<void> {
+/** The learner's progress on one lesson (which parts are done), or null if never started. */
+export async function fetchLessonProgress(lessonId: number): Promise<LessonProgressRow | null> {
+  const { data, error } = await supabase
+    .from('lesson_progress')
+    .select('written_done_at, oral_done_at, written_stats, oral_stats, completed_at')
+    .eq('lesson_id', lessonId)
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
+export interface SavedPart {
+  /** The lesson is now completed (both parts done). */
+  completed: boolean
+  /** Answers of both parts together, when completed. */
+  total: PartStats | null
+}
+
+/**
+ * Marks one part of a lesson as done with its answers. When the other part is already done the
+ * lesson is completed too: score over both parts (the database rejects completing with one part).
+ */
+export async function savePart(lessonId: number, part: LessonPart, stats: PartStats): Promise<SavedPart> {
+  // Read the row again: the other part may have been finished since the lesson was opened.
+  const previous = await fetchLessonProgress(lessonId)
+  const now = new Date().toISOString()
+  const done = part === 'written' ? { written_done_at: now, written_stats: { ...stats } } : { oral_done_at: now, oral_stats: { ...stats } }
+  const other = otherPart(part)
+  if (!partDone(previous, other)) {
+    const { error } = await supabase.from('lesson_progress').upsert({ lesson_id: lessonId, ...done })
+    if (error) throw error
+    return { completed: false, total: null }
+  }
+  const total = combineStats(stats, parseStats(other === 'written' ? previous?.written_stats : previous?.oral_stats))
+  // An update, not an upsert: the row exists (the other part is in it), and an upsert would check the
+  // constraints on a new row without the other part first, so completing would always be rejected.
   const { error } = await supabase
     .from('lesson_progress')
-    .upsert({ lesson_id: lessonId, score, completed_at: new Date().toISOString() })
+    .update({
+      ...done,
+      score: statsScore(total),
+      // A lesson redone keeps the day it was first completed.
+      completed_at: previous?.completed_at ?? now,
+    })
+    .eq('lesson_id', lessonId)
   if (error) throw error
+  return { completed: true, total }
 }
 
 /** Adds the lesson's words and expressions to spaced-repetition review; returns how many were new. */
@@ -57,15 +109,12 @@ export async function addToReview(userId: string, items: { en: string; it: strin
 }
 
 /** Saves the answers of a completed lesson (validated by the record_lesson_stats RPC). */
-export async function recordLessonStats(
-  lessonId: number,
-  stats: { answers: number; correct: number; bestStreak: number },
-): Promise<void> {
+export async function recordLessonStats(lessonId: number, stats: PartStats): Promise<void> {
   const { error } = await supabase.rpc('record_lesson_stats', {
     p_lesson_id: lessonId,
     p_answers: stats.answers,
     p_correct: stats.correct,
-    p_best_streak: stats.bestStreak,
+    p_best_streak: stats.best_streak,
   })
   if (error) throw error
 }

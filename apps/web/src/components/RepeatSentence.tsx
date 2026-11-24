@@ -5,9 +5,20 @@ import { transcribeWithPronunciation } from '../features/dialogue/api'
 import { PronunciationNote } from '../features/dialogue/PronunciationNote'
 import { Emoji } from './Emoji'
 
-/** Read a sentence aloud and get its pronunciation judged against the right text. Optional: never blocks the exercise. */
-export function RepeatSentence({ sentence }: { sentence: string }) {
-  const assess = useMutation({ mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, sentence, true) })
+interface RepeatSentenceProps {
+  sentence: string
+  /** Called with the pronunciation score of each judged attempt (the "Ripeti la frase" exercise of the oral part). */
+  onAssessed?: (score: number) => void
+}
+
+/** Read a sentence aloud and get its pronunciation judged against the right text. */
+export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
+  const assess = useMutation({
+    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, sentence, true),
+    onSuccess: (result) => {
+      if (result.pronunciation) onAssessed?.(result.pronunciation.score)
+    },
+  })
   const { isRecording, seconds, micError, start, stop } = useVoiceRecorder({
     onRecorded: (audio) => assess.mutate(audio),
   })

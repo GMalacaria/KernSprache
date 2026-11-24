@@ -117,7 +117,7 @@ Regole scritte in `CLAUDE.md` (Obiettivi del prodotto). Vanno fatte **prima** de
    - Test pgTAP: 18 + 2 minuti non chiude il giorno, 10 + 10 sì.
    - PWA: anello e banner (`features/study`, `GoalRing`, `StudyPrompts`) mostrano il totale e le due metà. "Obiettivo raggiunto" compare solo con le due metà; con il totale già pieno ma una metà mancante, il messaggio dice cosa manca ("ancora 4 minuti di orale").
    - Da ricontrollare: la serie in `profileStats.ts` e la scelta del promemoria in `_shared/reminders.ts` usano `completed_at`, quindi seguono da sole. Va verificato.
-2. **`feat(web): split lessons into written and oral parts`**
+2. ✅ **`feat(web): split lessons into written and oral parts`** (fatta: migration `20261125140000_lesson_parts`; la ripresa a metà parte sta sul dispositivo, non nel DB)
    - Il selettore Scritto | Orale in cima alla lezione si può cambiare in qualsiasi momento.
      - **Scritto:** grammatica, parole, quiz, dettato, lettura, dialogo scritto.
      - **Orale:** ascolto, "Ripeti la frase" sulle frasi della lezione, dialogo a voce.
