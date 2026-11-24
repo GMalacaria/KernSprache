@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { isIos, isStandalone } from './pwa'
 
 /**
- * Installing English Tutor on the phone's home screen.
+ * Installing Kern Sprache on the phone's home screen.
  *
  * - Chromium browsers on Android fire `beforeinstallprompt` when the app can be installed:
  *   the event is kept and its `prompt()` opens the system dialog.

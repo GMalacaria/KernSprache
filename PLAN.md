@@ -57,7 +57,7 @@ Provata in locale con Gemini reale e nel browser (percorso fallito, riprova con 
 
 ## Fatto: invito all'installazione (PR #14)
 
-Modellato su aiTool (`src/install.ts`). Provato in emulazione mobile (evento `beforeinstallprompt` sintetico e user agent iPhone); **non** su un telefono vero. Dopo il merge il frontend si pubblica da solo: controllare che il sito serva il dialogo "Installa English Tutor sul telefono" (e non più la vecchia barra in alto).
+Modellato su aiTool (`src/install.ts`). Provato in emulazione mobile (evento `beforeinstallprompt` sintetico e user agent iPhone); **non** su un telefono vero. Dopo il merge il frontend si pubblica da solo: controllare che il sito serva il dialogo "Installa Kern Sprache sul telefono" (e non più la vecchia barra in alto).
 
 ## Produzione (2026-11-23)
 
@@ -91,7 +91,7 @@ Modellato su aiTool (`src/install.ts`). Provato in emulazione mobile (evento `be
 - **Utente con password per curl:** `POST /auth/v1/signup` e `POST /auth/v1/token?grant_type=password` con l'header `apikey` (chiave anon locale di `supabase status`).
 - **Microfono finto in Playwright:** Chromium con `--use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-audio-capture=<file.wav>` e il permesso `microphone`.
 - **Audio di prova in inglese con errori:** generarlo con il modello TTS di Gemini (`gemini-3.1-flash-tts-preview`, `responseModalities: ["AUDIO"]`, PCM 24 kHz da avvolgere in WAV), poi `ffmpeg` per webm/mp4.
-- **Tempo di studio vicino alle soglie:** precaricare `study_days` (obiettivo 5 minuti) invece di aspettare. `psql` non è installato: usare `docker exec supabase_db_english-tutor psql -U postgres -Atc "..."`.
+- **Tempo di studio vicino alle soglie:** precaricare `study_days` (obiettivo 5 minuti) invece di aspettare. `psql` non è installato: usare `docker exec supabase_db_kern-sprache psql -U postgres -Atc "..."`.
 - **Prove di push in locale:** finto servizio push in Deno che decifra l'`aes128gcm` (RFC 8291) e `send-reminders` avviata con `deno run -A` e `DENO_SERVE_ADDRESS`.
 
 ## UX: stato e cosa resta

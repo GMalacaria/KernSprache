@@ -30,7 +30,7 @@ export function InstallDialog({ open, mode, onClose }: InstallDialogProps) {
 
   return (
     <dialog ref={ref} className="install-dialog" aria-labelledby="install-title" onClose={onClose}>
-      <h2 id="install-title">Installa English Tutor sul telefono</h2>
+      <h2 id="install-title">Installa Kern Sprache sul telefono</h2>
       <p>L'app sta nella schermata Home e si apre senza la barra del browser. Serve anche per ricevere i promemoria.</p>
       {mode === 'ios' ? (
         <>
