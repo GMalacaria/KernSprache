@@ -49,7 +49,7 @@ export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
         {isRecording
           ? `■ Fine (${seconds}s / ${MAX_RECORDING_MS / 1000}s)`
           : transcribe.isPending
-            ? 'Trascrivo…'
+            ? <>Trascrivo <span className="dots" aria-hidden="true" /></>
             : (
                 <>
                   <Emoji name="microphone" /> Rispondi a voce

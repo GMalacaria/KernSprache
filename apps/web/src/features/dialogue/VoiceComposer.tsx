@@ -47,7 +47,7 @@ export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceCompo
         aria-pressed={isRecording}
       >
         {isRecording ? `■ Invia (${seconds}s / ${limit}s)` : transcribe.isPending ? (
-          'Trascrivo…'
+          <>Trascrivo <span className="dots" aria-hidden="true" /></>
         ) : (
           <>
             <Emoji name="microphone" /> Parla

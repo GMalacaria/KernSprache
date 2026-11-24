@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { canRecord } from '../../lib/audio'
 import { skipPlacement, startPlacement, submitPlacement, type PlacementResult } from './api'
 import { SpokenAnswer } from './SpokenAnswer'
+import { Waiting } from '../../components/Waiting'
 
 interface PlacementTestPageProps {
   userId: string
@@ -76,7 +77,21 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
     )
   }
 
-  if (submit.isPending) return <Shell>Calcolo il tuo livello…</Shell>
+  if (submit.isPending) {
+    return (
+      <main className="page">
+        <h1>Test di livello</h1>
+        <Waiting
+          title="Calcolo il tuo livello"
+          hints={[
+            'Correggo le risposte scritte.',
+            'Ascolto come hai parlato.',
+            'Metto insieme scritto e orale.',
+          ]}
+        />
+      </main>
+    )
+  }
   if (submit.isError) {
     return (
       <Shell error>

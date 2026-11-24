@@ -94,7 +94,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onModeChange
             {turn.corrections && <CorrectionList corrections={turn.corrections} />}
           </li>
         ))}
-        {send.isPending && <li className="turn turn-assistant muted">Il tutor sta scrivendo…</li>}
+        {send.isPending && <li className="turn turn-assistant muted" role="status">Il tutor sta scrivendo <span className="dots" aria-hidden="true" /></li>}
       </ol>
       {send.isError && <p className="error">{send.error.message}</p>}
 

@@ -146,7 +146,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
             )}
           </li>
         ))}
-        {send.isPending && <li className="turn turn-assistant muted">Il tutor sta scrivendo…</li>}
+        {send.isPending && <li className="turn turn-assistant muted" role="status">Il tutor sta scrivendo <span className="dots" aria-hidden="true" /></li>}
       </ol>
       <div ref={bottom} />
 

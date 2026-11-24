@@ -11,6 +11,7 @@ import { SpokenAnswer } from '../placement/SpokenAnswer'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity } from '../study/useStudyTimer'
 import { type ChapterTest, type ChapterTestResult, startChapterTest, submitChapterTest } from './api'
+import { Waiting } from '../../components/Waiting'
 
 interface ChapterTestPageProps {
   userId: string
@@ -75,7 +76,14 @@ export function ChapterTestPage({
   }
 
   if (test.isPending) {
-    return <Shell onExit={onExit}>Preparo la verifica… (può richiedere qualche secondo)</Shell>
+    return (
+      <Shell onExit={onExit}>
+        <Waiting
+          title="Preparo la verifica"
+          hints={['Può richiedere qualche secondo.', 'Scelgo domande sul capitolo appena studiato.']}
+        />
+      </Shell>
+    )
   }
   if (test.isError) {
     return (
@@ -96,7 +104,16 @@ export function ChapterTestPage({
     else submit.mutate(transcripts)
   }
 
-  if (submit.isPending) return <Shell onExit={onExit}>Correggo la verifica…</Shell>
+  if (submit.isPending) {
+    return (
+      <Shell onExit={onExit}>
+        <Waiting
+          title="Correggo la verifica"
+          hints={['Controllo le risposte scritte.', 'Valuto le risposte a voce.', 'Calcolo il punteggio.']}
+        />
+      </Shell>
+    )
+  }
   if (submit.isError) {
     return (
       <Shell onExit={onExit} error>
@@ -333,7 +350,7 @@ function Shell({ children, error = false, onExit }: { children: ReactNode; error
           Esci
         </button>
       </header>
-      <p className={error ? 'error' : undefined}>{children}</p>
+      <div className={error ? 'error' : undefined}>{children}</div>
     </main>
   )
 }

@@ -26,7 +26,7 @@ export function RepeatSentence({ sentence }: { sentence: string }) {
   const label = isRecording ? (
     `■ Fine (${seconds}s / ${MAX_RECORDING_MS / 1000}s)`
   ) : assess.isPending ? (
-    'Valuto la pronuncia…'
+    <>Valuto la pronuncia <span className="dots" aria-hidden="true" /></>
   ) : (
     <>
       <Emoji name="microphone" /> {assess.isSuccess ? 'Riprova a ripetere' : 'Ripeti la frase'}

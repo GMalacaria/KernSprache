@@ -24,6 +24,7 @@ import {
 import { summarizeStats } from './stats'
 import { DictationIntro, GrammarView, ListeningView, PhrasesView, ReadingView, VerbsView, WordsView } from './sections'
 import type { LessonContent, QuizQuestion } from './types'
+import { Waiting } from '../../components/Waiting'
 
 interface LessonPageProps {
   userId: string
@@ -122,7 +123,14 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   if (lesson.isPending) {
     return (
       <Shell onExit={onExit} title="Lezione">
-        <p>Preparo la lezione per te… (la prima volta può richiedere qualche secondo)</p>
+        <Waiting
+          title="Preparo la lezione per te"
+          hints={[
+            'La prima volta può richiedere qualche secondo.',
+            'Scelgo parole ed esempi adatti al tuo scopo.',
+            'Scrivo il dialogo con il tutor.',
+          ]}
+        />
       </Shell>
     )
   }
@@ -308,7 +316,7 @@ function LessonDone({
           ])}
         />
       )}
-      {save.isPending && <p className="muted">Salvo i progressi…</p>}
+      {save.isPending && <Waiting title="Salvo i progressi" compact />}
       {save.isError && (
         <p className="error">
           Non sono riuscito a salvare i progressi.{' '}
