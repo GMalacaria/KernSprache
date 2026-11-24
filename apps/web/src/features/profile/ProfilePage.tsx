@@ -7,6 +7,7 @@ import { purposeLabel } from '../onboarding/purposes'
 import { summarizeStats } from '../lesson/stats'
 import { usePath } from '../path/usePath'
 import { localDay } from '../study/studyMath'
+import { Waiting } from '../../components/Waiting'
 import { fetchProfileData } from './api'
 import {
   bestGoalStreak,
@@ -65,7 +66,7 @@ export function ProfilePage({ userId, menu }: { userId: string; menu: AppMenuAct
         </section>
       )}
 
-      {data.isPending && <p className="muted">Carico i tuoi numeri…</p>}
+      {data.isPending && <Waiting title="Conto i tuoi progressi" compact />}
       {data.isError && <p className="error">Non riesco a caricare i tuoi numeri. Riprova tra poco.</p>}
 
       {data.isSuccess && !hasStudied && (

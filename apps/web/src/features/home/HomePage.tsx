@@ -44,7 +44,7 @@ export function HomePage({
   return (
     <main className="page home">
       <header className="row">
-        <h1>English Tutor</h1>
+        <h1>Kern Sprache</h1>
         <MenuButton onClick={() => setMenuOpen(true)} />
       </header>
 

@@ -3,6 +3,7 @@ import { AppMenu, type AppMenuActions } from '../home/AppMenu'
 import { MenuButton } from '../home/SideMenu'
 import { LEVELS, type ChapterView } from './progress'
 import { usePath } from './usePath'
+import { Waiting } from '../../components/Waiting'
 
 interface PathPageProps {
   userId: string
@@ -45,7 +46,7 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, menu }: PathPagePro
         <MenuButton onClick={() => setMenuOpen(true)} />
       </header>
       {isError && <p className="error">Impossibile caricare il percorso.</p>}
-      {!path && !isError && <p>Caricamento…</p>}
+      {!path && !isError && <Waiting title="Carico il percorso" compact />}
       {path &&
         LEVELS.map((level) => (
           <section key={level} className="level-section">

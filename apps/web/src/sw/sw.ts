@@ -22,7 +22,7 @@ interface PushPayload {
 }
 
 function parsePayload(data: PushMessageData | null): PushPayload {
-  if (!data) return { title: 'English Tutor' }
+  if (!data) return { title: 'Kern Sprache' }
   try {
     const json: unknown = data.json()
     if (json && typeof json === 'object' && 'title' in json && typeof json.title === 'string') {
@@ -31,7 +31,7 @@ function parsePayload(data: PushMessageData | null): PushPayload {
   } catch {
     // Fall through to plain text.
   }
-  return { title: 'English Tutor', body: data.text() }
+  return { title: 'Kern Sprache', body: data.text() }
 }
 
 self.addEventListener('push', (event) => {

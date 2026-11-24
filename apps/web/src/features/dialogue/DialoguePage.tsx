@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { canRecord, canSpeak, speak, stopSpeaking } from '../../lib/audio'
+import { ListenButton } from '../../components/ListenButton'
+import { canRecord, speak, stopSpeaking } from '../../lib/audio'
 import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity } from '../study/useStudyTimer'
@@ -128,10 +129,8 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
             <p className="bubble" lang={turn.role === 'assistant' ? 'en' : undefined}>
               {turn.content}
             </p>
-            {turn.role === 'assistant' && canSpeak() && (
-              <button type="button" className="link listen" onClick={() => speak(turn.content)}>
-                Ascolta
-              </button>
+            {turn.role === 'assistant' && (
+              <ListenButton text={turn.content} className="link listen" label="Ascolta" />
             )}
             {turn.pronunciation && <PronunciationNote pronunciation={turn.pronunciation} />}
             {turn.corrections && <CorrectionList corrections={turn.corrections} />}
@@ -147,7 +146,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
             )}
           </li>
         ))}
-        {send.isPending && <li className="turn turn-assistant muted">Il tutor sta scrivendo…</li>}
+        {send.isPending && <li className="turn turn-assistant muted" role="status">Il tutor sta scrivendo <span className="dots" aria-hidden="true" /></li>}
       </ol>
       <div ref={bottom} />
 

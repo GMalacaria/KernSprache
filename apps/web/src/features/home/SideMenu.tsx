@@ -30,7 +30,7 @@ export function SideMenu({ open, onClose, children }: SideMenuProps) {
     >
       <div className="side-menu-body">
         <div className="row">
-          <strong className="side-menu-title">English Tutor</strong>
+          <strong className="side-menu-title">Kern Sprache</strong>
           <button type="button" className="link" onClick={onClose} aria-label="Chiudi il menu">
             <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
               <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />

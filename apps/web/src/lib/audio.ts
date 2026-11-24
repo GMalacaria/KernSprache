@@ -91,6 +91,28 @@ let primed = false
 let speakToken = 0
 /** Sentence -> object URL of its audio, so a replay in the same session is instant. */
 const clips = new Map<string, string>()
+/** Downloads in flight: a tap during a prefetch waits for the same request instead of starting another. */
+const pending = new Map<string, Promise<string>>()
+
+/** Sentence the learner asked to hear and is still waiting for (generation or download), if any. */
+let loadingText: string | null = null
+const listeners = new Set<() => void>()
+
+function setLoading(text: string | null): void {
+  if (loadingText === text) return
+  loadingText = text
+  listeners.forEach((l) => l())
+}
+
+/** For useSyncExternalStore: the sentence whose audio is loading after a tap. */
+export function subscribeSpeechLoading(listener: () => void): () => void {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
+export function getSpeechLoading(): string | null {
+  return loadingText
+}
 
 function getPlayer(): HTMLAudioElement {
   player ??= new Audio()
@@ -107,9 +129,17 @@ function primePlayer(): void {
   })
 }
 
-async function fetchClip(text: string): Promise<string> {
+function fetchClip(text: string): Promise<string> {
   const cached = clips.get(text)
-  if (cached) return cached
+  if (cached) return Promise.resolve(cached)
+  const inFlight = pending.get(text)
+  if (inFlight) return inFlight
+  const request = downloadClip(text).finally(() => pending.delete(text))
+  pending.set(text, request)
+  return request
+}
+
+async function downloadClip(text: string): Promise<string> {
   const { data, error } = await supabase.functions.invoke<{ path: string }>('speak', { body: { text } })
   if (error || !data?.path) throw new Error('speak failed')
   const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}${data.path}`)
@@ -127,11 +157,13 @@ async function fetchClip(text: string): Promise<string> {
 }
 
 async function speakWithGemini(text: string, token: number): Promise<void> {
+  if (!clips.has(text)) setLoading(text)
   const url = await Promise.race([
     fetchClip(text),
     new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('timeout')), REMOTE_TIMEOUT_MS)),
   ])
   if (token !== speakToken) return
+  setLoading(null)
   const el = getPlayer()
   el.src = url
   el.playbackRate = PLAYBACK_RATE
@@ -156,8 +188,26 @@ export function speak(text: string): void {
   const token = speakToken
   primePlayer()
   void speakWithGemini(text, token).catch(() => {
-    if (token === speakToken) speakWithBrowser(text)
+    if (token !== speakToken) return
+    setLoading(null)
+    speakWithBrowser(text)
   })
+}
+
+/**
+ * Generates and downloads the audio of sentences the learner is going to hear anyway (one at a
+ * time, in order), so the tap plays at once. Failures are ignored: speak() retries on demand.
+ */
+export async function prefetchSpeech(texts: string[]): Promise<void> {
+  if (typeof Audio === 'undefined') return
+  for (const text of new Set(texts)) {
+    if (!text.trim()) continue
+    try {
+      await fetchClip(text)
+    } catch {
+      // speak() will try again, or use the browser voice.
+    }
+  }
 }
 
 /**
@@ -171,6 +221,7 @@ export function unlockSpeech(): void {
 
 export function stopSpeaking(): void {
   speakToken++
+  setLoading(null)
   player?.pause()
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel()
 }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { canRecord, stopSpeaking } from '../../lib/audio'
+import { canRecord, prefetchSpeech, stopSpeaking } from '../../lib/audio'
 import type { DialogueMode } from '../dialogue/DialoguePage'
 import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
@@ -24,6 +24,7 @@ import {
 import { summarizeStats } from './stats'
 import { DictationIntro, GrammarView, ListeningView, PhrasesView, ReadingView, VerbsView, WordsView } from './sections'
 import type { LessonContent, QuizQuestion } from './types'
+import { Waiting } from '../../components/Waiting'
 
 interface LessonPageProps {
   userId: string
@@ -106,6 +107,14 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   const inDialogue = sectionIndex === sections.length
   const { markActivity } = useStudyActivity(inDialogue && dialogueMode === 'oral' ? 'oral' : 'written')
 
+  // Audio the learner has to hear anyway (listening passage, dictation): prepare it now, so the
+  // tap plays at once instead of waiting for the voice to be generated.
+  const lessonContent = lesson.data?.content
+  useEffect(() => {
+    if (!lessonContent) return
+    void prefetchSpeech([lessonContent.listening.text_en, ...dictationSentences(lessonContent).map((d) => d.en)])
+  }, [lessonContent])
+
   // Last lesson of the chapter: get the next chapter's lessons ready.
   useEffect(() => {
     if (nextLessonId === undefined && nextChapterId !== undefined) prefetchChapter(nextChapterId)
@@ -114,7 +123,14 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   if (lesson.isPending) {
     return (
       <Shell onExit={onExit} title="Lezione">
-        <p>Preparo la lezione per te… (la prima volta può richiedere qualche secondo)</p>
+        <Waiting
+          title="Preparo la lezione per te"
+          hints={[
+            'La prima volta può richiedere qualche secondo.',
+            'Scelgo parole ed esempi adatti al tuo scopo.',
+            'Scrivo il dialogo con il tutor.',
+          ]}
+        />
       </Shell>
     )
   }
@@ -305,7 +321,7 @@ function LessonDone({
           ])}
         />
       )}
-      {save.isPending && <p className="muted">Salvo i progressi…</p>}
+      {save.isPending && <Waiting title="Salvo i progressi" compact />}
       {save.isError && (
         <p className="error">
           Non sono riuscito a salvare i progressi.{' '}
