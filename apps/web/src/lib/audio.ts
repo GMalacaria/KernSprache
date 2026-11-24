@@ -1,4 +1,6 @@
-// Microphone recording (MediaRecorder) and text-to-speech (speechSynthesis).
+// Microphone recording (MediaRecorder) and text-to-speech: a Gemini voice (function `speak`,
+// cached on the server) with the browser's own voice (speechSynthesis) as a fallback.
+import { supabase } from './supabase'
 
 /** First container the browser can record: webm/ogg on Android and desktop, mp4 on iOS Safari. */
 export function pickRecordingMimeType(): string | undefined {
@@ -72,12 +74,72 @@ function englishVoice(): SpeechSynthesisVoice | undefined {
 }
 
 export function canSpeak(): boolean {
-  return typeof window !== 'undefined' && 'speechSynthesis' in window
+  return typeof window !== 'undefined' && ('Audio' in window || 'speechSynthesis' in window)
 }
 
-/** Reads English text aloud, slightly slower than normal for a learner. */
-export function speak(text: string): void {
-  if (!canSpeak()) return
+/** A silent, empty WAV: playing it on a tap lets this element play later without another tap (iOS). */
+const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA='
+/** The Gemini voice is slightly slowed for a learner. */
+const PLAYBACK_RATE = 0.95
+/** Past this, the browser voice takes over instead of leaving the learner waiting. */
+const REMOTE_TIMEOUT_MS = 8000
+const MAX_CACHED_CLIPS = 60
+
+let player: HTMLAudioElement | undefined
+let primed = false
+/** Bumped by every speak() and stopSpeaking(): a late answer from the server is dropped if it is stale. */
+let speakToken = 0
+/** Sentence -> object URL of its audio, so a replay in the same session is instant. */
+const clips = new Map<string, string>()
+
+function getPlayer(): HTMLAudioElement {
+  player ??= new Audio()
+  return player
+}
+
+function primePlayer(): void {
+  if (primed || typeof Audio === 'undefined') return
+  primed = true
+  const el = getPlayer()
+  el.src = SILENT_WAV
+  void el.play().catch(() => {
+    primed = false
+  })
+}
+
+async function fetchClip(text: string): Promise<string> {
+  const cached = clips.get(text)
+  if (cached) return cached
+  const { data, error } = await supabase.functions.invoke<{ path: string }>('speak', { body: { text } })
+  if (error || !data?.path) throw new Error('speak failed')
+  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}${data.path}`)
+  if (!response.ok) throw new Error('audio download failed')
+  const url = URL.createObjectURL(await response.blob())
+  clips.set(text, url)
+  if (clips.size > MAX_CACHED_CLIPS) {
+    const oldest = clips.keys().next().value
+    if (oldest !== undefined) {
+      URL.revokeObjectURL(clips.get(oldest) ?? '')
+      clips.delete(oldest)
+    }
+  }
+  return url
+}
+
+async function speakWithGemini(text: string, token: number): Promise<void> {
+  const url = await Promise.race([
+    fetchClip(text),
+    new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('timeout')), REMOTE_TIMEOUT_MS)),
+  ])
+  if (token !== speakToken) return
+  const el = getPlayer()
+  el.src = url
+  el.playbackRate = PLAYBACK_RATE
+  await el.play()
+}
+
+function speakWithBrowser(text: string): void {
+  if (!('speechSynthesis' in window)) return
   window.speechSynthesis.cancel()
   const utterance = new SpeechSynthesisUtterance(text)
   const voice = englishVoice()
@@ -87,15 +149,28 @@ export function speak(text: string): void {
   window.speechSynthesis.speak(utterance)
 }
 
+/** Reads English text aloud with the Gemini voice; falls back to the browser voice if that fails. */
+export function speak(text: string): void {
+  if (!canSpeak()) return
+  stopSpeaking()
+  const token = speakToken
+  primePlayer()
+  void speakWithGemini(text, token).catch(() => {
+    if (token === speakToken) speakWithBrowser(text)
+  })
+}
+
 /**
- * iOS only allows speech started from a user gesture. Speaking an empty
- * utterance on a tap unlocks later, programmatic speak() calls.
+ * iOS only allows audio and speech started from a user gesture. Calling this on a tap unlocks
+ * later, programmatic speak() calls (the tutor's reply in the oral dialogue).
  */
 export function unlockSpeech(): void {
-  if (!canSpeak()) return
-  window.speechSynthesis.speak(new SpeechSynthesisUtterance(''))
+  primePlayer()
+  if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(''))
 }
 
 export function stopSpeaking(): void {
-  if (canSpeak()) window.speechSynthesis.cancel()
+  speakToken++
+  player?.pause()
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel()
 }

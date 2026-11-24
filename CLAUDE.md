@@ -25,7 +25,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - **Frontend:** React + TypeScript + Vite, `vite-plugin-pwa` (manifest e service worker).
 - **Backend:** Supabase (Auth, Postgres, Edge Functions in Deno, `pg_cron`).
 - **IA:** API di Google Gemini (credito di Google AI Studio) come provider predefinito, Anthropic come alternativa; si sceglie con `AI_PROVIDER`. Il provider viene chiamato **solo dalle Edge Functions**: la chiave API non deve mai arrivare al client.
-- **Voce:** da voce a testo con Gemini (function `transcribe`, audio registrato con `MediaRecorder`: webm su Android/desktop, mp4 su iOS); da testo a voce con `speechSynthesis` del browser, con un'API TTS come possibile alternativa.
+- **Voce:** da voce a testo con Gemini (function `transcribe`, audio registrato con `MediaRecorder`: webm su Android/desktop, mp4 su iOS); da testo a voce con una voce Gemini (function `speak`, modello `AI_MODEL_TTS`): ogni frase si genera una volta sola e il WAV resta in un bucket privato (`tts_cache`), le riprese servono dalla cache senza richiamare il modello. Se la function non risponde entro 8 secondi si ripiega su `speechSynthesis` del browser (`lib/audio.ts`).
 - **Spaced repetition:** `ts-fsrs`, calcolato nel client (`src/lib/fsrs.ts`): la PWA aggiorna i campi FSRS delle proprie righe tramite RLS. Le carte sono le parole (`vocab_items`) e gli errori (`mistakes`).
 - **Push:** Web Push con chiavi VAPID (`jsr:@negrel/webpush`, Web Crypto nativa in Deno), inviato da `send-reminders` richiamata ogni ora da `pg_cron`. Chiavi: `pnpm push:keys` (`VAPID_KEYS` e `CRON_SECRET` nei secret delle functions, `VITE_VAPID_PUBLIC_KEY` nella PWA). Il job legge `project_url` e `reminders_secret` da Vault: finché non esistono non fa nulla.
 - **Hosting frontend:** Cloudflare Workers (piano gratuito): Workers Builds pubblica da `main` a ogni merge, config in `wrangler.jsonc`, indirizzo `aitool-kernsprache.geom-malacaria.workers.dev`.
@@ -45,6 +45,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
   /functions
     tutor-chat         dialogo + correzioni (output JSON)
     lesson             contenuto delle lezioni: generazione, salvataggio e preparazione anticipata di un capitolo
+    speak              voce Gemini con cache: restituisce il percorso firmato del WAV di una frase (generata una sola volta, `tts_cache` + bucket `tts`)
     transcribe         trascrizione letterale del parlato (Gemini), errori inclusi; con `assess: true` valuta anche la pronuncia (punteggio 0-100, fino a 3 parole da migliorare con consiglio in italiano) nella stessa chiamata
     chapter-test       verifica di fine capitolo: domande generate dall'IA, correzione dello scritto e valutazione dell'orale sul server
     placement-test     test di livello iniziale (domande e correzione dello scritto, valutazione dell'orale)
@@ -86,6 +87,7 @@ Formato delle correzioni:
 - `placement_results`: risposte e livelli (scritto, orale, finale) di ogni test di livello; scritta solo dalla function `placement-test`.
 - `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at; si registra con la RPC `register_push_subscription` (un endpoint passa a chi ha fatto l'accesso sul dispositivo)
 - `reminder_log`: user_id, day (giorno locale), kind; una riga al giorno per utente, scritta solo da `send-reminders`
+- `tts_cache`: key (sha256 di voce + frase), text, voice, path del WAV nel bucket privato `tts`; RLS attiva senza policy, solo la function `speak` (service role) la usa.
 - `ai_usage`: user_id, function_name, model, token in/out/cache (scritta solo dalle Edge Functions con la service role)
 
 Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.uid()`. Il profilo viene creato da un trigger su `auth.users`. `chapters` e `lessons` sono in sola lettura per gli utenti; `ai_usage` è in sola lettura (propri record). I test RLS (pgTAP) sono in `supabase/tests`.
@@ -175,7 +177,7 @@ Deno è una dipendenza di sviluppo del progetto: non serve installarlo a parte.
 | `pnpm exec supabase secrets set --env-file supabase/functions/.env` | carica i secret sul progetto remoto (solo su richiesta esplicita) |
 | `pnpm exec supabase functions deploy <nome>` | deploy di una function (solo su richiesta esplicita) |
 
-Variabili delle functions: `AI_PROVIDER` (`gemini` o `anthropic`), `GEMINI_API_KEY` / `ANTHROPIC_API_KEY`, `AI_MODEL_FAST`, `AI_MODEL_SMART`, `AI_MODEL_TRANSCRIBE` (sempre un modello Gemini, serve anche con `AI_PROVIDER=anthropic`) (vedi `supabase/functions/.env.example`). `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` le fornisce Supabase.
+Variabili delle functions: `AI_PROVIDER` (`gemini` o `anthropic`), `GEMINI_API_KEY` / `ANTHROPIC_API_KEY`, `AI_MODEL_FAST`, `AI_MODEL_SMART`, `AI_MODEL_TRANSCRIBE` e `AI_MODEL_TTS` (sempre modelli Gemini, servono anche con `AI_PROVIDER=anthropic`; `AI_TTS_VOICE` facoltativa, predefinita Kore) (vedi `supabase/functions/.env.example`). `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` le fornisce Supabase.
 
 ### Git e qualità
 | Comando | Cosa fa |
