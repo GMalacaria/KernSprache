@@ -5,10 +5,21 @@ import type { DialogueMode } from '../dialogue/DialoguePage'
 import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity, useStudyTimer } from '../study/useStudyTimer'
-import { addToReview, completeLesson, getLesson, prefetchChapter } from './api'
+import { addToReview, completeLesson, getLesson, prefetchChapter, recordLessonStats } from './api'
+import { ChapterStats, StatsGrid } from './ChapterStats'
 import { LessonDialogue } from './LessonDialogue'
 import { MultipleChoice } from './MultipleChoice'
-import { comprehensionQuiz, lessonScore, phraseQuiz, verbQuiz, wordQuiz } from './quiz'
+import {
+  addAnswer,
+  comprehensionQuiz,
+  EMPTY_TALLY,
+  lessonScore,
+  phraseQuiz,
+  type QuizTally,
+  verbQuiz,
+  wordQuiz,
+} from './quiz'
+import { summarizeStats } from './stats'
 import { GrammarView, ListeningView, PhrasesView, ReadingView, VerbsView, WordsView } from './sections'
 import type { LessonContent, QuizQuestion } from './types'
 
@@ -70,7 +81,7 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   )
   const [sectionIndex, setSectionIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>({ kind: 'learn' })
-  const [score, setScore] = useState({ correct: 0, answered: 0 })
+  const [tally, setTally] = useState<QuizTally>(EMPTY_TALLY)
   const sections = useMemo(() => (lesson.data ? sectionsFor(lesson.data.content) : []), [lesson.data])
   const inDialogue = sectionIndex === sections.length
   const { markActivity } = useStudyActivity(inDialogue && dialogueMode === 'oral' ? 'oral' : 'written')
@@ -105,7 +116,7 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   }
 
   function onAnswered(correct: boolean) {
-    setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), answered: s.answered + 1 }))
+    setTally((t) => addAnswer(t, correct))
     if (!section || phase.kind !== 'quiz') return
     if (phase.index + 1 < section.quiz.length) setPhase({ kind: 'quiz', index: phase.index + 1 })
     else nextSection()
@@ -177,8 +188,9 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
         <LessonDone
           userId={userId}
           lessonId={meta.id}
+          chapterId={meta.chapter_id}
           content={content}
-          score={lessonScore(score.correct, score.answered)}
+          tally={tally}
           nextLessonId={nextLessonId}
           onOpenLesson={onOpenLesson}
           onExit={onExit}
@@ -191,19 +203,32 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
 interface LessonDoneProps {
   userId: string
   lessonId: number
+  chapterId: number
   content: LessonContent
-  score: number
+  tally: QuizTally
   nextLessonId?: number
   onOpenLesson: (lessonId: number) => void
   onExit: () => void
 }
 
-function LessonDone({ userId, lessonId, content, score, nextLessonId, onOpenLesson, onExit }: LessonDoneProps) {
+function LessonDone({
+  userId,
+  lessonId,
+  chapterId,
+  content,
+  tally,
+  nextLessonId,
+  onOpenLesson,
+  onExit,
+}: LessonDoneProps) {
+  const score = lessonScore(tally.correct, tally.answered)
+  const lastOfChapter = nextLessonId === undefined
   const queryClient = useQueryClient()
   const started = useRef(false)
   const save = useMutation({
     mutationFn: async () => {
       await completeLesson(lessonId, score)
+      await recordLessonStats(lessonId, { answers: tally.answered, correct: tally.correct, bestStreak: tally.bestStreak })
       return addToReview(userId, [
         ...content.words,
         ...content.phrases,
@@ -213,6 +238,7 @@ function LessonDone({ userId, lessonId, content, score, nextLessonId, onOpenLess
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['lesson-progress'] })
       void queryClient.invalidateQueries({ queryKey: ['review'] })
+      void queryClient.invalidateQueries({ queryKey: ['chapter-stats', chapterId] })
     },
   })
 
@@ -227,9 +253,14 @@ function LessonDone({ userId, lessonId, content, score, nextLessonId, onOpenLess
   return (
     <section className="success-card notice">
       <h2>Lezione completata</h2>
-      <p>
-        Risposte giuste: <strong>{score}%</strong>.
-      </p>
+      {tally.answered > 0 && <h3 className="small-heading">Questa lezione ({tally.answered} risposte)</h3>}
+      {tally.answered > 0 && (
+        <StatsGrid
+          summary={summarizeStats([
+            { lesson_id: lessonId, answers: tally.answered, correct: tally.correct, best_streak: tally.bestStreak },
+          ])}
+        />
+      )}
       {save.isPending && <p className="muted">Salvo i progressi…</p>}
       {save.isError && (
         <p className="error">
@@ -246,6 +277,8 @@ function LessonDone({ userId, lessonId, content, score, nextLessonId, onOpenLess
             : 'Le parole di questa lezione erano già nel ripasso.'}
         </p>
       )}
+      {/* Last lesson: the chapter's totals, read back once this lesson is saved. */}
+      {lastOfChapter && save.isSuccess && <ChapterStats chapterId={chapterId} title="Il capitolo in numeri" />}
       <div className="stack">
         {nextLessonId !== undefined && (
           <button type="button" disabled={!save.isSuccess} onClick={() => onOpenLesson(nextLessonId)}>

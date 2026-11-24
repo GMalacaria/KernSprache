@@ -22,6 +22,12 @@ export interface ChapterTest {
   oral_tasks: OralTask[]
 }
 
+export interface QuestionReview {
+  id: string
+  sentence_en: string | null
+  translation_it: string | null
+}
+
 export interface ChapterTestResult {
   chapter_id: number
   written: {
@@ -30,6 +36,8 @@ export interface ChapterTestResult {
     score: number
     wrong: { id: string; chosen: number | null; answer: number }[]
   }
+  /** Full sentence and translation of every question; missing from older servers, null for tests made before v2. */
+  review?: QuestionReview[]
   oral: {
     score: number
     feedback_it: string
