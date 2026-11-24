@@ -74,15 +74,8 @@ async function start(db: Db, userId: string, chapterId: number) {
   if (passedError) throw passedError
   if (passed.length > 0) throw new HttpError(409, 'already_passed', 'Hai già superato la verifica di questo capitolo.')
 
-  const { data: progress, error: progressError } = await db
-    .from('lesson_progress')
-    .select('lesson_id')
-    .in('lesson_id', chapter.lessons.map((l) => l.id))
-  if (progressError) throw progressError
-  if (chapter.lessons.length === 0 || progress.length < chapter.lessons.length) {
-    throw new HttpError(403, 'lessons_not_completed', 'Completa prima tutte le lezioni del capitolo.')
-  }
-
+  // No lesson check: the same test ends a chapter whose lessons are done and also
+  // lets the learner skip ahead to a later chapter. The app decides when to offer it.
   // A test that was never attempted is reused; after an attempt a new one is
   // generated, so a retry cannot be passed by memorising the previous answers.
   const { data: existing, error: existingError } = await admin

@@ -73,6 +73,11 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageP
                           ))}
                         </ol>
                       )}
+                      {chapter.skipTestAvailable && (
+                        <button type="button" className="secondary skip-test" onClick={() => onOpenTest(chapter.id)}>
+                          Salta qui con una verifica
+                        </button>
+                      )}
                       {chapter.status === 'current' &&
                         (chapter.testAvailable ? (
                           <button type="button" className="primary-action" onClick={() => onOpenTest(chapter.id)}>

@@ -58,6 +58,8 @@ function SignedInApp({ user }: { user: User }) {
   const [dialogueMode, setDialogueMode] = useState<DialogueMode>('written')
   const [lessonId, setLessonId] = useState<number | null>(null)
   const [testChapterId, setTestChapterId] = useState<number | null>(null)
+  // Decided when the test opens: a pass changes the chapter's status while the result is on screen.
+  const [skipAhead, setSkipAhead] = useState(false)
   const { path } = usePath(user.id)
   const installMode = useInstallMode()
   const [installOpen, setInstallOpen] = useState(false)
@@ -82,6 +84,7 @@ function SignedInApp({ user }: { user: User }) {
 
   function openTest(chapterId: number) {
     setTestChapterId(chapterId)
+    setSkipAhead(path?.find((c) => c.id === chapterId)?.status === 'locked')
     setView('chapter-test')
   }
 
@@ -150,6 +153,7 @@ function SignedInApp({ user }: { user: User }) {
           chapterId={testChapterId}
           chapterTitle={path?.find((c) => c.id === testChapterId)?.title ?? ''}
           nextChapterId={chapterAfter(path, testChapterId)?.id}
+          skipAhead={skipAhead}
           onExit={() => setView('path')}
         />
       ) : view === 'placement' ? (
