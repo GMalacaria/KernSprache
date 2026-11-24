@@ -1,5 +1,6 @@
 import { FunctionsHttpError } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
+import type { LessonStatsRow } from './stats'
 import type { LessonResponse } from './types'
 
 async function functionError(error: unknown, fallback: string): Promise<Error> {
@@ -53,4 +54,28 @@ export async function addToReview(userId: string, items: { en: string; it: strin
   const { error: insertError } = await supabase.from('vocab_items').insert(fresh)
   if (insertError && insertError.code !== '23505') throw insertError
   return fresh.length
+}
+
+/** Saves the answers of a completed lesson (validated by the record_lesson_stats RPC). */
+export async function recordLessonStats(
+  lessonId: number,
+  stats: { answers: number; correct: number; bestStreak: number },
+): Promise<void> {
+  const { error } = await supabase.rpc('record_lesson_stats', {
+    p_lesson_id: lessonId,
+    p_answers: stats.answers,
+    p_correct: stats.correct,
+    p_best_streak: stats.bestStreak,
+  })
+  if (error) throw error
+}
+
+/** Stats of the learner's completed lessons in a chapter. */
+export async function fetchChapterStats(chapterId: number): Promise<LessonStatsRow[]> {
+  const { data, error } = await supabase
+    .from('lesson_stats')
+    .select('lesson_id, answers, correct, best_streak')
+    .eq('chapter_id', chapterId)
+  if (error) throw error
+  return data
 }

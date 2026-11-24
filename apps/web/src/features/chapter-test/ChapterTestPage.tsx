@@ -1,8 +1,12 @@
 import { useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { SentenceFeedback } from '../../components/SentenceFeedback'
 import { canRecord } from '../../lib/audio'
 import { useProfile } from '../home/useProfile'
 import { prefetchChapter } from '../lesson/api'
+import { ChapterStats, StatsGrid } from '../lesson/ChapterStats'
+import { addAnswer, EMPTY_TALLY } from '../lesson/quiz'
+import { summarizeStats } from '../lesson/stats'
 import { SpokenAnswer } from '../placement/SpokenAnswer'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity } from '../study/useStudyTimer'
@@ -57,6 +61,7 @@ export function ChapterTestPage({
       setStep({ kind: 'result' })
       void queryClient.invalidateQueries({ queryKey: ['passed-chapters'] })
       void queryClient.invalidateQueries({ queryKey: ['profile', userId] })
+      void queryClient.invalidateQueries({ queryKey: ['chapter-stats', chapterId] })
       if (result.passed && nextChapterId !== undefined) prefetchChapter(nextChapterId)
     },
   })
@@ -186,6 +191,7 @@ export function ChapterTestPage({
     <ResultView
       result={result}
       test={test.data}
+      chapterId={chapterId}
       levelBefore={levelBefore}
       onRetry={retry}
       onExit={onExit}
@@ -208,13 +214,19 @@ function TypedAnswer({ onDone }: { onDone: (text: string) => void }) {
 interface ResultViewProps {
   result: ChapterTestResult
   test: ChapterTest
+  chapterId: number
   levelBefore: string | undefined
   onRetry: () => void
   onExit: () => void
 }
 
-function ResultView({ result, test, levelBefore, onRetry, onExit }: ResultViewProps) {
+function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: ResultViewProps) {
   const { written, oral } = result
+  // The written half in the same numbers as the lessons, in question order.
+  const tally = test.questions.reduce((t, q) => addAnswer(t, !written.wrong.some((w) => w.id === q.id)), EMPTY_TALLY)
+  const testSummary = summarizeStats([
+    { lesson_id: 0, answers: tally.answered, correct: tally.correct, best_streak: tally.bestStreak },
+  ])
   return (
     <main className="page">
       <h1>{result.passed ? 'Capitolo superato' : 'Non ancora'}</h1>
@@ -237,27 +249,39 @@ function ResultView({ result, test, levelBefore, onRetry, onExit }: ResultViewPr
         <FeedbackList title="Da migliorare" items={oral.to_improve_it} />
       </section>
 
-      {written.wrong.length > 0 && (
-        <section>
-          <h2 className="small-heading">Risposte sbagliate</h2>
-          <ul>
-            {written.wrong.map((w) => {
-              const q = test.questions.find((x) => x.id === w.id)
-              if (!q) return null
-              return (
-                <li key={w.id}>
-                  <span lang="en">{q.prompt}</span>
-                  <br />
-                  <small>
-                    {w.chosen === null ? 'Non risposta' : <>Hai scelto "{q.options[w.chosen]}"</>} · giusta: "
-                    {q.options[w.answer]}"
-                  </small>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
-      )}
+      <section>
+        <h2 className="small-heading">La parte scritta</h2>
+        <StatsGrid summary={testSummary} />
+      </section>
+      <ChapterStats chapterId={chapterId} />
+
+      <section>
+        <h2 className="small-heading">Rivedi le domande</h2>
+        <ul className="review-list">
+          {test.questions.map((q) => {
+            const wrong = written.wrong.find((w) => w.id === q.id)
+            const review = result.review?.find((r) => r.id === q.id)
+            return (
+              <li key={q.id}>
+                <p lang="en" className="review-answer">
+                  {q.prompt}
+                </p>
+                <p className="review-answer">
+                  {wrong ? (
+                    <span className="error">
+                      {wrong.chosen === null ? 'Non risposta' : <>Hai scelto "{q.options[wrong.chosen]}"</>} · giusta: "
+                      {q.options[wrong.answer]}"
+                    </span>
+                  ) : (
+                    <span className="ok">Giusta</span>
+                  )}
+                </p>
+                {review?.sentence_en && <SentenceFeedback en={review.sentence_en} it={review.translation_it} />}
+              </li>
+            )
+          })}
+        </ul>
+      </section>
 
       <div className="stack">
         <button type="button" onClick={onExit}>

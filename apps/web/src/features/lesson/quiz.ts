@@ -29,10 +29,11 @@ export function makeQuestion(
   distractors: string[],
   seed: number,
   optionsLang?: 'en',
+  feedback?: QuizQuestion['feedback'],
 ): QuizQuestion {
   const options = shuffle(unique([correct, ...distractors]).slice(0, 4), seed)
   const answer = options.findIndex((o) => o.trim().toLowerCase() === correct.trim().toLowerCase())
-  return { prompt, options, answer, optionsLang }
+  return { prompt, options, answer, optionsLang, ...(feedback ? { feedback } : {}) }
 }
 
 /** "Come si dice ... in inglese?" for every new word, distractors from the other words. */
@@ -48,6 +49,7 @@ export function wordQuiz(content: LessonContent): QuizQuestion[] {
       ),
       i + 1,
       'en',
+      { en: w.en, it: w.it },
     ),
   )
 }
@@ -63,6 +65,7 @@ export function verbQuiz(content: LessonContent): QuizQuestion[] {
       [regularMistake, v.base, v.past_participle, ...others],
       i + 11,
       'en',
+      { en: `${v.base}, ${v.past}, ${v.past_participle}`, it: v.it },
     )
   })
 }
@@ -76,6 +79,8 @@ export function phraseQuiz(content: LessonContent): QuizQuestion[] {
       idiom.meaning_it,
       [idiom.it, ...phraseMeanings],
       i + 21,
+      undefined,
+      { en: idiom.en, it: idiom.meaning_it },
     ),
   )
   const phraseQuestion = content.phrases[0]
@@ -85,6 +90,8 @@ export function phraseQuiz(content: LessonContent): QuizQuestion[] {
           content.phrases[0].it,
           phraseMeanings.slice(1),
           31,
+          undefined,
+          { en: content.phrases[0].en, it: content.phrases[0].it },
         ),
       ]
     : []
@@ -96,6 +103,26 @@ export function comprehensionQuiz(questions: LessonContent['listening']['questio
   return questions
     .filter((q) => q.options.length >= 2 && q.answer >= 0 && q.answer < q.options.length)
     .map((q) => ({ prompt: q.question_it, options: q.options, answer: q.answer }))
+}
+
+/** Running count of a lesson's answers: total, correct and the longest run of correct answers. */
+export interface QuizTally {
+  answered: number
+  correct: number
+  streak: number
+  bestStreak: number
+}
+
+export const EMPTY_TALLY: QuizTally = { answered: 0, correct: 0, streak: 0, bestStreak: 0 }
+
+export function addAnswer(tally: QuizTally, correct: boolean): QuizTally {
+  const streak = correct ? tally.streak + 1 : 0
+  return {
+    answered: tally.answered + 1,
+    correct: tally.correct + (correct ? 1 : 0),
+    streak,
+    bestStreak: Math.max(tally.bestStreak, streak),
+  }
 }
 
 /** Share of correct answers, 0-100 (100 when there were no questions). */
