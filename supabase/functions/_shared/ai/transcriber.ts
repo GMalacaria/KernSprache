@@ -1,6 +1,6 @@
 import { GeminiApiError, GoogleGenAI, ThinkingLevel } from '../deps.ts'
 import { requireEnv } from '../env.ts'
-import { PRONUNCIATION_PROMPT } from '../prompts/pronunciation.v1.ts'
+import { pronunciationPrompt } from '../prompts/pronunciation.v2.ts'
 import { NO_SPEECH_MARKER, TRANSCRIBE_PROMPT } from '../prompts/transcribe.v1.ts'
 import { assessedTranscriptSchema, type Pronunciation } from '../schemas/pronunciation.ts'
 import { toTokenUsage } from './gemini.ts'
@@ -27,7 +27,8 @@ export interface AssessedTranscript extends Transcript {
 export interface Transcriber {
   transcribe(audio: AudioInput): Promise<Transcript>
   /** Transcript and pronunciation assessment from the same recording, in one model call. */
-  assess(audio: AudioInput): Promise<AssessedTranscript>
+  /** With `expectedText`, the learner was reading that sentence aloud and is judged against it. */
+  assess(audio: AudioInput, expectedText?: string): Promise<AssessedTranscript>
 }
 
 /**
@@ -82,7 +83,7 @@ export class GeminiTranscriber implements Transcriber {
     }
   }
 
-  async assess(audio: AudioInput): Promise<AssessedTranscript> {
+  async assess(audio: AudioInput, expectedText?: string): Promise<AssessedTranscript> {
     const model = requireEnv('AI_MODEL_TRANSCRIBE')
     let response
     try {
@@ -92,7 +93,7 @@ export class GeminiTranscriber implements Transcriber {
           role: 'user',
           parts: [{
             inlineData: { mimeType: audio.mimeType, data: audio.data },
-          }, { text: PRONUNCIATION_PROMPT }],
+          }, { text: pronunciationPrompt(expectedText) }],
         }],
         config: {
           maxOutputTokens: 1024,

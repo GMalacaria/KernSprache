@@ -5,7 +5,7 @@ import { logAiUsage } from '../_shared/ai-usage.ts'
 import { AiError } from '../_shared/ai/index.ts'
 import { getTranscriber } from '../_shared/ai/transcriber.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
-import { PRONUNCIATION_PROMPT_VERSION } from '../_shared/prompts/pronunciation.v1.ts'
+import { PRONUNCIATION_PROMPT_VERSION } from '../_shared/prompts/pronunciation.v2.ts'
 import { TRANSCRIBE_PROMPT_VERSION } from '../_shared/prompts/transcribe.v1.ts'
 import { transcribeRequestSchema } from '../_shared/schemas/transcribe.ts'
 import { requireApprovedUser, userClient } from '../_shared/supabase.ts'
@@ -34,7 +34,7 @@ Deno.serve(
     }
     let transcript
     try {
-      transcript = body.data.assess ? await getTranscriber().assess(audio) : {
+      transcript = body.data.assess ? await getTranscriber().assess(audio, body.data.expected_text) : {
         ...(await getTranscriber().transcribe(audio)),
         pronunciation: null,
       }
