@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { supabase } from '../../lib/supabase'
 import type { DialogueMode } from '../dialogue/DialoguePage'
-import { NotificationSettings } from '../notifications/NotificationSettings'
-import { ChangePassword } from '../auth/ChangePassword'
 import { purposeLabel } from '../onboarding/purposes'
 import { useDueCount } from '../review/useDueCount'
 import { GoalRing } from '../study/GoalRing'
-import { MenuButton, SideMenu } from './SideMenu'
+import { AppMenu, type AppMenuActions } from './AppMenu'
+import { MenuButton } from './SideMenu'
 import { useStudyTimer } from '../study/useStudyTimer'
 import { chapterAwaitingTest, nextLesson } from '../path/progress'
 import { usePath } from '../path/usePath'
@@ -17,25 +15,18 @@ interface HomePageProps {
   user: User
   onStartDialogue: (mode: DialogueMode) => void
   onStartReview: () => void
-  onEditGoals: () => void
-  onRetakePlacement: () => void
-  onOpenPath: () => void
+  menu: AppMenuActions
   onOpenLesson: (lessonId: number) => void
   onOpenTest: (chapterId: number) => void
-  /** Present when the app can be installed on this device. */
-  onInstall?: () => void
 }
 
 export function HomePage({
   user,
   onStartDialogue,
   onStartReview,
-  onEditGoals,
-  onRetakePlacement,
-  onOpenPath,
+  menu,
   onOpenLesson,
   onOpenTest,
-  onInstall,
 }: HomePageProps) {
   const profile = useProfile(user.id)
   const dueCount = useDueCount()
@@ -50,14 +41,8 @@ export function HomePage({
   const secondary = 'secondary'
 
   const [menuOpen, setMenuOpen] = useState(false)
-  // Run a menu entry after the drawer has closed.
-  const fromMenu = (action: () => void) => () => {
-    setMenuOpen(false)
-    action()
-  }
-
   return (
-    <main className="page">
+    <main className="page home">
       <header className="row">
         <h1>English Tutor</h1>
         <MenuButton onClick={() => setMenuOpen(true)} />
@@ -104,31 +89,7 @@ export function HomePage({
         </button>
       </div>
 
-      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)}>
-        <nav className="side-menu-nav" aria-label="Sezioni">
-          <button type="button" className="menu-item" onClick={fromMenu(onOpenPath)}>
-            Percorso
-          </button>
-          <button type="button" className="menu-item" onClick={fromMenu(onEditGoals)}>
-            Obiettivo e scopo
-          </button>
-          <button type="button" className="menu-item" onClick={fromMenu(onRetakePlacement)}>
-            Rifai il test di livello
-          </button>
-          {onInstall && (
-            <button type="button" className="menu-item" onClick={fromMenu(onInstall)}>
-              Installa l'app
-            </button>
-          )}
-        </nav>
-        <NotificationSettings userId={user.id} />
-        <div className="footer-links">
-          <ChangePassword />
-        </div>
-        <button type="button" className="secondary menu-signout" onClick={() => void supabase.auth.signOut()}>
-          Esci
-        </button>
-      </SideMenu>
+      <AppMenu open={menuOpen} onClose={() => setMenuOpen(false)} userId={user.id} current="home" actions={menu} />
     </main>
   )
 }

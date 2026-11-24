@@ -7,6 +7,7 @@ import { SetPasswordPage } from './features/auth/SetPasswordPage'
 import { useAuthSession } from './features/auth/useAuthSession'
 import { ChapterTestPage } from './features/chapter-test/ChapterTestPage'
 import { DialoguePage, type DialogueMode } from './features/dialogue/DialoguePage'
+import type { AppMenuActions } from './features/home/AppMenu'
 import { HomePage } from './features/home/HomePage'
 import { useProfile } from './features/home/useProfile'
 import { InstallDialog } from './features/onboarding/InstallDialog'
@@ -93,6 +94,14 @@ function SignedInApp({ user }: { user: User }) {
     setView('dialogue')
   }
 
+  const menuActions: AppMenuActions = {
+    onGoHome: () => setView('home'),
+    onOpenPath: () => setView('path'),
+    onEditGoals: () => setView('settings'),
+    onRetakePlacement: () => setView('placement'),
+    onInstall: installMode ? () => setInstallOpen(true) : undefined,
+  }
+
   if (profile.isPending) {
     return (
       <main className="page">
@@ -136,7 +145,7 @@ function SignedInApp({ user }: { user: User }) {
       ) : view === 'review' ? (
         <ReviewPage onExit={() => setView('home')} onSwitchToOral={() => openDialogue('oral')} />
       ) : view === 'path' ? (
-        <PathPage userId={user.id} onOpenLesson={openLesson} onOpenTest={openTest} onExit={() => setView('home')} />
+        <PathPage userId={user.id} onOpenLesson={openLesson} onOpenTest={openTest} menu={menuActions} />
       ) : view === 'lesson' && lessonId !== null ? (
         <LessonPage
           key={lessonId}
@@ -165,12 +174,9 @@ function SignedInApp({ user }: { user: User }) {
           user={user}
           onStartDialogue={openDialogue}
           onStartReview={() => setView('review')}
-          onEditGoals={() => setView('settings')}
-          onRetakePlacement={() => setView('placement')}
-          onOpenPath={() => setView('path')}
+          menu={menuActions}
           onOpenLesson={openLesson}
           onOpenTest={openTest}
-          onInstall={installMode ? () => setInstallOpen(true) : undefined}
         />
       )}
       <InstallDialog open={installOpen} mode={installMode} onClose={() => setInstallOpen(false)} />
