@@ -1,7 +1,7 @@
 import { FunctionsHttpError } from '@supabase/supabase-js'
 import { blobToBase64 } from '../../lib/audio'
 import { supabase } from '../../lib/supabase'
-import type { TutorChatRequest, TutorChatResponse } from './types'
+import type { Pronunciation, TutorChatRequest, TutorChatResponse } from './types'
 
 const FALLBACK_ERROR = 'Il tutor non ha risposto. Riprova tra poco.'
 
@@ -38,6 +38,19 @@ export async function transcribeAudio(audio: Blob): Promise<string> {
   if (error) throw new Error(await errorMessage(error))
   if (!data?.text) throw new Error(FALLBACK_ERROR)
   return data.text
+}
+
+/** Like `transcribeAudio`, plus a pronunciation assessment (null when there was too little to judge). */
+export async function transcribeWithPronunciation(
+  audio: Blob,
+): Promise<{ text: string; pronunciation: Pronunciation | null }> {
+  const { data, error } = await supabase.functions.invoke<{ text: string; pronunciation: Pronunciation | null }>(
+    'transcribe',
+    { body: { audio_base64: await blobToBase64(audio), mime_type: audio.type, assess: true } },
+  )
+  if (error) throw new Error(await errorMessage(error))
+  if (!data?.text) throw new Error(FALLBACK_ERROR)
+  return { text: data.text, pronunciation: data.pronunciation ?? null }
 }
 
 export async function endSession(sessionId: string): Promise<void> {
