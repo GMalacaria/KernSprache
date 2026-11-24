@@ -1,3 +1,4 @@
+import { Emoji } from '../../components/Emoji'
 import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_RECORDING_MS, startRecording, type Recording } from '../../lib/audio'
@@ -72,7 +73,11 @@ export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
           ? `■ Fine (${seconds}s / ${MAX_RECORDING_MS / 1000}s)`
           : transcribe.isPending
             ? 'Trascrivo…'
-            : '🎤 Rispondi a voce'}
+            : (
+                <>
+                  <Emoji name="microphone" /> Rispondi a voce
+                </>
+              )}
       </button>
       {!isRecording && !transcribe.isPending && (
         <button type="button" className="link" onClick={onSkip}>

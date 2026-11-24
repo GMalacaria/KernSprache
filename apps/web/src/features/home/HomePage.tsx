@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
 import type { DialogueMode } from '../dialogue/DialoguePage'
@@ -5,7 +6,8 @@ import { NotificationSettings } from '../notifications/NotificationSettings'
 import { ChangePassword } from '../auth/ChangePassword'
 import { purposeLabel } from '../onboarding/purposes'
 import { useDueCount } from '../review/useDueCount'
-import { StudyTimerBar } from '../study/StudyTimerBar'
+import { GoalRing } from '../study/GoalRing'
+import { MenuButton, SideMenu } from './SideMenu'
 import { useStudyTimer } from '../study/useStudyTimer'
 import { chapterAwaitingTest, nextLesson } from '../path/progress'
 import { usePath } from '../path/usePath'
@@ -47,29 +49,29 @@ export function HomePage({
   const hasMainAction = Boolean(next || testChapter)
   const secondary = 'secondary'
 
+  const [menuOpen, setMenuOpen] = useState(false)
+  // Run a menu entry after the drawer has closed.
+  const fromMenu = (action: () => void) => () => {
+    setMenuOpen(false)
+    action()
+  }
+
   return (
     <main className="page">
       <header className="row">
-        <h1>Ciao!</h1>
-        <button type="button" className="link" onClick={() => void supabase.auth.signOut()}>
-          Esci
-        </button>
+        <h1>English Tutor</h1>
+        <MenuButton onClick={() => setMenuOpen(true)} />
       </header>
 
       {profile.data && (
-        <p className="row profile-summary">
-          <span>
-            Livello <strong>{profile.data.level}</strong> · {purposeLabel(profile.data.purpose)} · {goalMinutes} min al
-            giorno
-          </span>
-          <button type="button" className="link" onClick={onEditGoals}>
-            Modifica
-          </button>
+        <p className="profile-summary">
+          Livello <strong>{profile.data.level}</strong> · {purposeLabel(profile.data.purpose)} · {goalMinutes} min al
+          giorno
         </p>
       )}
 
-      <StudyTimerBar />
-      <p className="muted">
+      <GoalRing />
+      <p className="muted goal-hint">
         {timer.status.goalReached
           ? 'Obiettivo di oggi raggiunto. Puoi continuare ad allenarti quanto vuoi.'
           : recommended === 'written'
@@ -77,10 +79,12 @@ export function HomePage({
             : 'Seconda metà: orale (dialogo a voce).'}
       </p>
       {goalMinutes !== undefined && timer.ready && timer.goalSeconds !== goalMinutes * 60 && (
-        <p className="muted">Il nuovo obiettivo di {goalMinutes} minuti vale da domani: quello di oggi è già iniziato.</p>
+        <p className="muted goal-hint">
+          Il nuovo obiettivo di {goalMinutes} minuti vale da domani: quello di oggi è già iniziato.
+        </p>
       )}
 
-      <div className="stack">
+      <div className="home-actions">
         {next ? (
           <button type="button" className="primary-action" onClick={() => onOpenLesson(next.lesson.id)}>
             Continua il percorso: {next.lesson.title}
@@ -92,15 +96,10 @@ export function HomePage({
           testChapter && (
             <button type="button" className="primary-action" onClick={() => onOpenTest(testChapter.id)}>
               Verifica del capitolo: {testChapter.title}
-              <small>
-                {testChapter.level} · scritto e orale, per passare al capitolo successivo
-              </small>
+              <small>{testChapter.level} · scritto e orale, per passare al capitolo successivo</small>
             </button>
           )
         )}
-        <button type="button" className={secondary} onClick={onOpenPath}>
-          Percorso
-        </button>
         <button type="button" className={hasMainAction ? secondary : undefined} onClick={() => onStartDialogue(recommended)}>
           {recommended === 'oral' ? 'Inizia un dialogo a voce' : 'Inizia un dialogo'}
         </button>
@@ -109,19 +108,31 @@ export function HomePage({
         </button>
       </div>
 
-      <NotificationSettings userId={user.id} />
-
-      <div className="footer-links">
-        <button type="button" className="link" onClick={onRetakePlacement}>
-          Rifai il test di livello
-        </button>
-        {onInstall && (
-          <button type="button" className="link" onClick={onInstall}>
-            Installa l'app
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)}>
+        <nav className="side-menu-nav" aria-label="Sezioni">
+          <button type="button" className="menu-item" onClick={fromMenu(onOpenPath)}>
+            Percorso
           </button>
-        )}
-        <ChangePassword />
-      </div>
+          <button type="button" className="menu-item" onClick={fromMenu(onEditGoals)}>
+            Obiettivo e scopo
+          </button>
+          <button type="button" className="menu-item" onClick={fromMenu(onRetakePlacement)}>
+            Rifai il test di livello
+          </button>
+          {onInstall && (
+            <button type="button" className="menu-item" onClick={fromMenu(onInstall)}>
+              Installa l'app
+            </button>
+          )}
+        </nav>
+        <NotificationSettings userId={user.id} />
+        <div className="footer-links">
+          <ChangePassword />
+        </div>
+        <button type="button" className="secondary menu-signout" onClick={() => void supabase.auth.signOut()}>
+          Esci
+        </button>
+      </SideMenu>
     </main>
   )
 }

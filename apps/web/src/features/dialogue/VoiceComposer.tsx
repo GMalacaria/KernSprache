@@ -1,3 +1,4 @@
+import { Emoji } from '../../components/Emoji'
 import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_RECORDING_MS, startRecording, stopSpeaking, unlockSpeech, type Recording } from '../../lib/audio'
@@ -72,7 +73,13 @@ export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceCompo
         disabled={busy && !isRecording}
         aria-pressed={isRecording}
       >
-        {isRecording ? `■ Invia (${seconds}s / ${limit}s)` : transcribe.isPending ? 'Trascrivo…' : '🎤 Parla'}
+        {isRecording ? `■ Invia (${seconds}s / ${limit}s)` : transcribe.isPending ? (
+          'Trascrivo…'
+        ) : (
+          <>
+            <Emoji name="microphone" /> Parla
+          </>
+        )}
       </button>
       {isRecording && (
         <button

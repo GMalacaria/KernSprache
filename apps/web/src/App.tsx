@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 import type { User } from '@supabase/supabase-js'
 import { LoginPage } from './features/auth/LoginPage'
 import { PendingApprovalPage } from './features/auth/PendingApprovalPage'
@@ -45,7 +46,15 @@ export function App() {
 
 function SignedInApp({ user }: { user: User }) {
   const profile = useProfile(user.id)
-  const [view, setView] = useState<View>('home')
+  const [view, setViewNow] = useState<View>('home')
+  // Cross-fade between screens where the browser supports view transitions.
+  function setView(next: View) {
+    if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setViewNow(next)
+      return
+    }
+    document.startViewTransition(() => flushSync(() => setViewNow(next)))
+  }
   const [dialogueMode, setDialogueMode] = useState<DialogueMode>('written')
   const [lessonId, setLessonId] = useState<number | null>(null)
   const [testChapterId, setTestChapterId] = useState<number | null>(null)

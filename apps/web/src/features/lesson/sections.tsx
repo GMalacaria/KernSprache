@@ -1,3 +1,4 @@
+import { Emoji } from '../../components/Emoji'
 import { canSpeak, speak } from '../../lib/audio'
 import type { LessonContent } from './types'
 
@@ -5,7 +6,7 @@ function Listen({ text }: { text: string }) {
   if (!canSpeak()) return null
   return (
     <button type="button" className="link listen" onClick={() => speak(text)} aria-label={`Ascolta: ${text}`}>
-      🔊
+      <Emoji name="speaker" />
     </button>
   )
 }
@@ -107,7 +108,7 @@ export function ListeningView({ content, showText }: { content: LessonContent; s
     <div className="stack">
       {canSpeak() ? (
         <button type="button" onClick={() => speak(content.listening.text_en)}>
-          🔊 Ascolta il testo
+          <Emoji name="speaker" /> Ascolta il testo
         </button>
       ) : (
         <p className="muted">La sintesi vocale non è disponibile: leggi il testo.</p>

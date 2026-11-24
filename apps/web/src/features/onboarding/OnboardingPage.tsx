@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { GOAL_OPTIONS } from '../study/studyMath'
+import { Emoji } from '../../components/Emoji'
 import { PURPOSES, type LearningPurpose } from './purposes'
 
 interface OnboardingPageProps {
@@ -42,6 +43,8 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
     },
   })
 
+  const chosen = PURPOSES.find((p) => p.value === purpose)
+
   function onSubmit(event: FormEvent) {
     event.preventDefault()
     if (purpose) save.mutate()
@@ -51,27 +54,29 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
     <main className="page">
       <h1>{editing ? 'I tuoi obiettivi' : 'Benvenuto!'}</h1>
       <form onSubmit={onSubmit} className="stack">
-        <fieldset className="purposes">
-          <legend>Perché vuoi imparare l'inglese?</legend>
+        <label htmlFor="purpose">Perché vuoi imparare l'inglese?</label>
+        <select
+          id="purpose"
+          value={purpose ?? ''}
+          onChange={(e) => setPurpose(e.target.value as LearningPurpose)}
+        >
+          {purpose === null && (
+            <option value="" disabled>
+              Scegli un motivo
+            </option>
+          )}
           {PURPOSES.map((p) => (
-            <label key={p.value} className={`purpose${purpose === p.value ? ' selected' : ''}`}>
-              <input
-                type="radio"
-                name="purpose"
-                value={p.value}
-                checked={purpose === p.value}
-                onChange={() => setPurpose(p.value)}
-              />
-              <span className="purpose-icon" aria-hidden="true">
-                {p.icon}
-              </span>
-              <span>
-                <strong>{p.label}</strong>
-                <small>{p.hint}</small>
-              </span>
-            </label>
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
           ))}
-        </fieldset>
+        </select>
+        {chosen && (
+          <p className="purpose-hint muted">
+            <Emoji name={chosen.icon} size="1.5rem" />
+            <span>{chosen.hint}</span>
+          </p>
+        )}
 
         <label htmlFor="details">Vuoi aggiungere qualcosa? (facoltativo)</label>
         <textarea

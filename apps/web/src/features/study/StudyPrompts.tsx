@@ -1,3 +1,4 @@
+import { Emoji } from '../../components/Emoji'
 import { formatClock } from './studyMath'
 import { useStudyTimer } from './useStudyTimer'
 
@@ -15,7 +16,9 @@ export function StudyPrompts({ onSwitchToOral, onExit }: StudyPromptsProps) {
     return (
       <div className="overlay" role="dialog" aria-modal="true" aria-labelledby="goal-title">
         <div className="overlay-card success-card">
-          <p className="big">🎉</p>
+          <p className="big">
+            <Emoji name="party" size="3rem" />
+          </p>
           <h2 id="goal-title">Obiettivo di oggi raggiunto!</h2>
           <p>
             Hai studiato {formatClock(timer.status.totalSeconds)} minuti: {formatClock(timer.writtenSeconds)} di
