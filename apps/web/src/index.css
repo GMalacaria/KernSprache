@@ -207,7 +207,24 @@ button.danger { color: var(--error); }
 .quiz-prompt { font-weight: 600; }
 .option.right { background: var(--success-bg); color: var(--success); border-color: var(--success); box-shadow: 0 2px 0 var(--success); }
 .option.wrong { background: transparent; color: var(--error); border-color: var(--error); box-shadow: none; }
-.quiz-feedback { margin-top: 0.75rem; }
+.quiz-feedback { margin-top: 0.75rem; padding: 0.85rem 1rem 1rem; border-radius: var(--radius-panel); display: flex; flex-direction: column; gap: 0.6rem; }
+.quiz-feedback p { margin: 0; }
+.quiz-feedback.is-right { background: var(--success-bg); }
+.quiz-feedback.is-wrong { background: color-mix(in srgb, var(--error) 12%, var(--surface)); }
+.sentence-feedback { display: flex; align-items: flex-start; gap: 0.7rem; }
+.sentence-feedback .sentence-en { font-weight: 700; }
+.sentence-feedback .sentence-it { color: var(--muted); }
+.listen-button { flex: none; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--line); box-shadow: 0 2px 0 var(--line); }
+
+/* End-of-chapter (and end-of-lesson) numbers. */
+.chapter-stats { margin-bottom: 1rem; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.5rem 0 0; padding: 0; list-style: none; }
+.stats-grid li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.6rem 0.4rem; text-align: center; display: flex; flex-direction: column; gap: 0.1rem; }
+.stats-grid strong { font-family: var(--display); font-size: 1.5rem; line-height: 1.1; color: var(--accent); }
+.stats-grid small { color: var(--muted); font-size: 0.75rem; line-height: 1.2; }
+.review-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.review-list li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.75rem; }
+.review-list .review-answer { margin: 0 0 0.5rem; font-size: 0.85rem; }
 .ok { color: var(--success); }
 
 .install-dialog {

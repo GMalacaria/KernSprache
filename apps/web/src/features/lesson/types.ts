@@ -29,4 +29,6 @@ export interface QuizQuestion {
   options: string[]
   answer: number
   optionsLang?: 'en'
+  /** English sentence and Italian translation shown (and read aloud) after answering. */
+  feedback?: { en: string; it: string }
 }
