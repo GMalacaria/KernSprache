@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDock } from './useDock'
 import { SentenceFeedback } from '../../components/SentenceFeedback'
 import { playCorrect, playWrong } from '../../lib/sounds'
 import type { QuizQuestion } from './types'
@@ -13,6 +14,7 @@ export function MultipleChoice({ question, onAnswered }: MultipleChoiceProps) {
   const [chosen, setChosen] = useState<number | null>(null)
   const answered = chosen !== null
   const correct = chosen === question.answer
+  const dock = useDock<HTMLDivElement>(answered)
 
   return (
     <div className="quiz">
@@ -39,7 +41,7 @@ export function MultipleChoice({ question, onAnswered }: MultipleChoiceProps) {
         })}
       </div>
       {answered && (
-        <div className={`quiz-feedback ${correct ? 'is-right' : 'is-wrong'}`} role="status">
+        <div ref={dock} className={`quiz-feedback quiz-dock ${correct ? 'is-right' : 'is-wrong'}`} role="status">
           <p className={correct ? 'ok' : 'error'}>
             <strong>
               {correct ? 'Giusto!' : `Non proprio: la risposta giusta è "${question.options[question.answer]}".`}

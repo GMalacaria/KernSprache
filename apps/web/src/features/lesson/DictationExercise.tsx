@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useDock } from './useDock'
 import { SentenceFeedback } from '../../components/SentenceFeedback'
 import { ListenButton } from '../../components/ListenButton'
 import { playCorrect, playWrong } from '../../lib/sounds'
@@ -48,10 +49,12 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone }: Dictatio
     onTextShown()
   }
 
+  const dock = useDock<HTMLDivElement>(done)
+
   if (done) {
     const score = dictationScore(wrong, shown)
     return (
-      <div className="quiz-feedback is-right" role="status">
+      <div ref={dock} className="quiz-feedback quiz-dock is-right" role="status">
         <p className="ok">
           <strong>Giusto!</strong>
         </p>
