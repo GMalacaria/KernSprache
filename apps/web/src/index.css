@@ -17,6 +17,9 @@
   --error: #b4232f;
   --success: #0a7a55;
   --success-bg: #d9f5e8;
+  /* The two halves of the daily goal: written in cobalt, oral in terracotta (both readable as text). */
+  --written: var(--accent);
+  --oral: #c2410c;
   --radius-control: 1rem;
   --radius-panel: 1.25rem;
   --display: 'Fredoka Variable', 'Nunito Variable', system-ui, sans-serif;
@@ -40,6 +43,7 @@
     --error: #ff8a93;
     --success: #6fdcae;
     --success-bg: #0d3a2a;
+    --oral: #fb923c;
   }
 }
 
@@ -266,14 +270,22 @@ form.stack button[type='submit'] { margin-top: 0.75rem; }
 .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .ring circle { fill: none; stroke-width: 10; }
 .ring-track { stroke: var(--track); }
-.ring-arc { stroke: var(--accent); stroke-linecap: round; }
+.ring-arc { stroke-linecap: round; }
+.ring-arc.written { stroke: var(--written); }
+.ring-arc.oral { stroke: var(--oral); }
 .ring .ring-sun { fill: var(--lemon); stroke: none; }
 .ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .ring-clock { font-family: var(--display); font-size: 2.6rem; font-weight: 700; letter-spacing: 0; font-variant-numeric: tabular-nums; line-height: 1; }
 .ring-label span { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
 .ring.reached .ring-clock, .ring.reached .ring-label span { color: var(--on-lemon); font-weight: 600; }
 .ring-halves { display: flex; gap: 1.25rem; margin: 0; font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.ring-halves b { color: var(--fg); font-weight: 600; }
+.ring-halves b { font-weight: 700; }
+.ring-halves .written, .half.written small { color: var(--written); }
+.ring-halves .oral, .half.oral small { color: var(--oral); }
+.half.written .bar span { background: var(--written); }
+.half.oral .bar span { background: var(--oral); }
+.goal-missing { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--muted); text-align: center; text-wrap: pretty; }
+.study-timer .goal-missing { text-align: left; }
 .goal-hint { text-align: center; margin: 0 0 1rem; }
 .home-actions { display: flex; flex-direction: column; gap: 0.7rem; }
 .settings { margin-top: 1.5rem; border-top: 1px solid var(--line); }
@@ -285,7 +297,7 @@ form.stack button[type='submit'] { margin-top: 0.75rem; }
 
 /* Motion: only responds to what the person does, plus one coordinated entrance on the home screen. */
 @media (prefers-reduced-motion: no-preference) {
-  .ring-arc { transition: stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+  .ring-arc { transition: stroke-dasharray 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
   .ring.reached .ring-sun { animation: sun-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; transform-origin: center; }
   .home-actions > * { animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
   .home-actions > :nth-child(2) { animation-delay: 0.06s; }

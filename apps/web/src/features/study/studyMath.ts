@@ -10,26 +10,45 @@ export interface StudyProgress {
 }
 
 export interface StudyStatus {
+  /** All the time studied today, shown in full even past the goal. */
   totalSeconds: number
+  /** Seconds each half needs: half of the goal for written, half for oral. */
   halfSeconds: number
-  /** First half (written) completed. */
+  /** Written half completed. */
   writtenHalfDone: boolean
+  /** Oral half completed. */
+  oralHalfDone: boolean
+  /** Time still missing in each half (0 when done). */
+  writtenMissingSeconds: number
+  oralMissingSeconds: number
+  /** Reached only with both halves: the total alone is not enough (same rule as add_study_time). */
   goalReached: boolean
-  /** Written until the first half is done, then oral. */
+  /** Written until its half is done, then oral; back to written if only the oral half is done. */
   recommendedMode: StudyMode
 }
 
 export function studyStatus(p: StudyProgress): StudyStatus {
   const totalSeconds = p.writtenSeconds + p.oralSeconds
   const halfSeconds = Math.ceil(p.goalSeconds / 2)
-  const writtenHalfDone = p.writtenSeconds >= halfSeconds
+  const writtenMissingSeconds = Math.max(0, halfSeconds - p.writtenSeconds)
+  const oralMissingSeconds = Math.max(0, halfSeconds - p.oralSeconds)
+  const writtenHalfDone = writtenMissingSeconds === 0
+  const oralHalfDone = oralMissingSeconds === 0
   return {
     totalSeconds,
     halfSeconds,
     writtenHalfDone,
-    goalReached: totalSeconds >= p.goalSeconds,
+    oralHalfDone,
+    writtenMissingSeconds,
+    oralMissingSeconds,
+    goalReached: writtenHalfDone && oralHalfDone,
     recommendedMode: writtenHalfDone ? 'oral' : 'written',
   }
+}
+
+/** "4 min" (rounded up, so "1 min" until the very last second). */
+export function formatMinutesLeft(seconds: number): string {
+  return `${Math.max(1, Math.ceil(seconds / 60))} min`
 }
 
 /** The learner is "really on the site": page visible, window focused, recent interaction. */
