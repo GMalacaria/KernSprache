@@ -353,3 +353,9 @@ button .emoji { margin-right: 0.15em; }
 .repeat-sentence .pronunciation { max-width: 100%; width: 100%; }
 .repeat-heard { margin: 0; font-size: 0.85rem; }
 .repeat-sentence button.recording { color: var(--error); border-color: var(--error); }
+/* Dictation */
+.dictation textarea { min-height: 4.5rem; }
+.dictation-attempt { margin: 0 0 0.5rem; font-size: 1.05rem; }
+.dictation-attempt .word-wrong { color: var(--error); text-decoration: underline wavy; text-underline-offset: 0.2em; font-weight: 700; }
+.dictation-score { margin: 0.5rem 0; }
+.dictation-rules { margin: 0; font-size: 0.85rem; }

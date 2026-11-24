@@ -103,6 +103,20 @@ export function VerbsView({ content }: { content: LessonContent }) {
   )
 }
 
+export function DictationIntro({ count }: { count: number }) {
+  return (
+    <div className="stack">
+      <p>
+        Ascolterai {count} {count === 1 ? 'frase' : 'frasi'} e le scriverai. Se sbagli, vedrai sottolineate le parole che non
+        coincidono e riproverai finché la frase è giusta.
+      </p>
+      <p className="muted">
+        Puoi leggere il testo, ma ogni tentativo sbagliato e la lettura del testo abbassano il punteggio.
+      </p>
+    </div>
+  )
+}
+
 export function ListeningView({ content, showText }: { content: LessonContent; showText: boolean }) {
   return (
     <div className="stack">
