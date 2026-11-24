@@ -7,6 +7,8 @@ import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity, useStudyTimer } from '../study/useStudyTimer'
 import { addToReview, completeLesson, getLesson, prefetchChapter, recordLessonStats } from './api'
 import { ChapterStats, StatsGrid } from './ChapterStats'
+import { Dictation } from './DictationExercise'
+import { dictationSentences, type DictationSentence } from './dictation'
 import { LessonDialogue } from './LessonDialogue'
 import { MultipleChoice } from './MultipleChoice'
 import {
@@ -20,7 +22,7 @@ import {
   wordQuiz,
 } from './quiz'
 import { summarizeStats } from './stats'
-import { GrammarView, ListeningView, PhrasesView, ReadingView, VerbsView, WordsView } from './sections'
+import { DictationIntro, GrammarView, ListeningView, PhrasesView, ReadingView, VerbsView, WordsView } from './sections'
 import type { LessonContent, QuizQuestion } from './types'
 
 interface LessonPageProps {
@@ -39,11 +41,18 @@ interface Section {
   title: string
   learn: (showAll: boolean) => ReactNode
   quiz: QuizQuestion[]
+  /** Dictation sentences, for sections that are written from what was heard instead of multiple choice. */
+  dictation?: DictationSentence[]
   /** Keep the learning material visible while answering (listening, reading). */
   keepDuringQuiz?: boolean
 }
 
+function exerciseCount(section: Section): number {
+  return section.dictation?.length ?? section.quiz.length
+}
+
 function sectionsFor(content: LessonContent): Section[] {
+  const dictation = dictationSentences(content)
   return [
     { key: 'grammar', title: 'Grammatica', learn: () => <GrammarView content={content} />, quiz: [] },
     { key: 'words', title: 'Parole nuove', learn: () => <WordsView content={content} />, quiz: wordQuiz(content) },
@@ -61,6 +70,17 @@ function sectionsFor(content: LessonContent): Section[] {
       quiz: comprehensionQuiz(content.listening.questions),
       keepDuringQuiz: true,
     },
+    ...(dictation.length
+      ? [
+          {
+            key: 'dictation',
+            title: 'Dettato',
+            learn: () => <DictationIntro count={dictation.length} />,
+            quiz: [],
+            dictation,
+          },
+        ]
+      : []),
     {
       key: 'reading',
       title: 'Lettura',
@@ -115,11 +135,15 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
     setPhase({ kind: 'learn' })
   }
 
+  function advance() {
+    if (!section || phase.kind !== 'quiz') return
+    if (phase.index + 1 < exerciseCount(section)) setPhase({ kind: 'quiz', index: phase.index + 1 })
+    else nextSection()
+  }
+
   function onAnswered(correct: boolean) {
     setTally((t) => addAnswer(t, correct))
-    if (!section || phase.kind !== 'quiz') return
-    if (phase.index + 1 < section.quiz.length) setPhase({ kind: 'quiz', index: phase.index + 1 })
-    else nextSection()
+    advance()
   }
 
   const done = sectionIndex > sections.length
@@ -148,10 +172,25 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
           <button
             type="button"
             className="next-step"
-            onClick={() => (section.quiz.length ? setPhase({ kind: 'quiz', index: 0 }) : nextSection())}
+            onClick={() => (exerciseCount(section) ? setPhase({ kind: 'quiz', index: 0 }) : nextSection())}
           >
-            {section.quiz.length ? 'Mettiti alla prova' : 'Avanti'}
+            {exerciseCount(section) ? 'Mettiti alla prova' : 'Avanti'}
           </button>
+        </section>
+      )}
+
+      {section && phase.kind === 'quiz' && section.dictation?.[phase.index] && (
+        <section>
+          <h2>
+            {section.title}: frase {phase.index + 1} di {section.dictation.length}
+          </h2>
+          <Dictation
+            key={`${section.key}-${phase.index}`}
+            sentence={section.dictation[phase.index] as DictationSentence}
+            onAttempt={(correct) => setTally((t) => addAnswer(t, correct))}
+            onTextShown={() => setTally((t) => addAnswer(t, false))}
+            onDone={advance}
+          />
         </section>
       )}
 
