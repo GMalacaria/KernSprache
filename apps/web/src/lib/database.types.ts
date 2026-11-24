@@ -185,14 +185,14 @@ isOneToOne: false
                   ]
                 },"mistakes": {
                   Row: {
-                    "category": Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at": string,"difficulty": number,"due": string,"elapsed_days": number,"explanation_it": string,"id": string,"lapses": number,"last_review": string | null,"learning_steps": number,"original": string,"reps": number,"scheduled_days": number,"session_id": string | null,"stability": number,"state": number,"user_id": string
+                    "category": Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at": string,"difficulty": number,"due": string,"explanation_it": string,"id": string,"lapses": number,"last_review": string | null,"learning_steps": number,"original": string,"reps": number,"scheduled_days": number,"session_id": string | null,"stability": number,"state": number,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at"?: string,"difficulty"?: number,"due"?: string,"elapsed_days"?: number,"explanation_it": string,"id"?: string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original": string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
+                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at"?: string,"difficulty"?: number,"due"?: string,"explanation_it": string,"id"?: string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original": string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
                   }
                   Update: {
-                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected"?: string,"created_at"?: string,"difficulty"?: number,"due"?: string,"elapsed_days"?: number,"explanation_it"?: string,"id"?: string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original"?: string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
+                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected"?: string,"created_at"?: string,"difficulty"?: number,"due"?: string,"explanation_it"?: string,"id"?: string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original"?: string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -315,14 +315,14 @@ isOneToOne: false
                   ]
                 },"vocab_items": {
                   Row: {
-                    "created_at": string,"difficulty": number,"due": string,"elapsed_days": number,"en": string,"id": string,"it": string,"lapses": number,"last_review": string | null,"learning_steps": number,"reps": number,"scheduled_days": number,"stability": number,"state": number,"user_id": string
+                    "created_at": string,"difficulty": number,"due": string,"en": string,"id": string,"it": string,"lapses": number,"last_review": string | null,"learning_steps": number,"reps": number,"scheduled_days": number,"stability": number,"state": number,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"difficulty"?: number,"due"?: string,"elapsed_days"?: number,"en": string,"id"?: string,"it": string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"reps"?: number,"scheduled_days"?: number,"stability"?: number,"state"?: number,"user_id"?: string
+                    "created_at"?: string,"difficulty"?: number,"due"?: string,"en": string,"id"?: string,"it": string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"reps"?: number,"scheduled_days"?: number,"stability"?: number,"state"?: number,"user_id"?: string
                   }
                   Update: {
-                    "created_at"?: string,"difficulty"?: number,"due"?: string,"elapsed_days"?: number,"en"?: string,"id"?: string,"it"?: string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"reps"?: number,"scheduled_days"?: number,"stability"?: number,"state"?: number,"user_id"?: string
+                    "created_at"?: string,"difficulty"?: number,"due"?: string,"en"?: string,"id"?: string,"it"?: string,"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"reps"?: number,"scheduled_days"?: number,"stability"?: number,"state"?: number,"user_id"?: string
                   }
                   Relationships: [
                     

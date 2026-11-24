@@ -3,10 +3,7 @@ import { fsrs, State, type Card, type Grade } from 'ts-fsrs'
 /** Single scheduler with default FSRS parameters (fuzz spreads reviews over nearby days). */
 export const scheduler = fsrs({ enable_fuzz: true })
 
-/**
- * FSRS columns shared by vocab_items and mistakes. `elapsed_days` also exists in the
- * tables but ts-fsrs 6 no longer uses it, so it is neither read nor written.
- */
+/** FSRS columns shared by vocab_items and mistakes. */
 export interface FsrsColumns {
   due: string
   stability: number
