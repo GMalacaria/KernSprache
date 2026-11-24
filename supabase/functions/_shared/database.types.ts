@@ -299,6 +299,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"tts_cache": {
+                  Row: {
+                    "created_at": string,"key": string,"path": string,"text": string,"voice": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"key": string,"path": string,"text": string,"voice": string
+                  }
+                  Update: {
+                    "created_at"?: string,"key"?: string,"path"?: string,"text"?: string,"voice"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"vocab_items": {
                   Row: {
                     "created_at": string,"difficulty": number,"due": string,"elapsed_days": number,"en": string,"id": string,"it": string,"lapses": number,"last_review": string | null,"learning_steps": number,"reps": number,"scheduled_days": number,"stability": number,"state": number,"user_id": string
