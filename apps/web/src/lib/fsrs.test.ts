@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { Rating, State } from 'ts-fsrs'
-import { formatInterval, previewDue, scheduler, toCard, toColumns, type FsrsColumns } from './fsrs'
+import { formatInterval, scheduler, toCard, toColumns, type FsrsColumns } from './fsrs'
 
 const NEW_ROW: FsrsColumns = {
   due: '2026-11-22T10:00:00.000Z',
@@ -29,13 +29,6 @@ describe('fsrs mapping', () => {
     expect(row.reps).toBe(1)
     expect(row.last_review).toBe(now.toISOString())
     expect(new Date(row.due).getTime()).toBeGreaterThan(now.getTime())
-  })
-
-  it('previews a later due date for easier grades', () => {
-    const now = new Date('2026-11-22T10:00:00Z')
-    const next = previewDue(NEW_ROW, now)
-    expect(next[Rating.Again].getTime()).toBeLessThanOrEqual(next[Rating.Good].getTime())
-    expect(next[Rating.Good].getTime()).toBeLessThanOrEqual(next[Rating.Easy].getTime())
   })
 })
 

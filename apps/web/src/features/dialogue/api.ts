@@ -6,7 +6,7 @@ import type { Pronunciation, TutorChatRequest, TutorChatResponse } from './types
 const FALLBACK_ERROR = 'Il tutor non ha risposto. Riprova tra poco.'
 
 /** Reads the Italian message the function puts in `{ error: { message } }`. */
-async function errorMessage(error: unknown): Promise<string> {
+export async function errorMessage(error: unknown, fallback = FALLBACK_ERROR): Promise<string> {
   if (error instanceof FunctionsHttpError) {
     try {
       const body: unknown = await (error.context as Response).json()
@@ -20,7 +20,7 @@ async function errorMessage(error: unknown): Promise<string> {
       // Not JSON: fall through.
     }
   }
-  return FALLBACK_ERROR
+  return fallback
 }
 
 export async function sendTutorTurn(request: TutorChatRequest): Promise<TutorChatResponse> {
@@ -45,6 +45,8 @@ export async function transcribeWithPronunciation(
   audio: Blob,
   /** The sentence the learner was reading aloud: the pronunciation is judged against it. */
   expectedText?: string,
+  /** Store the mispronounced words as review cards (dialogue and exercises, not the review itself). */
+  saveMistakes = false,
 ): Promise<{ text: string; pronunciation: Pronunciation | null }> {
   const { data, error } = await supabase.functions.invoke<{ text: string; pronunciation: Pronunciation | null }>(
     'transcribe',
@@ -54,6 +56,7 @@ export async function transcribeWithPronunciation(
         mime_type: audio.type,
         assess: true,
         ...(expectedText ? { expected_text: expectedText } : {}),
+        save_mistakes: saveMistakes,
       },
     },
   )

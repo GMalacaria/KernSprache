@@ -124,9 +124,6 @@ button.danger { color: var(--error); }
 .flashcard p { margin: 0; }
 .card-main { font-family: var(--display); font-size: 2rem; font-weight: 700; letter-spacing: 0; }
 .card-answer { font-family: var(--display); font-size: 1.4rem; color: var(--accent); font-weight: 650; }
-.grades { position: sticky; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; padding: 0.6rem 0; background: var(--bg); }
-.grades button { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 3.5rem; padding: 0.5rem 0.25rem; font-size: 0.9rem; }
-.grades small { opacity: 0.8; font-size: 0.75rem; font-weight: 400; }
 
 .segmented { display: inline-flex; border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 0.2rem; margin-bottom: 0.5rem; }
 .segmented button { border-radius: 999px; background: transparent; color: var(--muted); padding: 0.35rem 1.1rem; min-height: 2.25rem; box-shadow: none; }
@@ -250,7 +247,17 @@ button.danger { color: var(--error); }
 form.stack label:not(:first-child) { margin-top: 0.5rem; }
 form.stack button[type='submit'] { margin-top: 0.75rem; }
 .review { display: flex; flex-direction: column; min-height: 100dvh; }
-.review .grades { margin-top: auto; }
+.card-word { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+.card-sentence { font-size: 1.4rem; line-height: 1.3; }
+.review-answer { margin-top: 0.25rem; }
+.review-answer .link { align-self: center; }
+.review-actions { gap: 0.5rem; }
+.review-actions > button { flex: 1; }
+.review-answer button.recording { color: var(--error); border-color: var(--error); }
+.review-heard { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem; }
+.review-heard p { margin: 0; }
+.review-result { position: sticky; bottom: 0; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0; margin-top: auto; background: var(--bg); }
+.review-result p { margin: 0; text-align: center; }
 
 /* Home: the daily goal ring is the one memorable element; settings stay folded away. */
 .profile-summary { margin: 0; color: var(--muted); font-size: 0.9rem; }

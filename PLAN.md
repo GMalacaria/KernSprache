@@ -11,7 +11,7 @@ Ultimo aggiornamento: 2026-11-24. `main` a `b6d75fe` (PR #22), **tutto mergiato 
 | Base | monorepo pnpm, PWA React/Vite, Supabase locale, RLS + test pgTAP, CI, commitlint | `apps/web`, `supabase`, `.github` |
 | IA | `AiProvider` con Gemini (predefinito) e Anthropic, JSON validato con zod, uso token in `ai_usage` | `supabase/functions/_shared/ai` |
 | Dialogo | chat con correzioni in italiano, scritta e **a voce** (trascrizione Gemini, risposta letta con `speechSynthesis`) | `tutor-chat`, `transcribe`, `features/dialogue` |
-| Ripasso | flashcard FSRS di parole ed errori | `features/review`, `src/lib/fsrs.ts` |
+| Ripasso | flashcard FSRS di parole, errori e pronuncia, con voto dato dall'app (traduzione, frase corretta scritta o detta, parola ripetuta a voce; `review-check` per sinonimi e correzioni diverse) | `features/review`, `src/lib/fsrs.ts`, `functions/review-check` |
 | Tempo di studio | obiettivo in minuti, timer solo sul tempo attivo, metà scritto/metà orale, banner di successo | `study_days` + RPC `add_study_time`, `features/study` |
 | Primo accesso | scopo (svago/viaggi/lavoro/amore, uno solo) → test di livello (scritto fisso + orale valutato dall'IA) | `placement-test`, `features/onboarding`, `features/placement` |
 | Accesso | email + password, registrazione con **approvazione del proprietario** (`profiles.approved`, da dashboard Supabase), reset e cambio password | `features/auth`, `requireApprovedUser` nelle functions |
