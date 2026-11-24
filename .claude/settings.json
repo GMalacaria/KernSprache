@@ -40,5 +40,8 @@
       "Bash(pnpm exec supabase secrets set:*)",
       "Bash(npx wrangler deploy:*)"
     ]
+  },
+  "enabledPlugins": {
+    "frontend-design@anthropic-plugin-directory": true
   }
 }
