@@ -62,6 +62,7 @@ button:disabled { opacity: 0.6; cursor: default; }
 button.link { background: none; color: var(--accent); padding: 0.6rem 0.5rem; }
 /* Quieter than the main action: outline instead of a solid fill. */
 button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+button.danger { color: var(--error); border-color: var(--error); }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
@@ -98,8 +99,8 @@ textarea {
 .flashcard p { margin: 0; }
 .card-main { font-size: 1.5rem; font-weight: 600; }
 .card-answer { font-size: 1.25rem; color: var(--accent); font-weight: 600; }
-.grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
-.grades button { display: flex; flex-direction: column; align-items: center; padding: 0.5rem 0.25rem; font-size: 0.9rem; }
+.grades { position: sticky; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; padding: 0.5rem 0; background: var(--bg); }
+.grades button { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 3.5rem; padding: 0.5rem 0.25rem; font-size: 0.9rem; }
 .grades small { opacity: 0.8; font-size: 0.75rem; }
 
 .segmented { display: inline-flex; border: 1px solid var(--accent); border-radius: 0.5rem; overflow: hidden; margin-bottom: 0.5rem; }
@@ -202,3 +203,8 @@ select { font: inherit; padding: 0.4rem 0.5rem; border-radius: 0.5rem; border: 1
 .sticky-header { position: sticky; top: 0; z-index: 5; background: var(--bg); padding-top: env(safe-area-inset-top); }
 .sticky-header h1 { font-size: 1.5rem; margin: 0.5rem 0; }
 .chapter-current { scroll-margin-top: 4rem; }
+
+form.stack label:not(:first-child) { margin-top: 0.5rem; }
+.review { display: flex; flex-direction: column; min-height: 100dvh; }
+.review .grades { margin-top: auto; }
+form.stack button[type='submit'] { margin-top: 0.75rem; }
