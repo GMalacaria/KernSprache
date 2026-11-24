@@ -8,9 +8,8 @@ import { handle, HttpError, json } from '../_shared/http.ts'
 import {
   CHAPTER_TEST_ORAL_PROMPT_VERSION,
   CHAPTER_TEST_ORAL_SYSTEM_PROMPT,
-  CHAPTER_TEST_PROMPT_VERSION,
-  CHAPTER_TEST_SYSTEM_PROMPT,
 } from '../_shared/prompts/chapter-test.v1.ts'
+import { CHAPTER_TEST_PROMPT_VERSION, CHAPTER_TEST_SYSTEM_PROMPT } from '../_shared/prompts/chapter-test.v2.ts'
 import {
   chapterTestRequestSchema,
   generatedTestSchema,
@@ -18,6 +17,7 @@ import {
   oralAssessmentSchema,
   type OralTask,
   oralTaskSchema,
+  questionReview,
   type StoredQuestion,
   storedQuestionSchema,
   testIsValid,
@@ -226,6 +226,8 @@ async function submit(
   return {
     chapter_id: chapter.id,
     written: { correct: written.correct, total: written.total, score: written.score, wrong: written.wrong },
+    // Answers are revealed now: the full sentence and its translation, for every question.
+    review: questions.map(questionReview),
     oral: {
       score: oralScore,
       feedback_it: feedback.feedback_it,

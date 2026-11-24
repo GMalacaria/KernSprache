@@ -10,6 +10,9 @@ export const generatedTestSchema = z.object({
     options: z.array(z.string()),
     /** Index of the correct option. */
     answer: z.number().int().min(0).max(3),
+    /** The full correct sentence, shown with its translation after the test. */
+    sentence_en: z.string(),
+    translation_it: z.string(),
   })),
   oral_tasks: z.array(z.object({ prompt_it: z.string() })),
 })
@@ -22,14 +25,26 @@ export function testIsValid(test: GeneratedTest): boolean {
     test.questions.every((q) => q.options.length === 4 && q.answer < 4 && q.prompt.trim() !== '')
 }
 
-/** A question as stored on the server (with the answer). */
+/** A question as stored on the server (with the answer). Tests saved before
+ * chapter-test.v2 have no sentence and translation. */
 export const storedQuestionSchema = z.object({
   id: z.string(),
   prompt: z.string(),
   options: z.array(z.string()),
   answer: z.number().int().min(0).max(3),
+  sentence_en: z.string().optional(),
+  translation_it: z.string().optional(),
 })
 export type StoredQuestion = z.infer<typeof storedQuestionSchema>
+
+/** What the learner sees about a question after submitting (nothing when the test predates v2). */
+export function questionReview(
+  q: StoredQuestion,
+): { id: string; sentence_en: string | null; translation_it: string | null } {
+  const sentence = q.sentence_en?.trim()
+  const translation = q.translation_it?.trim()
+  return { id: q.id, sentence_en: sentence || null, translation_it: (sentence && translation) || null }
+}
 
 export const oralTaskSchema = z.object({ id: z.string(), prompt_it: z.string() })
 export type OralTask = z.infer<typeof oralTaskSchema>
