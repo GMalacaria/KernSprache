@@ -37,6 +37,22 @@ describe('fsrs mapping', () => {
     expect(next[Rating.Again].getTime()).toBeLessThanOrEqual(next[Rating.Good].getTime())
     expect(next[Rating.Good].getTime()).toBeLessThanOrEqual(next[Rating.Easy].getTime())
   })
+
+  it('previews the same fuzzed date that grading at the same time stores', () => {
+    // A card in review with a long interval, so "Easy" gets fuzzed.
+    const row: FsrsColumns = {
+      ...NEW_ROW,
+      stability: 20,
+      difficulty: 5,
+      scheduled_days: 15,
+      reps: 4,
+      state: State.Review,
+      last_review: '2026-11-07T10:00:00.000Z',
+    }
+    const now = new Date('2026-11-22T10:00:00.123Z')
+    const { card } = scheduler.next(toCard(row), now, Rating.Easy)
+    expect(previewDue(row, now)[Rating.Easy]).toEqual(card.due)
+  })
 })
 
 describe('formatInterval', () => {

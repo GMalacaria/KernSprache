@@ -51,20 +51,22 @@ interface ReviewSessionProps {
 function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionProps) {
   useStudyActivity('written')
   const [queue, setQueue] = useState(initialItems)
-  const [revealed, setRevealed] = useState(false)
+  // Time the answer was shown: the interval labels and the saved grade both use it, so the
+  // fuzzed intervals stay put while the timer re-renders the page and match what gets stored.
+  const [revealedAt, setRevealedAt] = useState<Date | null>(null)
   const [done, setDone] = useState(0)
   const sessionId = useRef<Promise<string> | null>(null)
   const current = queue[0]
 
   const grade = useMutation({
-    mutationFn: async ({ item, value }: { item: ReviewItem; value: Grade }) => {
+    mutationFn: async ({ item, value, at }: { item: ReviewItem; value: Grade; at: Date }) => {
       sessionId.current ??= startReviewSession()
       await sessionId.current
-      return gradeItem(item, value, new Date())
+      return gradeItem(item, value, at)
     },
     onSuccess: (updated) => {
       setDone((n) => n + 1)
-      setRevealed(false)
+      setRevealedAt(null)
       setQueue((prev) => {
         const rest = prev.slice(1)
         const comesBackSoon = new Date(updated.due).getTime() - Date.now() < REQUEUE_WITHIN_MS
@@ -103,17 +105,22 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
           <p className="muted">Ancora da ripassare: {queue.length}</p>
           <article className="flashcard">
             <CardFront item={current} />
-            {revealed ? (
+            {revealedAt ? (
               <CardBack item={current} />
             ) : (
-              <button type="button" onClick={() => setRevealed(true)}>
+              <button type="button" onClick={() => setRevealedAt(new Date())}>
                 Mostra risposta
               </button>
             )}
           </article>
 
-          {revealed && (
-            <GradeButtons item={current} disabled={grade.isPending} onGrade={(value) => grade.mutate({ item: current, value })} />
+          {revealedAt && (
+            <GradeButtons
+              item={current}
+              now={revealedAt}
+              disabled={grade.isPending}
+              onGrade={(value) => grade.mutate({ item: current, value, at: revealedAt })}
+            />
           )}
           {grade.isError && <p className="error">Salvataggio non riuscito, riprova.</p>}
         </>
@@ -152,8 +159,14 @@ function CardBack({ item }: { item: ReviewItem }) {
 // "Good" is the usual answer, so it is the only solid button; "Again" is flagged in the error colour.
 const GRADE_STYLES = ['secondary danger', 'secondary', '', 'secondary']
 
-function GradeButtons({ item, disabled, onGrade }: { item: ReviewItem; disabled: boolean; onGrade: (g: Grade) => void }) {
-  const now = new Date()
+interface GradeButtonsProps {
+  item: ReviewItem
+  now: Date
+  disabled: boolean
+  onGrade: (g: Grade) => void
+}
+
+function GradeButtons({ item, now, disabled, onGrade }: GradeButtonsProps) {
   const next = previewDue(item, now)
   return (
     <div className="grades">
