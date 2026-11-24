@@ -6,7 +6,8 @@ import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity } from '../study/useStudyTimer'
 import { endSession, sendTutorTurn } from './api'
 import { CorrectionList } from './CorrectionList'
-import type { DialogueTurn } from './types'
+import type { DialogueTurn, Pronunciation } from './types'
+import { PronunciationNote } from './PronunciationNote'
 import { VoiceComposer } from './VoiceComposer'
 
 const MAX_CHARS = 2000
@@ -41,6 +42,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
           content: userTurn?.content ?? '',
           corrections: res.corrections,
           newVocab: res.new_vocab,
+          pronunciation: prev.at(-1)?.pronunciation,
         },
         { id: `a${prev.length}`, role: 'assistant', content: res.reply },
       ])
@@ -71,10 +73,10 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
 
   useEffect(() => stopSpeaking, [])
 
-  function sendText(text: string) {
+  function sendText(text: string, pronunciation?: Pronunciation) {
     const content = text.trim()
     if (!content || send.isPending) return
-    const next: DialogueTurn[] = [...turns, { id: `p${turns.length}`, role: 'user', content }]
+    const next: DialogueTurn[] = [...turns, { id: `p${turns.length}`, role: 'user', content, pronunciation }]
     setTurns(next)
     send.mutate({
       session_id: sessionId.current,
@@ -131,6 +133,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
                 Ascolta
               </button>
             )}
+            {turn.pronunciation && <PronunciationNote pronunciation={turn.pronunciation} />}
             {turn.corrections && <CorrectionList corrections={turn.corrections} />}
             {turn.newVocab && turn.newVocab.length > 0 && (
               <p className="vocab">

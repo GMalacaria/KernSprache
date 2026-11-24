@@ -39,9 +39,18 @@ export interface TutorChatResponse {
   new_vocab: VocabEntry[]
 }
 
+/** Mirrors supabase/functions/_shared/schemas/pronunciation.ts. */
+export interface Pronunciation {
+  score: number
+  words: { word: string; tip_it: string }[]
+  feedback_it: string
+}
+
 /** A message as shown in the UI: user turns carry the corrections they received. */
 export interface DialogueTurn extends ChatMessage {
   id: string
   corrections?: Correction[]
   newVocab?: VocabEntry[]
+  /** Spoken turns only: how the learner sounded. */
+  pronunciation?: Pronunciation
 }
