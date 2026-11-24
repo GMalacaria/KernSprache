@@ -80,13 +80,10 @@ Modellato su aiTool (`src/install.ts`). Provato in emulazione mobile (evento `be
 
 - `pnpm fn:serve` ora è provato in locale e funziona (dopo `pnpm db:start`).
 - Se `pnpm` o `deno` cercano pacchetti su `npm.pepita.io` (registry aziendale, senza VPN non risolve): usare `npm_config_manage_package_manager_versions=false` per pnpm e `NPM_CONFIG_REGISTRY=https://registry.npmjs.org` per Deno.
-- `supabase/tests/*.sql` assumono un DB appena resettato: dopo prove manuali fare `pnpm db:reset` prima di `pnpm test:db`.
-- Effetto del prompt `tutor-chat.v2` (scopo) mai verificato con una chiamata reale.
-- Se la prima lezione si apre mentre il prefetch dello stesso capitolo è in corso, la lezione può essere generata due volte (costo minimo).
-- I tipi delle risposte delle functions sono duplicati nella PWA (`features/dialogue/types.ts`, `features/lesson/types.ts`, `features/placement/api.ts`): tenerli allineati agli schemi zod.
-- `SpokenAnswer` (placement) e `VoiceComposer` (dialogo) duplicano parte della logica di registrazione: valutare un hook comune.
-- La colonna `elapsed_days` di `vocab_items`/`mistakes` non è più usata da `ts-fsrs` 6.
-- `profiles.goal` contiene i dettagli dello scopo in parole dell'utente (il nome è storico).
+- Se la prima lezione si apre mentre il prefetch dello stesso capitolo è in corso, la lezione può essere generata due volte (costo minimo). Lo risolve il lock della cache condivisa in `PLAN-multilingua.md` (PR 5).
+- I tipi delle risposte delle functions sono duplicati nella PWA (`features/dialogue/types.ts`, `features/lesson/types.ts`, `features/placement/api.ts`): tenerli allineati agli schemi zod. Scelta del proprietario: si lasciano così (il piano multilingua riscrive comunque quegli schemi).
+- `profiles.goal` contiene i dettagli dello scopo in parole dell'utente (il nome è storico; col multilingua passa a `learner_languages`).
+- Chiuso il 2026-11-24: hook `useVoiceRecorder` condiviso da `VoiceComposer` e `SpokenAnswer`; prompt `tutor-chat.v2` verificato con Gemini reale (le risposte cambiano con lo scopo, correzioni identiche); i test pgTAP passano anche su un database con dati (le conte sono filtrate dalla RLS e il test di approvazione cancella gli utenti dentro la transazione); colonna `elapsed_days` tolta da `vocab_items` e `mistakes`.
 
 ## Come provare (note pratiche)
 
@@ -108,4 +105,4 @@ Provato dal proprietario su telefono: tutto fino alla #21. Da provare: traduzion
 2. **Voce Gemini con cache** (branch `feat/gemini-voice`): function `speak`, tabella `tts_cache`, bucket privato `tts`, `AI_MODEL_TTS`. Per rilasciarla: `supabase db push`, `supabase functions deploy speak`, `supabase secrets set AI_MODEL_TTS=gemini-3.1-flash-tts-preview` (con conferma). Possibile miglioria: generare in anticipo le frasi di una lezione appena creata, per togliere i 3-4 secondi della prima riproduzione.
 3. **Dettato (esercizio di ascolto)**, richiesto dal proprietario. Oggi l'ascolto è solo comprensione (testo letto ad alta voce e domande a scelta multipla). Il dettato: si sente una frase breve (voce Gemini, ripetibile), si scrive quello che si è capito; se è sbagliata si evidenziano le parti errate (confronto parola per parola) e si deve riprovare finché non si indovina; poi si può scegliere di leggere il testo. Sbagliare e scegliere di vedere il testo abbassano il punteggio finale (penalità per ogni tentativo sbagliato e per il testo mostrato). Il punteggio va in `lesson_stats` e quindi nel profilo. Frasi dal contenuto della lezione (esempi, espressioni, testo di ascolto).
 4. **Pagina di profilo**: usa `lesson_stats` (e `study_days`) per mostrare serie, errori, percentuale di successo nel tempo.
-5. **Debito tecnico** (sezione sopra): tipi duplicati PWA/functions, hook comune di registrazione audio, effetto reale del prompt `tutor-chat.v2`, doppia generazione di una lezione con prefetch in corso, colonna `elapsed_days`.
+5. **Debito tecnico residuo** (sezione sopra): niente di urgente; lock sulla generazione delle lezioni nel piano multilingua.

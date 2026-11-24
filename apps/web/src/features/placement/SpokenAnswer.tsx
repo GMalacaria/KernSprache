@@ -1,7 +1,7 @@
 import { Emoji } from '../../components/Emoji'
-import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { MAX_RECORDING_MS, startRecording, type Recording } from '../../lib/audio'
+import { MAX_RECORDING_MS } from '../../lib/audio'
+import { useVoiceRecorder } from '../../lib/useVoiceRecorder'
 import { transcribeAudio } from '../dialogue/api'
 
 interface SpokenAnswerProps {
@@ -11,37 +11,14 @@ interface SpokenAnswerProps {
 
 /** Records one spoken answer, shows the transcript, lets the learner redo it. */
 export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
-  const recording = useRef<Recording | null>(null)
-  const [isRecording, setIsRecording] = useState(false)
-  const [seconds, setSeconds] = useState(0)
-  const [micError, setMicError] = useState<string | null>(null)
   const transcribe = useMutation({ mutationFn: transcribeAudio })
+  const { isRecording, seconds, micError, start, stop } = useVoiceRecorder({
+    onRecorded: (audio) => transcribe.mutate(audio),
+  })
 
-  useEffect(() => {
-    if (!isRecording) return
-    const id = window.setInterval(() => setSeconds((s) => s + 1), 1000)
-    return () => window.clearInterval(id)
-  }, [isRecording])
-
-  useEffect(() => () => recording.current?.cancel(), [])
-
-  async function stop() {
-    const current = recording.current
-    recording.current = null
-    setIsRecording(false)
-    if (current) transcribe.mutate(await current.stop())
-  }
-
-  async function start() {
-    setMicError(null)
+  async function begin() {
     transcribe.reset()
-    try {
-      recording.current = await startRecording(() => void stop())
-      setSeconds(0)
-      setIsRecording(true)
-    } catch {
-      setMicError('Non riesco a usare il microfono. Controlla il permesso del browser.')
-    }
+    await start()
   }
 
   if (transcribe.isSuccess) {
@@ -54,7 +31,7 @@ export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
         <button type="button" onClick={() => onDone(transcribe.data)}>
           Avanti
         </button>
-        <button type="button" className="link" onClick={() => void start()}>
+        <button type="button" className="link" onClick={() => void begin()}>
           Rifai la registrazione
         </button>
       </div>
@@ -66,7 +43,7 @@ export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
       <button
         type="button"
         className={`mic${isRecording ? ' recording' : ''}`}
-        onClick={() => void (isRecording ? stop() : start())}
+        onClick={() => void (isRecording ? stop() : begin())}
         disabled={transcribe.isPending}
       >
         {isRecording

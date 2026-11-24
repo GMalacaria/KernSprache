@@ -2,7 +2,8 @@
 begin;
 select plan(4);
 
-insert into public.tts_cache (key, text, voice, path) values ('k1', 'Where were you?', 'Kore', 'k1.wav');
+-- Random keys: the test must not collide with rows a real database already has.
+insert into public.tts_cache (key, text, voice, path) values (md5(random()::text), 'Where were you?', 'Kore', 'a.wav');
 insert into auth.users (id, email) values ('bbbbbbbb-0000-0000-0000-bbbbbbbbbbbb', 'tea@example.com');
 
 select is((select public from storage.buckets where id = 'tts'), false, 'the tts bucket is private');
@@ -12,7 +13,7 @@ select set_config('request.jwt.claims', '{"sub":"bbbbbbbb-0000-0000-0000-bbbbbbb
 
 select is((select count(*) from public.tts_cache)::int, 0, 'a signed-in user cannot read the cache');
 select throws_ok(
-  $$ insert into public.tts_cache (key, text, voice, path) values ('k2', 'x', 'Kore', 'k2.wav') $$,
+  $$ insert into public.tts_cache (key, text, voice, path) values (md5(random()::text), 'x', 'Kore', 'b.wav') $$,
   '42501', null, 'a signed-in user cannot write the cache'
 );
 
