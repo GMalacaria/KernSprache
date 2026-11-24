@@ -43,10 +43,19 @@ export async function transcribeAudio(audio: Blob): Promise<string> {
 /** Like `transcribeAudio`, plus a pronunciation assessment (null when there was too little to judge). */
 export async function transcribeWithPronunciation(
   audio: Blob,
+  /** The sentence the learner was reading aloud: the pronunciation is judged against it. */
+  expectedText?: string,
 ): Promise<{ text: string; pronunciation: Pronunciation | null }> {
   const { data, error } = await supabase.functions.invoke<{ text: string; pronunciation: Pronunciation | null }>(
     'transcribe',
-    { body: { audio_base64: await blobToBase64(audio), mime_type: audio.type, assess: true } },
+    {
+      body: {
+        audio_base64: await blobToBase64(audio),
+        mime_type: audio.type,
+        assess: true,
+        ...(expectedText ? { expected_text: expectedText } : {}),
+      },
+    },
   )
   if (error) throw new Error(await errorMessage(error))
   if (!data?.text) throw new Error(FALLBACK_ERROR)

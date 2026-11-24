@@ -346,3 +346,10 @@ button .emoji { margin-right: 0.15em; }
 .tag.score-low { color: var(--error); }
 .pronunciation-words { list-style: none; margin: 0.25rem 0 0; padding: 0; }
 .pronunciation-words li { border-left: 3px solid var(--accent); padding-left: 0.6rem; margin-top: 0.25rem; }
+
+/* Repeat a sentence aloud */
+.sentence-block { display: flex; flex-direction: column; gap: 0.5rem; }
+.repeat-sentence { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+.repeat-sentence .pronunciation { max-width: 100%; width: 100%; }
+.repeat-heard { margin: 0; font-size: 0.85rem; }
+.repeat-sentence button.recording { color: var(--error); border-color: var(--error); }
