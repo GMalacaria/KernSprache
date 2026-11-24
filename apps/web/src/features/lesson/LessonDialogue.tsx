@@ -1,7 +1,7 @@
 import { ListenButton } from '../../components/ListenButton'
 import { useRef, useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { canRecord, speak } from '../../lib/audio'
+import { speak } from '../../lib/audio'
 import { sendTutorTurn } from '../dialogue/api'
 import { CorrectionList } from '../dialogue/CorrectionList'
 import type { DialogueMode } from '../dialogue/DialoguePage'
@@ -14,19 +14,18 @@ interface LessonDialogueProps {
   lessonId: number
   scenario: string
   opening: string
+  /** Fixed by the part of the lesson: written in the written part, spoken in the oral part. */
   mode: DialogueMode
-  onModeChange: (mode: DialogueMode) => void
   onActivity: () => void
   onFinished: () => void
 }
 
-/** Short role-play with the tutor at the end of a lesson: three learner turns. */
-export function LessonDialogue({ lessonId, scenario, opening, mode, onModeChange, onActivity, onFinished }: LessonDialogueProps) {
+/** Short role-play with the tutor at the end of each part of a lesson: three learner turns. */
+export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, onFinished }: LessonDialogueProps) {
   const [turns, setTurns] = useState<DialogueTurn[]>([{ id: 'opening', role: 'assistant', content: opening }])
   const [draft, setDraft] = useState('')
   const sessionId = useRef<string | undefined>(undefined)
   const learnerTurns = turns.filter((t) => t.role === 'user' && t.corrections).length
-  const voice = canRecord()
 
   const send = useMutation({
     mutationFn: sendTutorTurn,
@@ -72,16 +71,6 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onModeChange
   return (
     <div>
       <p className="notice">{scenario}</p>
-      {voice && (
-        <div className="segmented" role="group" aria-label="Modalità">
-          <button type="button" aria-pressed={mode === 'written'} onClick={() => onModeChange('written')}>
-            Scritto
-          </button>
-          <button type="button" aria-pressed={mode === 'oral'} onClick={() => onModeChange('oral')}>
-            Orale
-          </button>
-        </div>
-      )}
       <ol className="turns">
         {turns.map((turn) => (
           <li key={turn.id} className={`turn turn-${turn.role}`}>
@@ -100,7 +89,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onModeChange
 
       {finished ? (
         <button type="button" onClick={onFinished}>
-          Concludi la lezione
+          {mode === 'oral' ? 'Concludi la parte orale' : 'Concludi la parte scritta'}
         </button>
       ) : (
         <>

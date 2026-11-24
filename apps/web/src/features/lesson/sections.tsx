@@ -112,6 +112,18 @@ export function DictationIntro({ count }: { count: number }) {
   )
 }
 
+export function RepeatIntro({ count }: { count: number }) {
+  return (
+    <div className="stack">
+      <p>
+        Ascolta {count} {count === 1 ? 'frase' : 'frasi'} e {count === 1 ? 'ripetila' : 'ripetile'} a voce: valuto la
+        pronuncia parola per parola.
+      </p>
+      <p className="muted">Conta il primo tentativo valutato; puoi riprovare quante volte vuoi per migliorare.</p>
+    </div>
+  )
+}
+
 export function ListeningView({ content, showText }: { content: LessonContent; showText: boolean }) {
   return (
     <div className="stack">

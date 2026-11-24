@@ -17,7 +17,8 @@ async function fetchChapters(): Promise<ChapterRow[]> {
 }
 
 async function fetchCompletedLessonIds(): Promise<number[]> {
-  const { data, error } = await supabase.from('lesson_progress').select('lesson_id')
+  // A row also exists for a lesson with only one part done: completed means both parts.
+  const { data, error } = await supabase.from('lesson_progress').select('lesson_id').not('completed_at', 'is', null)
   if (error) throw error
   return data.map((row) => row.lesson_id)
 }

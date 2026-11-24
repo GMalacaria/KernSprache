@@ -119,14 +119,14 @@ isOneToOne: false
                   ]
                 },"lesson_progress": {
                   Row: {
-                    "completed_at": string,"lesson_id": number,"score": number,"user_id": string
+                    "completed_at": string | null,"lesson_id": number,"oral_done_at": string | null,"oral_stats": Json | null,"score": number | null,"user_id": string,"written_done_at": string | null,"written_stats": Json | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "completed_at"?: string,"lesson_id": number,"score": number,"user_id"?: string
+                    "completed_at"?: string | null,"lesson_id": number,"oral_done_at"?: string | null,"oral_stats"?: Json | null,"score"?: number | null,"user_id"?: string,"written_done_at"?: string | null,"written_stats"?: Json | null
                   }
                   Update: {
-                    "completed_at"?: string,"lesson_id"?: number,"score"?: number,"user_id"?: string
+                    "completed_at"?: string | null,"lesson_id"?: number,"oral_done_at"?: string | null,"oral_stats"?: Json | null,"score"?: number | null,"user_id"?: string,"written_done_at"?: string | null,"written_stats"?: Json | null
                   }
                   Relationships: [
                     {
