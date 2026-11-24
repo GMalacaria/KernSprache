@@ -335,3 +335,13 @@ button .emoji { margin-right: 0.15em; }
 .placement-progress small { display: block; margin-bottom: 0.35rem; }
 .option:disabled.right, .option:disabled.wrong { opacity: 1; }
 .menu-item[aria-current='page'] { color: var(--accent); font-weight: 700; background: var(--track); }
+
+/* Pronunciation note under a spoken turn */
+.pronunciation { max-width: 85%; font-size: 0.9rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.5rem 0.75rem; }
+.pronunciation p { margin: 0.1rem 0; }
+.pronunciation-head { display: flex; align-items: center; gap: 0.5rem; }
+.pronunciation-head .tag { margin-left: 0; font-weight: 700; }
+.tag.score-good { background: var(--success-bg); color: var(--success); }
+.tag.score-low { color: var(--error); }
+.pronunciation-words { list-style: none; margin: 0.25rem 0 0; padding: 0; }
+.pronunciation-words li { border-left: 3px solid var(--accent); padding-left: 0.6rem; margin-top: 0.25rem; }
