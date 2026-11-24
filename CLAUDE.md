@@ -45,7 +45,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
   /functions
     tutor-chat         dialogo + correzioni (output JSON)
     lesson             contenuto delle lezioni: generazione, salvataggio e preparazione anticipata di un capitolo
-    transcribe         trascrizione letterale del parlato (Gemini), errori inclusi
+    transcribe         trascrizione letterale del parlato (Gemini), errori inclusi; con `assess: true` valuta anche la pronuncia (punteggio 0-100, fino a 3 parole da migliorare con consiglio in italiano) nella stessa chiamata
     chapter-test       verifica di fine capitolo: domande generate dall'IA, correzione dello scritto e valutazione dell'orale sul server
     placement-test     test di livello iniziale (domande e correzione dello scritto, valutazione dell'orale)
     send-reminders     promemoria giornaliero via Web Push (chiamata ogni ora da pg_cron con x-cron-secret, senza JWT utente)
@@ -126,7 +126,7 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 2. Flashcard con FSRS e notifiche push (promemoria e ripassi in scadenza).
 3. Voce: trascrizione per il parlato, sintesi vocale per l'ascolto.
 4. Curriculum strutturato A1→B2 e test di livello iniziale.
-5. Valutazione della pronuncia (es. Azure Pronunciation Assessment).
+5. Valutazione della pronuncia: fatta con Gemini nel dialogo a voce (`transcribe` con `assess`, `PronunciationNote`); da estendere a esercizi e verifiche orali, e da salvare per il profilo.
 
 ## Comandi
 Requisiti: Node 22, pnpm 10, Docker (per Supabase locale). Tutti i comandi si lanciano dalla root del repo.
