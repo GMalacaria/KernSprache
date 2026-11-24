@@ -1,4 +1,5 @@
-@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/fredoka';
+@import '@fontsource-variable/nunito';
 
 /* Maiolica palette: cobalt on pale paper, with lemon reserved for "goal reached". */
 :root {
@@ -18,9 +19,10 @@
   --success-bg: #d9f5e8;
   --radius-control: 1rem;
   --radius-panel: 1.25rem;
-  --display: 'Bricolage Grotesque Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --display: 'Fredoka Variable', 'Nunito Variable', system-ui, sans-serif;
+  --body: 'Nunito Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color-scheme: light dark;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--body);
   line-height: 1.5;
 }
 
@@ -50,9 +52,9 @@ body {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-h1, h2, h3 { font-family: var(--display); letter-spacing: -0.02em; line-height: 1.15; }
-h1 { font-size: 2rem; font-weight: 700; margin: 0.5rem 0; }
-h2 { font-size: 1.3rem; font-weight: 650; }
+h1, h2, h3 { font-family: var(--display); letter-spacing: 0; line-height: 1.15; }
+h1 { font-size: 2rem; font-weight: 600; margin: 0.5rem 0; }
+h2 { font-size: 1.3rem; font-weight: 600; }
 
 .page { max-width: 32rem; margin: 0 auto; padding: 1.5rem 1rem 2rem; }
 .stack { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -78,7 +80,7 @@ select { padding: 0.5rem 0.6rem; }
 
 /* Buttons: a solid bottom edge makes the main action feel pressable, and it sinks when pressed. */
 button {
-  font: inherit; font-weight: 600; padding: 0.6rem 1.1rem; border-radius: var(--radius-control); border: none;
+  font: inherit; font-weight: 700; padding: 0.6rem 1.1rem; border-radius: var(--radius-control); border: none;
   min-height: 2.75rem; /* 44px touch target */
   background: var(--accent); color: var(--on-accent); cursor: pointer;
   box-shadow: 0 3px 0 var(--accent-deep);
@@ -120,7 +122,7 @@ button.danger { color: var(--error); }
   background: var(--surface); border: 1px solid var(--line); border-radius: 1.5rem; padding: 2rem 1rem; margin: 1rem 0;
 }
 .flashcard p { margin: 0; }
-.card-main { font-family: var(--display); font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+.card-main { font-family: var(--display); font-size: 2rem; font-weight: 700; letter-spacing: 0; }
 .card-answer { font-family: var(--display); font-size: 1.4rem; color: var(--accent); font-weight: 650; }
 .grades { position: sticky; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; padding: 0.6rem 0; background: var(--bg); }
 .grades button { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 3.5rem; padding: 0.5rem 0.25rem; font-size: 0.9rem; }
@@ -164,7 +166,7 @@ button.danger { color: var(--error); }
 .options .option { background: var(--surface); color: var(--fg); border: 1.5px solid var(--line); box-shadow: 0 2px 0 var(--line); }
 .transcript { background: var(--surface); }
 .level-badge { font-family: var(--display); font-size: 3.5rem; font-weight: 700; color: var(--accent); margin: 0.5rem 0; }
-.small-heading { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; font-size: 0.95rem; letter-spacing: 0; margin: 0.75rem 0 0.25rem; }
+.small-heading { font-family: var(--body); font-size: 0.95rem; letter-spacing: 0; margin: 0.75rem 0 0.25rem; }
 
 .primary-action { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 1rem 1.1rem; }
 .primary-action small { opacity: 0.9; font-size: 0.8rem; font-weight: 400; }
@@ -243,7 +245,7 @@ form.stack button[type='submit'] { margin-top: 0.75rem; }
 .ring-arc { stroke: var(--accent); stroke-linecap: round; }
 .ring .ring-sun { fill: var(--lemon); stroke: none; }
 .ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.ring-clock { font-family: var(--display); font-size: 2.6rem; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1; }
+.ring-clock { font-family: var(--display); font-size: 2.6rem; font-weight: 700; letter-spacing: 0; font-variant-numeric: tabular-nums; line-height: 1; }
 .ring-label span { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
 .ring.reached .ring-clock, .ring.reached .ring-label span { color: var(--on-lemon); font-weight: 600; }
 .ring-halves { display: flex; gap: 1.25rem; margin: 0; font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -291,7 +293,7 @@ form.stack button[type='submit'] { margin-top: 0.75rem; }
 .side-menu { margin: 0; padding: 0; border: none; background: var(--bg); color: var(--fg); width: min(20rem, 88vw); max-width: none; height: 100dvh; max-height: none; inset: 0 auto 0 0; box-shadow: 0 0 40px rgb(8 12 28 / 0.35); }
 .side-menu::backdrop { background: rgb(8 12 28 / 0.55); }
 .side-menu-body { display: flex; flex-direction: column; gap: 1rem; min-height: 100%; padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(1rem + env(safe-area-inset-bottom)); }
-.side-menu-title { font-family: var(--display); font-size: 1.3rem; letter-spacing: -0.02em; }
+.side-menu-title { font-family: var(--display); font-size: 1.3rem; }
 .side-menu-nav { display: flex; flex-direction: column; }
 .menu-item { background: none; color: var(--fg); box-shadow: none; text-align: left; border-radius: 0.75rem; padding: 0.75rem 0.5rem; font-weight: 500; }
 .menu-item:active:not(:disabled) { transform: none; background: var(--track); box-shadow: none; }
