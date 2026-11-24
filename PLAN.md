@@ -2,7 +2,7 @@
 
 Punto di ripartenza per una nuova sessione. Le regole del progetto (stack, convenzioni, comandi) sono in [CLAUDE.md](./CLAUDE.md): questo file dice **dove siamo e cosa fare dopo**.
 
-Ultimo aggiornamento: 2026-11-24. `main` a `116f874` (PR #20), **tutto mergiato e in produzione** (frontend da Cloudflare, function `chapter-test` ridistribuita a mano). Il branch `feat/ux-menu-screens` porta il menu laterale sul Percorso e gli ultimi ritocchi UX. Resta sul remoto solo `docs/next-steps-plan` (un vecchio commit di piano mai mergiato: si può cancellare).
+Ultimo aggiornamento: 2026-11-24. `main` a `b6d75fe` (PR #22), **tutto mergiato e in produzione** (frontend da Cloudflare; migration `lesson_stats` e function `chapter-test` v2 rilasciate a mano). Resta sul remoto solo `docs/next-steps-plan` (un vecchio commit di piano mai mergiato: si può cancellare).
 
 ## Stato attuale (tutto su `main` e in produzione)
 
@@ -20,6 +20,7 @@ Ultimo aggiornamento: 2026-11-24. `main` a `116f874` (PR #20), **tutto mergiato 
 | Verifica di capitolo | 8 domande scritte (corrette sul server) + 2 consegne orali (valutate dall'IA, scritte se manca il microfono), 70/100 per passare, test nuovo dopo ogni tentativo, livello alzato a fine livello | `chapter-test`, `chapter_tests`, `features/chapter-test` |
 | Percorso | 24 capitoli A1–B2 × 4 lezioni (struttura fissa in migration); lezioni generate per livello e scopo, salvate e preparate in anticipo; schermata Percorso (traccia di nodi, capitoli superati ripiegati) e "Continua il percorso" | `lesson`, `features/path`, `features/lesson` |
 | Verifica di salto | sui capitoli bloccati un lucchetto aperto accanto al badge apre la verifica di quel capitolo; superarla segna superati i capitoli precedenti e alza `profiles.level` almeno a quello del capitolo (`levelAfterPass`, `buildPath`). La function non chiede più le lezioni completate | `chapter-test`, `features/path/progress.ts` |
+| Esercizi e statistiche | dopo ogni risposta del quiz compare la traduzione italiana della frase con un pulsante per ascoltarla (`speechSynthesis`); le domande della verifica hanno `sentence`/`translation_it` (prompt `chapter-test.v2`, compatibile con le verifiche già salvate senza); a fine capitolo si vedono errori, serie massima di risposte giuste e percentuale. I dati si salvano in `lesson_stats` con la RPC `record_lesson_stats` (base per una futura pagina di profilo) | `features/lesson`, `components/SentenceFeedback.tsx`, `lesson_stats` |
 | Grafica | palette maiolica (cobalto, limone), Fredoka per titoli e Nunito per il testo (self-hosted con `@fontsource-variable`), emoji Fluent come SVG (`components/Emoji.tsx`, `assets/emoji`), anello dell'obiettivo in home, animazioni solo alle azioni e con movimento ridotto rispettato, View Transitions tra schermate | `src/index.css`, `features/study/GoalRing.tsx` |
 | Menu laterale | dialog nativo con Home, Percorso, obiettivo e scopo (scopo da menu a tendina), test di livello, installazione, promemoria, cambio password ed Esci; sulle schermate hub (home e percorso). Le schermate di attività (lezione, dialogo, ripasso, verifiche) restano con i loro pulsanti di uscita | `features/home/AppMenu.tsx`, `SideMenu.tsx` |
 
@@ -61,7 +62,7 @@ Modellato su aiTool (`src/install.ts`). Provato in emulazione mobile (evento `be
 ## Produzione (2026-11-23)
 
 - **Sito:** https://aitool-kernsprache.geom-malacaria.workers.dev (Cloudflare Workers, build da `main` con `pnpm run build` + `npx wrangler deploy`, config in `wrangler.jsonc`; i build leggono le variabili `VITE_*` **di build** del Worker). Attenzione: `aitool-kernsprache.kernsprache.workers.dev` è una vecchia copia di un altro account, non si aggiorna dal repo. Il frontend si pubblica da solo a ogni merge su `main` (circa 3-4 minuti); migration, functions e secret **no**.
-- **Supabase:** progetto `KernSprache` (produzione), repo collegato con `supabase link`; 11 migration applicate, 6 functions pubblicate, secret impostati (`GEMINI_API_KEY`, `AI_*`, `VAPID_KEYS`, `VAPID_SUBJECT`, `CRON_SECRET`), Vault con `project_url` e `reminders_secret`. Auth: Site URL e Redirect URLs sull'indirizzo `geom-malacaria`, "Confirm email" disattivato.
+- **Supabase:** progetto `KernSprache` (produzione), repo collegato con `supabase link`; 12 migration applicate, 6 functions pubblicate, secret impostati (`GEMINI_API_KEY`, `AI_*`, `VAPID_KEYS`, `VAPID_SUBJECT`, `CRON_SECRET`), Vault con `project_url` e `reminders_secret`. Auth: Site URL e Redirect URLs sull'indirizzo `geom-malacaria`, "Confirm email" disattivato.
 - **Provato in produzione:** accesso, dialogo con l'IA, reset password.
 - **Provato (2026-11-24, dal proprietario):** verifica di capitolo, promemoria su telefono, invito all'installazione, nuova grafica su telefono vero. Per riprovare i promemoria: in SQL Editor `select public.call_send_reminders();` poi `select status_code, content from net._http_response order by created desc limit 1;` (`200` ok, `401` secret diversi).
 - **Fatto:** limite di spesa su Google AI Studio.
@@ -99,9 +100,12 @@ Modellato su aiTool (`src/install.ts`). Provato in emulazione mobile (evento `be
 ## UX: stato e cosa resta
 
 Fatto: restyling completo, menu laterale su home e percorso, emoji Fluent, font Fredoka/Nunito, verifica di salto.
-Resta (non bloccante): riguardare con calma dialogo (bolle e correzioni), ripasso con carte di errori, test di livello orale e schermata di risultato delle verifiche sul telefono; valutare se mettere il menu anche nelle schermate di attività (rischio: perdere il progresso a metà lezione).
+Provato dal proprietario su telefono: tutto fino alla #21. Da provare: traduzione/ascolto dopo le risposte e statistiche di fine capitolo (#22). Resta (non bloccante): riguardare con calma dialogo (bolle e correzioni), ripasso con carte di errori, test di livello orale e schermata di risultato delle verifiche sul telefono; valutare se mettere il menu anche nelle schermate di attività (rischio: perdere il progresso a metà lezione).
 
-## Prossima sessione
+## Prossimi passi
 
-1. **Fase 5: valutazione della pronuncia** (es. Azure Pronunciation Assessment): scegliere il servizio, costo contenuto, punteggio per parola; dove mostrarlo (dialogo a voce, risposte orali delle verifiche).
-2. **Debito tecnico** (sezione sopra): tipi duplicati PWA/functions, hook comune di registrazione audio, effetto reale del prompt `tutor-chat.v2`, doppia generazione di una lezione con prefetch in corso, colonna `elapsed_days`.
+1. **Fase 5: pronuncia.** Fatto: nel dialogo a voce la pronuncia si valuta con Gemini (`transcribe` con `assess`, nota "Pronuncia" sotto il messaggio). Da fare: ripetere la frase negli esercizi con confronto sul testo noto (campo del testo atteso nella function), pronuncia nelle risposte orali di verifiche e test di livello, salvataggio dell'esito accanto a `lesson_stats`.
+2. **Voce Gemini con cache** (branch `feat/gemini-voice`): function `speak`, tabella `tts_cache`, bucket privato `tts`, `AI_MODEL_TTS`. Per rilasciarla: `supabase db push`, `supabase functions deploy speak`, `supabase secrets set AI_MODEL_TTS=gemini-3.1-flash-tts-preview` (con conferma). Possibile miglioria: generare in anticipo le frasi di una lezione appena creata, per togliere i 3-4 secondi della prima riproduzione.
+3. **Dettato (esercizio di ascolto)**, richiesto dal proprietario. Oggi l'ascolto è solo comprensione (testo letto ad alta voce e domande a scelta multipla). Il dettato: si sente una frase breve (voce Gemini, ripetibile), si scrive quello che si è capito; se è sbagliata si evidenziano le parti errate (confronto parola per parola) e si deve riprovare finché non si indovina; poi si può scegliere di leggere il testo. Sbagliare e scegliere di vedere il testo abbassano il punteggio finale (penalità per ogni tentativo sbagliato e per il testo mostrato). Il punteggio va in `lesson_stats` e quindi nel profilo. Frasi dal contenuto della lezione (esempi, espressioni, testo di ascolto).
+4. **Pagina di profilo**: usa `lesson_stats` (e `study_days`) per mostrare serie, errori, percentuale di successo nel tempo.
+5. **Debito tecnico** (sezione sopra): tipi duplicati PWA/functions, hook comune di registrazione audio, effetto reale del prompt `tutor-chat.v2`, doppia generazione di una lezione con prefetch in corso, colonna `elapsed_days`.

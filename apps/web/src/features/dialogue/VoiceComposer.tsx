@@ -2,11 +2,12 @@ import { Emoji } from '../../components/Emoji'
 import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_RECORDING_MS, startRecording, stopSpeaking, unlockSpeech, type Recording } from '../../lib/audio'
-import { transcribeAudio } from './api'
+import { transcribeWithPronunciation } from './api'
+import type { Pronunciation } from './types'
 
 interface VoiceComposerProps {
   disabled: boolean
-  onTranscript: (text: string) => void
+  onTranscript: (text: string, pronunciation?: Pronunciation) => void
   /** Called while recording so the study timer knows the learner is active. */
   onActivity?: () => void
 }
@@ -19,8 +20,8 @@ export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceCompo
   const [micError, setMicError] = useState<string | null>(null)
 
   const transcribe = useMutation({
-    mutationFn: transcribeAudio,
-    onSuccess: onTranscript,
+    mutationFn: transcribeWithPronunciation,
+    onSuccess: ({ text, pronunciation }) => onTranscript(text, pronunciation ?? undefined),
   })
 
   useEffect(() => {
