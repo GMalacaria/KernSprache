@@ -307,3 +307,6 @@ form.stack button[type='submit'] { margin-top: 0.75rem; }
   .side-menu[open]::backdrop { animation: fade-in 0.26s ease-out both; }
 }
 @keyframes drawer-in { from { transform: translateX(-100%); } }
+
+.emoji { display: inline-block; vertical-align: -0.2em; }
+button .emoji { margin-right: 0.15em; }

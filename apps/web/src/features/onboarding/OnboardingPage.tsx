@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { GOAL_OPTIONS } from '../study/studyMath'
+import { Emoji } from '../../components/Emoji'
 import { PURPOSES, type LearningPurpose } from './purposes'
 
 interface OnboardingPageProps {
@@ -63,7 +64,7 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
                 onChange={() => setPurpose(p.value)}
               />
               <span className="purpose-icon" aria-hidden="true">
-                {p.icon}
+                <Emoji name={p.icon} size="1.75rem" />
               </span>
               <span>
                 <strong>{p.label}</strong>

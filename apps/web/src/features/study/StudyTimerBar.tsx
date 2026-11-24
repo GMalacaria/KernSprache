@@ -1,3 +1,4 @@
+import { Emoji } from '../../components/Emoji'
 import { formatClock } from './studyMath'
 import { useStudyTimer } from './useStudyTimer'
 
@@ -12,7 +13,7 @@ export function StudyTimerBar() {
     <section className="study-timer" aria-label="Tempo di studio di oggi">
       <div className="row">
         <strong className="clock">
-          ⏱ {formatClock(status.totalSeconds)} / {formatClock(goalSeconds)}
+          <Emoji name="stopwatch" /> {formatClock(status.totalSeconds)} / {formatClock(goalSeconds)}
         </strong>
         {activeMode && !isCounting && !status.goalReached && <span className="tag">In pausa</span>}
         {status.goalReached && <span className="tag success">Obiettivo raggiunto</span>}
