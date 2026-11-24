@@ -157,14 +157,6 @@ button.danger { color: var(--error); }
 
 .goal-setting { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
 
-.purposes { border: none; padding: 0; margin: 0 0 0.5rem; display: grid; gap: 0.6rem; }
-.purposes legend { font-weight: 600; margin-bottom: 0.5rem; }
-.purpose { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem; border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--radius-panel); cursor: pointer; }
-.purpose.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-.purpose input { position: absolute; opacity: 0; pointer-events: none; }
-.purpose:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
-.purpose-icon { font-size: 1.6rem; }
-.purpose small { display: block; color: var(--muted); }
 
 .placement-progress { margin-bottom: 1rem; }
 .placement-progress small { color: var(--muted); }
@@ -310,3 +302,5 @@ form.stack button[type='submit'] { margin-top: 0.75rem; }
 
 .emoji { display: inline-block; vertical-align: -0.2em; }
 button .emoji { margin-right: 0.15em; }
+
+.purpose-hint { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.75rem; }
