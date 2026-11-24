@@ -1,6 +1,7 @@
 # English Tutor – CLAUDE.md
 
 App personale (PWA) per imparare l'inglese partendo dalle basi: grammatica, ascolto, dialogo, con un tutor IA che corregge e incentiva, e notifiche push sul telefono.
+
 > **Stato e prossimi passi:** vedi [PLAN.md](PLAN.md). Aggiornalo quando chiudi un passo.
 
 Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice semplice e manutenibile, nessuna dipendenza da abbonamenti (si usano API a consumo).
