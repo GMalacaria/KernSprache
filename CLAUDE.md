@@ -8,7 +8,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 
 ## Obiettivi del prodotto
 - Percorso a capitoli di difficoltà crescente (6 per livello, da A1 a B2), ognuno con 4 lezioni e una verifica finale. La struttura è fissa (migration); i capitoli sotto il livello del test sono superati, il capitolo in corso è il primo non superato, le lezioni si sbloccano in ordine.
-- Lezione: 6-8 minuti con inizio e fine (nel tempo giornaliero ne stanno una o più). Parti: grammatica, 5 parole nuove, 3 espressioni, 1 modo di dire, 3 verbi, ascolto e comprensione, lettura e comprensione, dialogo di 3 turni con il tutor. Parole ed espressioni finiscono nel ripasso.
+- Lezione: 6-8 minuti con inizio e fine (nel tempo giornaliero ne stanno una o più). Parti: grammatica, 5 parole nuove, 3 espressioni, 1 modo di dire, 3 verbi, ascolto e comprensione, dettato (3 frasi brevi da ascoltare e scrivere: le parole sbagliate si sottolineano e si riprova finché è giusto; ogni tentativo sbagliato e la lettura del testo tolgono punti alla frase e contano come errori nelle statistiche), lettura e comprensione, dialogo di 3 turni con il tutor. Parole ed espressioni finiscono nel ripasso.
 - Il contenuto di ogni lezione è generato dall'IA per livello e scopo dell'utente e salvato in `lesson_contents` (rigenerato se cambia lo scopo); le lezioni del capitolo in corso vengono preparate in anticipo, e aprendo l'ultima lezione di un capitolo si prepara il successivo.
 - Correzione di ogni errore: frase originale, correzione, spiegazione breve **in italiano**.
 - Negli esercizi a scelta, dopo la risposta compare in basso la frase inglese con il pulsante per ascoltarla (`speak`) e la traduzione italiana (componente `SentenceFeedback`): nei quiz della lezione dalle traduzioni già nel contenuto, nella verifica di capitolo nella revisione finale (le risposte si vedono solo alla fine), con `sentence_en` e `translation_it` generati dall'IA (prompt `chapter-test.v2`; i test salvati prima non li hanno). Il test di livello non li mostra.
@@ -51,7 +51,7 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
     tutor-chat         dialogo + correzioni (output JSON)
     lesson             contenuto delle lezioni: generazione, salvataggio e preparazione anticipata di un capitolo
     speak              voce Gemini con cache: restituisce il percorso firmato del WAV di una frase (generata una sola volta, `tts_cache` + bucket `tts`)
-    transcribe         trascrizione letterale del parlato (Gemini), errori inclusi; con `assess: true` valuta anche la pronuncia (punteggio 0-100, fino a 3 parole da migliorare con consiglio in italiano) nella stessa chiamata
+    transcribe         trascrizione letterale del parlato (Gemini), errori inclusi; con `assess: true` valuta anche la pronuncia (punteggio 0-100, fino a 3 parole da migliorare con consiglio in italiano) nella stessa chiamata; con `expected_text` la giudica rispetto a una frase nota (ripetizione negli esercizi), mantenendo letterale la trascrizione
     chapter-test       verifica di fine capitolo: domande generate dall'IA, correzione dello scritto e valutazione dell'orale sul server
     placement-test     test di livello iniziale (domande e correzione dello scritto, valutazione dell'orale)
     send-reminders     promemoria giornaliero via Web Push (chiamata ogni ora da pg_cron con x-cron-secret, senza JWT utente)
@@ -133,7 +133,7 @@ Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.u
 2. Flashcard con FSRS e notifiche push (promemoria e ripassi in scadenza).
 3. Voce: trascrizione per il parlato, sintesi vocale per l'ascolto.
 4. Curriculum strutturato A1→B2 e test di livello iniziale.
-5. Valutazione della pronuncia: fatta con Gemini nel dialogo a voce (`transcribe` con `assess`, `PronunciationNote`); da estendere a esercizi e verifiche orali, e da salvare per il profilo.
+5. Valutazione della pronuncia: fatta con Gemini nel dialogo a voce (`transcribe` con `assess`, `PronunciationNote`) e nella ripetizione delle frasi dopo gli esercizi (`RepeatSentence`, con `expected_text`); da estendere alle verifiche orali e da salvare per il profilo.
 
 ## Comandi
 Requisiti: Node 22, pnpm 10, Docker (per Supabase locale). Tutti i comandi si lanciano dalla root del repo.

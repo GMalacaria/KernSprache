@@ -20,6 +20,8 @@ export const transcribeRequestSchema = z.object({
   // Browsers report e.g. "audio/webm;codecs=opus": keep only the base type.
   /** Also return a pronunciation assessment (oral dialogue). */
   assess: z.boolean().default(false),
+  /** With `assess`: the sentence the learner was reading aloud, so the pronunciation is judged against it. */
+  expected_text: z.string().trim().min(1).max(300).optional(),
   mime_type: z.string().transform((m) => m.split(';')[0]!.trim().toLowerCase())
     .pipe(z.enum(AUDIO_MIME_TYPES)),
 })
