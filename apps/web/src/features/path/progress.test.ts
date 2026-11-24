@@ -68,4 +68,16 @@ describe('buildPath', () => {
     const passed = buildPath({ ...base, completedLessonIds: new Set([11, 12, 13, 14]), passedChapterIds: new Set([1]) })
     expect(chapterAwaitingTest(passed)).toBeNull()
   })
+
+  it('skips the chapters before one whose test was passed ahead of the path', () => {
+    const path = buildPath({ chapters, level: 'A1', completedLessonIds: none, passedChapterIds: new Set([3]) })
+    expect(path.map((c) => c.status)).toEqual(['skipped', 'skipped', 'done', 'current'])
+    expect(path.map((c) => c.skipTestAvailable)).toEqual([false, false, false, false])
+    expect(nextLesson(path)?.lesson.title).toBe('L4.1')
+  })
+
+  it('offers the skip-ahead test only on locked chapters', () => {
+    const path = buildPath({ chapters, level: 'A1', completedLessonIds: none, passedChapterIds: none })
+    expect(path.map((c) => c.skipTestAvailable)).toEqual([false, true, true, true])
+  })
 })

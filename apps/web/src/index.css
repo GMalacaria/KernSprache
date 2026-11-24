@@ -175,7 +175,10 @@ button.danger { color: var(--error); }
 .chapter { border-bottom: 1px solid var(--line); padding: 1rem 0; }
 .chapter p { margin: 0.25rem 0; }
 .chapter-current { background: var(--surface); border: 1.5px solid var(--accent); border-radius: var(--radius-panel); padding: 1rem; margin: 0.5rem 0; scroll-margin-top: 5.5rem; }
-.chapter-locked { opacity: 0.55; }
+.chapter-locked > p, .chapter-locked strong, .chapter-locked .tag { opacity: 0.55; }
+.chapter-badges { display: inline-flex; align-items: center; }
+/* Keeps the 44px touch target without making the chapter row taller. */
+.icon-button { margin: -0.6rem -0.5rem -0.6rem 0; padding: 0.6rem; }
 .lessons { margin: 0.5rem 0 0.5rem 0.9rem; border-left: 2px solid var(--line); }
 .lesson-link { display: flex; align-items: center; gap: 0.75rem; width: 100%; background: none; color: var(--fg); padding: 0.35rem 0; text-align: left; font-weight: 500; box-shadow: none; }
 .lesson-link:active:not(:disabled) { transform: none; opacity: 0.7; }

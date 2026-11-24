@@ -71,13 +71,9 @@ export function HomePage({
       )}
 
       <GoalRing />
-      <p className="muted goal-hint">
-        {timer.status.goalReached
-          ? 'Obiettivo di oggi raggiunto. Puoi continuare ad allenarti quanto vuoi.'
-          : recommended === 'written'
-            ? 'Prima metà: scritto (dialogo scritto e ripasso).'
-            : 'Seconda metà: orale (dialogo a voce).'}
-      </p>
+      {timer.status.goalReached && (
+        <p className="muted goal-hint">Obiettivo di oggi raggiunto. Puoi continuare ad allenarti quanto vuoi.</p>
+      )}
       {goalMinutes !== undefined && timer.ready && timer.goalSeconds !== goalMinutes * 60 && (
         <p className="muted goal-hint">
           Il nuovo obiettivo di {goalMinutes} minuti vale da domani: quello di oggi è già iniziato.

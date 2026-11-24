@@ -14,13 +14,22 @@ interface ChapterTestPageProps {
   chapterTitle: string
   /** Chapter after this one: prepared in the background once this test is passed. */
   nextChapterId?: number
+  /** The chapter is ahead of the path: passing it skips the chapters before it. */
+  skipAhead?: boolean
   onExit: () => void
 }
 
 type Step = { kind: 'intro' } | { kind: 'written'; index: number } | { kind: 'oral'; index: number } | { kind: 'result' }
 type Transcript = { id: string; transcript: string }
 
-export function ChapterTestPage({ userId, chapterId, chapterTitle, nextChapterId, onExit }: ChapterTestPageProps) {
+export function ChapterTestPage({
+  userId,
+  chapterId,
+  chapterTitle,
+  nextChapterId,
+  skipAhead = false,
+  onExit,
+}: ChapterTestPageProps) {
   const queryClient = useQueryClient()
   // A new attempt (after a failed one) asks the server for a fresh test.
   const [attempt, setAttempt] = useState(0)
@@ -108,8 +117,10 @@ export function ChapterTestPage({ userId, chapterId, chapterTitle, nextChapterId
           {voice ? 'a voce' : 'scritte (microfono non disponibile)'}.
         </p>
         <p className="muted">
-          Serve a capire se hai capito il capitolo: con almeno 70 su 100 (media di scritto e orale) passi al capitolo
-          successivo. Le risposte giuste le vedi alla fine.
+          {skipAhead
+            ? 'Non hai ancora studiato questo capitolo: se superi la verifica con almeno 70 su 100 (media di scritto e orale) salti i capitoli che lo precedono e passi a quello dopo. '
+            : 'Serve a capire se hai capito il capitolo: con almeno 70 su 100 (media di scritto e orale) passi al capitolo successivo. '}
+          Le risposte giuste le vedi alla fine.
         </p>
         <button type="button" onClick={() => setStep({ kind: 'written', index: 0 })}>
           Inizia

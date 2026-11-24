@@ -31,6 +31,8 @@ export interface ChapterView extends Omit<ChapterRow, 'lessons'> {
   completedLessons: number
   /** All lessons done in the current chapter: the chapter test can start. */
   testAvailable: boolean
+  /** A locked chapter ahead: its test can be taken to skip to it. */
+  skipTestAvailable: boolean
 }
 
 export interface PathInput {
@@ -45,20 +47,23 @@ function byOrder<T extends { sort_order: number }>(a: T, b: T): number {
 }
 
 /**
- * Chapters below the learner's level are skipped (placement test); from the
- * level up, the first chapter whose test is not passed is the current one and
- * later chapters are locked. Inside a chapter, lessons unlock one after another.
+ * Chapters below the learner's level are skipped (placement test), and so are
+ * those before the furthest chapter whose test was passed (skip-ahead test).
+ * From there on, the first chapter whose test is not passed is the current one
+ * and later chapters are locked. Inside a chapter, lessons unlock one after another.
  */
 export function buildPath({ chapters, level, completedLessonIds, passedChapterIds }: PathInput): ChapterView[] {
   const sorted = [...chapters].sort(
     (a, b) => LEVELS.indexOf(a.level) - LEVELS.indexOf(b.level) || a.sort_order - b.sort_order,
   )
   let currentFound = false
+  const furthestPassed = sorted.reduce((max, c, i) => (passedChapterIds.has(c.id) ? i : max), -1)
 
-  return sorted.map((chapter) => {
+  return sorted.map((chapter, index) => {
     let status: ChapterStatus
     if (LEVELS.indexOf(chapter.level) < LEVELS.indexOf(level)) status = 'skipped'
     else if (passedChapterIds.has(chapter.id)) status = 'done'
+    else if (index < furthestPassed) status = 'skipped'
     else if (!currentFound) {
       status = 'current'
       currentFound = true
@@ -84,6 +89,7 @@ export function buildPath({ chapters, level, completedLessonIds, passedChapterId
       lessons: lessonViews,
       completedLessons,
       testAvailable: status === 'current' && lessons.length > 0 && completedLessons === lessons.length,
+      skipTestAvailable: status === 'locked',
     }
   })
 }

@@ -32,4 +32,7 @@ Deno.test('levelAfterPass: moves up only after the last chapter of the level', (
   assertEquals(levelAfterPass('A1', 'A1', true), 'A2')
   assertEquals(levelAfterPass('B1', 'A1', true), 'B1')
   assertEquals(levelAfterPass('B2', 'B2', true), 'B2')
+  // A chapter passed ahead of the path lifts the learner to its level.
+  assertEquals(levelAfterPass('A1', 'B1', false), 'B1')
+  assertEquals(levelAfterPass('A1', 'B1', true), 'B2')
 })

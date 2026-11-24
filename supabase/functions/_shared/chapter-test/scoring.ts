@@ -38,11 +38,14 @@ export function combineScores(written: number, oral: number): { score: number; p
 }
 
 /**
- * Level after passing a chapter: when it is the last chapter of the learner's
- * own level (or of a higher one), the learner moves up to the next level.
+ * Level after passing a chapter: never below the chapter's own level (passing a
+ * chapter ahead of the path skips the levels before it), and one level up when
+ * it is the last chapter of the learner's own level (or of a higher one).
  */
 export function levelAfterPass(current: Level, chapterLevel: Level, isLastOfLevel: boolean): Level {
-  if (!isLastOfLevel) return current
+  const higher = (a: Level, b: Level): Level => (CEFR_ORDER.indexOf(a) >= CEFR_ORDER.indexOf(b) ? a : b)
+  const reached = higher(current, chapterLevel)
+  if (!isLastOfLevel) return reached
   const next = CEFR_ORDER[Math.min(CEFR_ORDER.indexOf(chapterLevel) + 1, CEFR_ORDER.length - 1)]!
-  return CEFR_ORDER.indexOf(next) > CEFR_ORDER.indexOf(current) ? next : current
+  return higher(reached, next)
 }

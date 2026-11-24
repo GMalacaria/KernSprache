@@ -16,6 +16,16 @@ const STATUS_LABEL: Record<ChapterView['status'], string> = {
   locked: 'Bloccato',
 }
 
+/** Open padlock: the chapter is locked but a test can open it. */
+function OpenLock() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="11" width="16" height="10" rx="2.5" />
+      <path d="M8 11V7a4 4 0 0 1 7.5-1.9" />
+    </svg>
+  )
+}
+
 export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageProps) {
   const { path, isError } = usePath(userId)
   const currentRef = useRef<HTMLLIElement>(null)
@@ -47,7 +57,20 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageP
                   const header = (
                     <>
                       <strong>{chapter.title}</strong>
-                      <span className="tag">{STATUS_LABEL[chapter.status]}</span>
+                      <span className="chapter-badges">
+                        <span className="tag">{STATUS_LABEL[chapter.status]}</span>
+                        {chapter.skipTestAvailable && (
+                          <button
+                            type="button"
+                            className="link icon-button"
+                            aria-label={`Sblocca "${chapter.title}" con una verifica`}
+                            title="Sblocca con una verifica"
+                            onClick={() => onOpenTest(chapter.id)}
+                          >
+                            <OpenLock />
+                          </button>
+                        )}
+                      </span>
                     </>
                   )
                   const body = (
