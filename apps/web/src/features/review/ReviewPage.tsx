@@ -6,6 +6,7 @@ import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, GRADES, startReviewSession, type ReviewItem } from './api'
+import { Waiting } from '../../components/Waiting'
 
 // Cards graded "Again" come back in the same sitting once they are due again (minutes away).
 const REQUEUE_WITHIN_MS = 30 * 60_000
@@ -29,7 +30,7 @@ export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onS
             Chiudi
           </button>
         </header>
-        {due.isPending ? <p>Caricamento…</p> : <p className="error">Impossibile caricare le carte da ripassare.</p>}
+        {due.isPending ? <Waiting title="Preparo il ripasso" compact /> : <p className="error">Impossibile caricare le carte da ripassare.</p>}
       </main>
     )
   }

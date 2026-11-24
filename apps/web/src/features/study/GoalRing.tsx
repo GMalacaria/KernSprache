@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { formatClock } from './studyMath'
 import { useStudyTimer } from './useStudyTimer'
+import { Waiting } from '../../components/Waiting'
 
 const RADIUS = 52
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
@@ -15,7 +16,7 @@ export function GoalRing() {
     return () => cancelAnimationFrame(id)
   }, [])
 
-  if (!ready) return <section className="goal-ring muted">Carico il tempo di oggi…</section>
+  if (!ready) return <section className="goal-ring"><Waiting title="Carico il tempo di oggi" compact /></section>
 
   const progress = Math.min(1, status.totalSeconds / goalSeconds)
   const half = status.halfSeconds

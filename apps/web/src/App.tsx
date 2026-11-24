@@ -20,6 +20,7 @@ import { OnboardingPage } from './features/onboarding/OnboardingPage'
 import { PlacementTestPage } from './features/placement/PlacementTestPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { StudyTimerProvider } from './features/study/StudyTimerContext'
+import { Waiting } from './components/Waiting'
 
 /** The install offer appears a few seconds after the learner is in the app. */
 const INSTALL_OFFER_DELAY_MS = 4000
@@ -33,7 +34,7 @@ export function App() {
     <>
       {session === undefined ? (
         <main className="page">
-          <p>Caricamento…</p>
+          <Waiting title="Carico Kern Sprache" compact />
         </main>
       ) : session && recovering ? (
         <SetPasswordPage onDone={endRecovery} />
@@ -107,7 +108,7 @@ function SignedInApp({ user }: { user: User }) {
   if (profile.isPending) {
     return (
       <main className="page">
-        <p>Caricamento…</p>
+        <Waiting title="Carico il tuo profilo" compact />
       </main>
     )
   }

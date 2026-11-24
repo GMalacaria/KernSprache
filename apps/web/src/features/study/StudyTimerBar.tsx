@@ -1,11 +1,12 @@
 import { Emoji } from '../../components/Emoji'
 import { formatClock } from './studyMath'
 import { useStudyTimer } from './useStudyTimer'
+import { Waiting } from '../../components/Waiting'
 
 /** Daily timer: total time, written half and oral half. */
 export function StudyTimerBar() {
   const { ready, goalSeconds, writtenSeconds, oralSeconds, status, isCounting, activeMode } = useStudyTimer()
-  if (!ready) return <section className="study-timer muted">Carico il tempo di oggi…</section>
+  if (!ready) return <section className="study-timer"><Waiting title="Carico il tempo di oggi" compact /></section>
   const half = status.halfSeconds
   const pct = (value: number, max: number) => `${Math.min(100, (value / max) * 100)}%`
 
