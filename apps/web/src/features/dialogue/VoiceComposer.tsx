@@ -15,7 +15,7 @@ interface VoiceComposerProps {
 /** Tap to start speaking, tap again to send. The transcript goes to the tutor like a typed message. */
 export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceComposerProps) {
   const transcribe = useMutation({
-    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio),
+    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, undefined, true),
     onSuccess: ({ text, pronunciation }) => onTranscript(text, pronunciation ?? undefined),
   })
   const { isRecording, seconds, micError, start, stop, cancel } = useVoiceRecorder({

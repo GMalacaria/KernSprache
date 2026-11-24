@@ -1,6 +1,8 @@
-import { Rating, type Grade } from 'ts-fsrs'
+import type { Grade } from 'ts-fsrs'
 import { scheduler, toCard, toColumns, type FsrsColumns } from '../../lib/fsrs'
 import { supabase } from '../../lib/supabase'
+import type { Database } from '../../lib/database.types'
+import { errorMessage } from '../dialogue/api'
 
 const FSRS_SELECT = 'due, stability, difficulty, scheduled_days, learning_steps, reps, lapses, state, last_review'
 
@@ -8,7 +10,15 @@ export const DAILY_REVIEW_LIMIT = 30
 
 export type ReviewItem =
   | ({ kind: 'vocab'; id: string; en: string; it: string } & FsrsColumns)
-  | ({ kind: 'mistake'; id: string; original: string; corrected: string; explanation_it: string } & FsrsColumns)
+  | ({
+    kind: 'mistake'
+    id: string
+    original: string
+    corrected: string
+    explanation_it: string
+    /** "pronunciation": a word to say aloud; any other category: a sentence to correct. */
+    category: Database['public']['Enums']['mistake_category']
+  } & FsrsColumns)
 
 /** Cards due now from both sources, oldest first. */
 export async function fetchDueItems(now: Date): Promise<ReviewItem[]> {
@@ -17,7 +27,7 @@ export async function fetchDueItems(now: Date): Promise<ReviewItem[]> {
     supabase.from('vocab_items').select(`id, en, it, ${FSRS_SELECT}`).lte('due', iso).order('due').limit(DAILY_REVIEW_LIMIT),
     supabase
       .from('mistakes')
-      .select(`id, original, corrected, explanation_it, ${FSRS_SELECT}`)
+      .select(`id, original, corrected, explanation_it, category, ${FSRS_SELECT}`)
       .lte('due', iso)
       .order('due')
       .limit(DAILY_REVIEW_LIMIT),
@@ -44,7 +54,7 @@ export async function fetchDueCount(now: Date): Promise<number> {
   return (vocab.count ?? 0) + (mistakes.count ?? 0)
 }
 
-/** Applies the learner's grade with FSRS and stores the new schedule. Returns the updated item. */
+/** Applies the grade the app gave the answer with FSRS and stores the new schedule. Returns the updated item. */
 export async function gradeItem(item: ReviewItem, grade: Grade, now: Date): Promise<ReviewItem> {
   const { card } = scheduler.next(toCard(item), now, grade)
   const columns = toColumns(card)
@@ -65,9 +75,22 @@ export async function endReviewSession(id: string): Promise<void> {
   if (error) throw error
 }
 
-export const GRADES: { grade: Grade; label: string }[] = [
-  { grade: Rating.Again, label: 'Di nuovo' },
-  { grade: Rating.Hard, label: 'Difficile' },
-  { grade: Rating.Good, label: 'Bene' },
-  { grade: Rating.Easy, label: 'Facile' },
-]
+export interface AnswerCheck {
+  correct: boolean
+  feedback_it: string
+}
+
+/** Asks the AI whether an answer that differs from the stored solution is still right (synonym, other valid fix). */
+export async function checkAnswer(request: {
+  kind: 'translation' | 'correction'
+  prompt: string
+  expected: string
+  answer: string
+  spoken?: boolean
+}): Promise<AnswerCheck> {
+  const { data, error } = await supabase.functions.invoke<AnswerCheck>('review-check', { body: request })
+  const fallback = 'Non riesco a controllare la risposta adesso.'
+  if (error) throw new Error(await errorMessage(error, fallback))
+  if (!data) throw new Error(fallback)
+  return data
+}

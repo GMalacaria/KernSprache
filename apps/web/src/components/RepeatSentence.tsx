@@ -7,7 +7,7 @@ import { Emoji } from './Emoji'
 
 /** Read a sentence aloud and get its pronunciation judged against the right text. Optional: never blocks the exercise. */
 export function RepeatSentence({ sentence }: { sentence: string }) {
-  const assess = useMutation({ mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, sentence) })
+  const assess = useMutation({ mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, sentence, true) })
   const { isRecording, seconds, micError, start, stop } = useVoiceRecorder({
     onRecorded: (audio) => assess.mutate(audio),
   })

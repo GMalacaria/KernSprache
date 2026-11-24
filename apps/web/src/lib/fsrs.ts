@@ -1,4 +1,4 @@
-import { fsrs, State, type Card, type Grade } from 'ts-fsrs'
+import { fsrs, State, type Card } from 'ts-fsrs'
 
 /** Single scheduler with default FSRS parameters (fuzz spreads reviews over nearby days). */
 export const scheduler = fsrs({ enable_fuzz: true })
@@ -44,14 +44,6 @@ export function toColumns(card: Card): FsrsColumns {
     state: card.state,
     last_review: card.last_review ? card.last_review.toISOString() : null,
   }
-}
-
-/** Next due date for each grade, for the labels on the rating buttons. */
-export function previewDue(row: FsrsColumns, now: Date): Record<Grade, Date> {
-  const preview = scheduler.repeat(toCard(row), now)
-  const result = {} as Record<Grade, Date>
-  for (const item of preview) result[item.log.rating as Grade] = item.card.due
-  return result
 }
 
 /** Short Italian label for how far away a date is, e.g. "10 min", "3 g", "2 mesi". */

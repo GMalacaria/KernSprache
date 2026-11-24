@@ -3,6 +3,7 @@
 // `assess` it also rates the pronunciation, from the same recording and model call.
 import { logAiUsage } from '../_shared/ai-usage.ts'
 import { AiError } from '../_shared/ai/index.ts'
+import { savePronunciationCards } from '../_shared/pronunciation-cards.ts'
 import { getTranscriber } from '../_shared/ai/transcriber.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
 import { PRONUNCIATION_PROMPT_VERSION } from '../_shared/prompts/pronunciation.v2.ts'
@@ -14,7 +15,8 @@ const FUNCTION_NAME = 'transcribe'
 
 Deno.serve(
   handle(async (req) => {
-    const userId = await requireApprovedUser(userClient(req))
+    const db = userClient(req)
+    const userId = await requireApprovedUser(db)
 
     const body = transcribeRequestSchema.safeParse(
       await req.json().catch(() => null),
@@ -72,6 +74,9 @@ Deno.serve(
         'no_speech',
         'Non ho sentito niente. Avvicina il telefono e riprova.',
       )
+    }
+    if (body.data.assess && body.data.save_mistakes) {
+      await savePronunciationCards(db, userId, transcript.pronunciation)
     }
     return json({
       text: transcript.text,

@@ -373,7 +373,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "cefr_level": "A1"|"A2"|"B1"|"B2","learning_purpose": "leisure"|"travel"|"work"|"love","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
+            "cefr_level": "A1"|"A2"|"B1"|"B2","learning_purpose": "leisure"|"travel"|"work"|"love","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other"|"pronunciation","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -493,7 +493,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "cefr_level": ["A1", "A2", "B1", "B2"],"learning_purpose": ["leisure", "travel", "work", "love"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
+            "cefr_level": ["A1", "A2", "B1", "B2"],"learning_purpose": ["leisure", "travel", "work", "love"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other", "pronunciation"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
           }
         }
 } as const

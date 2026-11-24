@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Grade } from 'ts-fsrs'
-import { formatInterval, previewDue } from '../../lib/fsrs'
+import { formatInterval } from '../../lib/fsrs'
 import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity } from '../study/useStudyTimer'
-import { endReviewSession, fetchDueItems, gradeItem, GRADES, startReviewSession, type ReviewItem } from './api'
+import { endReviewSession, fetchDueItems, gradeItem, startReviewSession, type ReviewItem } from './api'
 import { Waiting } from '../../components/Waiting'
+import { GRADE_LABELS } from './grading'
+import { PronunciationCard, SentenceCard, VocabCard } from './ReviewCards'
 
 // Cards graded "Again" come back in the same sitting once they are due again (minutes away).
 const REQUEUE_WITHIN_MS = 30 * 60_000
@@ -52,27 +54,44 @@ interface ReviewSessionProps {
 function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionProps) {
   useStudyActivity('written')
   const [queue, setQueue] = useState(initialItems)
-  const [revealed, setRevealed] = useState(false)
   const [done, setDone] = useState(0)
+  // The grade the app gave the current card and when: the next due date is computed from that moment.
+  const [graded, setGraded] = useState<{ grade: Grade; at: Date } | null>(null)
   const sessionId = useRef<Promise<string> | null>(null)
   const current = queue[0]
 
-  const grade = useMutation({
-    mutationFn: async ({ item, value }: { item: ReviewItem; value: Grade }) => {
+  const save = useMutation({
+    mutationFn: async ({ item, value, at }: { item: ReviewItem; value: Grade; at: Date }) => {
       sessionId.current ??= startReviewSession()
       await sessionId.current
-      return gradeItem(item, value, new Date())
-    },
-    onSuccess: (updated) => {
-      setDone((n) => n + 1)
-      setRevealed(false)
-      setQueue((prev) => {
-        const rest = prev.slice(1)
-        const comesBackSoon = new Date(updated.due).getTime() - Date.now() < REQUEUE_WITHIN_MS
-        return comesBackSoon ? [...rest, updated] : rest
-      })
+      return gradeItem(item, value, at)
     },
   })
+
+  function onGraded(value: Grade) {
+    if (!current) return
+    const at = new Date()
+    setGraded({ grade: value, at })
+    save.mutate({ item: current, value, at })
+  }
+
+  function next() {
+    const updated = save.data
+    if (!updated) return
+    setDone((n) => n + 1)
+    setGraded(null)
+    save.reset()
+    setQueue((prev) => {
+      const rest = prev.slice(1)
+      const comesBackSoon = new Date(updated.due).getTime() - Date.now() < REQUEUE_WITHIN_MS
+      return comesBackSoon ? [...rest, updated] : rest
+    })
+  }
+
+  /** Leaves the card for another time: it stays due and is not graded. */
+  function skip() {
+    setQueue((prev) => prev.slice(1))
+  }
 
   return (
     <main className="page review">
@@ -94,82 +113,45 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
           {done === 0 ? (
             <p>Non hai carte da ripassare adesso. Le parole e gli errori dei dialoghi arriveranno qui.</p>
           ) : (
-            <p>Ripasso finito: {done} risposte. Le prossime carte torneranno quando è il momento giusto.</p>
+            <p>Ripasso finito: {done} carte. Le prossime torneranno quando è il momento giusto.</p>
           )}
         </section>
       )}
 
       {current && (
         <>
-          <p className="muted">Ancora da ripassare: {queue.length}</p>
-          <article className="flashcard">
-            <CardFront item={current} />
-            {revealed ? (
-              <CardBack item={current} />
-            ) : (
-              <button type="button" onClick={() => setRevealed(true)}>
-                Mostra risposta
-              </button>
-            )}
-          </article>
+          <p className="muted">
+            Ancora da ripassare: {queue.length}. L&apos;app valuta la risposta e decide quando riproporti la carta.
+          </p>
+          <ReviewCard key={`${current.kind}-${current.id}-${current.reps}`} item={current} onGraded={onGraded} onSkip={skip} />
 
-          {revealed && (
-            <GradeButtons item={current} disabled={grade.isPending} onGrade={(value) => grade.mutate({ item: current, value })} />
+          {graded && (
+            <div className="review-result" role="status">
+              <p>
+                <strong>{GRADE_LABELS[graded.grade]}</strong>
+                {save.isSuccess && <> · torna tra {formatInterval(new Date(save.data.due), graded.at)}</>}
+              </p>
+              {save.isError && (
+                <>
+                  <p className="error">Salvataggio non riuscito.</p>
+                  <button type="button" className="secondary" onClick={() => save.variables && save.mutate(save.variables)}>
+                    Riprova
+                  </button>
+                </>
+              )}
+              <button type="button" onClick={next} disabled={!save.isSuccess}>
+                {save.isPending ? 'Salvo…' : 'Avanti'}
+              </button>
+            </div>
           )}
-          {grade.isError && <p className="error">Salvataggio non riuscito, riprova.</p>}
         </>
       )}
     </main>
   )
 }
 
-function CardFront({ item }: { item: ReviewItem }) {
-  if (item.kind === 'vocab') {
-    return (
-      <>
-        <p className="muted">Come si dice in italiano?</p>
-        <p className="card-main" lang="en">{item.en}</p>
-      </>
-    )
-  }
-  return (
-    <>
-      <p className="muted">Questa frase ha un errore. Come si corregge?</p>
-      <p className="card-main" lang="en">{item.original}</p>
-    </>
-  )
-}
-
-function CardBack({ item }: { item: ReviewItem }) {
-  if (item.kind === 'vocab') return <p className="card-answer">{item.it}</p>
-  return (
-    <>
-      <p className="card-answer" lang="en">{item.corrected}</p>
-      <p className="muted">{item.explanation_it}</p>
-    </>
-  )
-}
-
-// "Good" is the usual answer, so it is the only solid button; "Again" is flagged in the error colour.
-const GRADE_STYLES = ['secondary danger', 'secondary', '', 'secondary']
-
-function GradeButtons({ item, disabled, onGrade }: { item: ReviewItem; disabled: boolean; onGrade: (g: Grade) => void }) {
-  const now = new Date()
-  const next = previewDue(item, now)
-  return (
-    <div className="grades">
-      {GRADES.map(({ grade, label }, index) => (
-        <button
-          key={grade}
-          type="button"
-          className={GRADE_STYLES[index]}
-          disabled={disabled}
-          onClick={() => onGrade(grade)}
-        >
-          <span>{label}</span>
-          <small>{formatInterval(next[grade], now)}</small>
-        </button>
-      ))}
-    </div>
-  )
+function ReviewCard({ item, onGraded, onSkip }: { item: ReviewItem; onGraded: (g: Grade) => void; onSkip: () => void }) {
+  if (item.kind === 'vocab') return <VocabCard item={item} onGraded={onGraded} />
+  if (item.category === 'pronunciation') return <PronunciationCard item={item} onGraded={onGraded} onSkip={onSkip} />
+  return <SentenceCard item={item} onGraded={onGraded} />
 }
