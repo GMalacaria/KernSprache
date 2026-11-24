@@ -1,14 +1,9 @@
-import { Emoji } from '../../components/Emoji'
-import { canSpeak, speak } from '../../lib/audio'
+import { ListenButton } from '../../components/ListenButton'
+import { canSpeak } from '../../lib/audio'
 import type { LessonContent } from './types'
 
 function Listen({ text }: { text: string }) {
-  if (!canSpeak()) return null
-  return (
-    <button type="button" className="link listen" onClick={() => speak(text)} aria-label={`Ascolta: ${text}`}>
-      <Emoji name="speaker" />
-    </button>
-  )
+  return <ListenButton text={text} className="link listen" />
 }
 
 export function GrammarView({ content }: { content: LessonContent }) {
@@ -121,9 +116,7 @@ export function ListeningView({ content, showText }: { content: LessonContent; s
   return (
     <div className="stack">
       {canSpeak() ? (
-        <button type="button" onClick={() => speak(content.listening.text_en)}>
-          <Emoji name="speaker" /> Ascolta il testo
-        </button>
+        <ListenButton text={content.listening.text_en} label="Ascolta il testo" />
       ) : (
         <p className="muted">La sintesi vocale non è disponibile: leggi il testo.</p>
       )}
