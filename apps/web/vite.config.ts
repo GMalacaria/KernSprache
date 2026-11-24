@@ -12,11 +12,11 @@ export default defineConfig({
       filename: 'sw.ts',
       registerType: 'autoUpdate',
       injectRegister: false,
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
-        name: 'English Tutor',
-        short_name: 'English Tutor',
-        description: 'Il tuo tutor personale di inglese',
+        name: 'Kern Sprache',
+        short_name: 'Kern Sprache',
+        description: 'Il tuo tutor personale per imparare le lingue',
         lang: 'it',
         start_url: '/',
         scope: '/',
@@ -27,7 +27,7 @@ export default defineConfig({
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       injectManifest: {

@@ -1,6 +1,6 @@
-# English Tutor – CLAUDE.md
+# Kern Sprache – CLAUDE.md
 
-App personale (PWA) per imparare l'inglese partendo dalle basi: grammatica, ascolto, dialogo, con un tutor IA che corregge e incentiva, e notifiche push sul telefono.
+Kern Sprache (famiglia di app "Kern", come aiTool) è un'app personale (PWA) per imparare le lingue partendo dalle basi. Oggi insegna l'inglese a chi parla italiano; il passaggio a più lingue è descritto in [PLAN-multilingua.md](PLAN-multilingua.md). Copre grammatica, ascolto e dialogo, con un tutor IA che corregge e incentiva, e notifiche push sul telefono.
 
 > **Stato e prossimi passi:** vedi [PLAN.md](PLAN.md). Aggiornalo quando chiudi un passo.
 

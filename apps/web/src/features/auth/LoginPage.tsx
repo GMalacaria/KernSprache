@@ -47,7 +47,7 @@ export function LoginPage() {
 
   return (
     <main className="page">
-      <h1>English Tutor</h1>
+      <h1>Kern Sprache</h1>
       <h2 className="small-heading">{title}</h2>
       {mode === 'register' && (
         <p className="muted">Dopo la registrazione l'account deve essere approvato prima di poter usare l'app.</p>

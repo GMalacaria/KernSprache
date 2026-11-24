@@ -1,5 +1,5 @@
-import { canRecord, canSpeak, speak } from '../lib/audio'
-import { Emoji } from './Emoji'
+import { canRecord } from '../lib/audio'
+import { ListenButton } from './ListenButton'
 import { RepeatSentence } from './RepeatSentence'
 
 interface SentenceFeedbackProps {
@@ -14,11 +14,7 @@ export function SentenceFeedback({ en, it }: SentenceFeedbackProps) {
   return (
     <div className="sentence-block">
       <div className="sentence-feedback">
-        {canSpeak() && (
-          <button type="button" className="listen-button" onClick={() => speak(en)} aria-label={`Ascolta: ${en}`}>
-            <Emoji name="speaker" size="1.4em" />
-          </button>
-        )}
+        <ListenButton text={en} className="listen-button" iconSize="1.4em" />
         <div>
           <p lang="en" className="sentence-en">
             {en}

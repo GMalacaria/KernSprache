@@ -1,4 +1,4 @@
-import { Emoji } from '../../components/Emoji'
+import { ListenButton } from '../../components/ListenButton'
 import { useRef, useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { canRecord, speak } from '../../lib/audio'
@@ -89,9 +89,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onModeChange
               {turn.content}
             </p>
             {turn.role === 'assistant' && (
-              <button type="button" className="link listen" onClick={() => speak(turn.content)}>
-                <Emoji name="speaker" /> Ascolta
-              </button>
+              <ListenButton text={turn.content} className="link listen" label="Ascolta" />
             )}
             {turn.corrections && <CorrectionList corrections={turn.corrections} />}
           </li>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { canRecord, stopSpeaking } from '../../lib/audio'
+import { canRecord, prefetchSpeech, stopSpeaking } from '../../lib/audio'
 import type { DialogueMode } from '../dialogue/DialoguePage'
 import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
@@ -106,6 +106,14 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   const sections = useMemo(() => (lesson.data ? sectionsFor(lesson.data.content) : []), [lesson.data])
   const inDialogue = sectionIndex === sections.length
   const { markActivity } = useStudyActivity(inDialogue && dialogueMode === 'oral' ? 'oral' : 'written')
+
+  // Audio the learner has to hear anyway (listening passage, dictation): prepare it now, so the
+  // tap plays at once instead of waiting for the voice to be generated.
+  const lessonContent = lesson.data?.content
+  useEffect(() => {
+    if (!lessonContent) return
+    void prefetchSpeech([lessonContent.listening.text_en, ...dictationSentences(lessonContent).map((d) => d.en)])
+  }, [lessonContent])
 
   // Last lesson of the chapter: get the next chapter's lessons ready.
   useEffect(() => {

@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { Emoji } from '../../components/Emoji'
 import { SentenceFeedback } from '../../components/SentenceFeedback'
-import { canSpeak, speak } from '../../lib/audio'
+import { ListenButton } from '../../components/ListenButton'
 import { playCorrect, playWrong } from '../../lib/sounds'
 import {
   compareDictation,
@@ -77,11 +76,7 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone }: Dictatio
 
   return (
     <form className="stack dictation" onSubmit={check}>
-      {canSpeak() && (
-        <button type="button" className="secondary" onClick={() => speak(sentence.en)}>
-          <Emoji name="speaker" /> Ascolta la frase
-        </button>
-      )}
+      <ListenButton text={sentence.en} className="secondary" label="Ascolta la frase" />
       <label htmlFor="dictation-input" className="visually-hidden">
         Scrivi quello che hai sentito
       </label>
