@@ -137,6 +137,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"lesson_stats": {
+                  Row: {
+                    "answers": number,"best_streak": number,"chapter_id": number,"completed_at": string,"correct": number,"lesson_id": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "answers": number,"best_streak": number,"chapter_id": number,"completed_at"?: string,"correct": number,"lesson_id": number,"user_id"?: string
+                  }
+                  Update: {
+                    "answers"?: number,"best_streak"?: number,"chapter_id"?: number,"completed_at"?: string,"correct"?: number,"lesson_id"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lesson_stats_chapter_id_fkey"
+      columns: ["chapter_id"]
+isOneToOne: false
+      referencedRelation: "chapters"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lesson_stats_lesson_id_fkey"
+      columns: ["lesson_id"]
+isOneToOne: false
+      referencedRelation: "lessons"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"lessons": {
                   Row: {
                     "chapter_id": number,"focus": string,"id": number,"slug": string,"sort_order": number,"title": string
@@ -312,6 +338,22 @@ isOneToOne: false
 "call_send_reminders":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
+"record_lesson_stats":
+{ Args: { "p_answers": number,"p_best_streak": number,"p_correct": number,"p_lesson_id": number }; Returns: {
+              "answers": number,
+"best_streak": number,
+"chapter_id": number,
+"completed_at": string,
+"correct": number,
+"lesson_id": number,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "lesson_stats"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "register_push_subscription":
 { Args: { "p_auth": string,"p_endpoint": string,"p_p256dh": string }; Returns: undefined
                            }
