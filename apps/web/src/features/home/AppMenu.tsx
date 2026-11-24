@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { setSoundsEnabled, soundsEnabled } from '../../lib/sounds'
 import { supabase } from '../../lib/supabase'
 import { ChangePassword } from '../auth/ChangePassword'
 import { NotificationSettings } from '../notifications/NotificationSettings'
@@ -23,6 +25,7 @@ interface AppMenuProps {
 
 /** The side menu of the hub screens (home and path): navigation, settings and sign-out. */
 export function AppMenu({ open, onClose, userId, current, actions }: AppMenuProps) {
+  const [sounds, setSounds] = useState(soundsEnabled)
   // Run an entry after the drawer has closed.
   const run = (action: () => void) => () => {
     onClose()
@@ -56,6 +59,19 @@ export function AppMenu({ open, onClose, userId, current, actions }: AppMenuProp
           </button>
         )}
       </nav>
+      <button
+        type="button"
+        className="menu-item menu-toggle"
+        role="switch"
+        aria-checked={sounds}
+        onClick={() => {
+          setSounds(!sounds)
+          setSoundsEnabled(!sounds)
+        }}
+      >
+        Effetti sonori
+        <span className="tag">{sounds ? 'Attivi' : 'Disattivati'}</span>
+      </button>
       <NotificationSettings userId={userId} />
       <div className="footer-links">
         <ChangePassword />

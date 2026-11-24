@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { SentenceFeedback } from '../../components/SentenceFeedback'
+import { playCorrect, playWrong } from '../../lib/sounds'
 import type { QuizQuestion } from './types'
 
 interface MultipleChoiceProps {
@@ -26,7 +27,11 @@ export function MultipleChoice({ question, onAnswered }: MultipleChoiceProps) {
               className={`option${state}`}
               lang={question.optionsLang}
               disabled={answered}
-              onClick={() => setChosen(i)}
+              onClick={() => {
+                setChosen(i)
+                if (i === question.answer) playCorrect()
+                else playWrong()
+              }}
             >
               {option}
             </button>

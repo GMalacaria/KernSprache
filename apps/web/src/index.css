@@ -335,3 +335,4 @@ button .emoji { margin-right: 0.15em; }
 .placement-progress small { display: block; margin-bottom: 0.35rem; }
 .option:disabled.right, .option:disabled.wrong { opacity: 1; }
 .menu-item[aria-current='page'] { color: var(--accent); font-weight: 700; background: var(--track); }
+.menu-toggle { display: flex; align-items: center; justify-content: space-between; }
