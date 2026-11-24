@@ -347,6 +347,23 @@ button .emoji { margin-right: 0.15em; }
 .pronunciation-words { list-style: none; margin: 0.25rem 0 0; padding: 0; }
 .pronunciation-words li { border-left: 3px solid var(--accent); padding-left: 0.6rem; margin-top: 0.25rem; }
 
+/* Profile */
+.profile-hero { text-align: center; }
+.profile-hero p { margin: 0.25rem 0; }
+.stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
+.stats-grid-4 strong { font-size: 1.6rem; }
+.day-bars { list-style: none; margin: 0.75rem 0 0; padding: 0.75rem 0.5rem 0.4rem; display: grid; grid-template-columns: repeat(14, 1fr); gap: 0.2rem; align-items: end; height: 7.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
+.day-bars li { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 0.2rem; }
+.day-bar { display: block; width: 100%; max-width: 1rem; min-height: 3px; border-radius: 0.25rem 0.25rem 0.1rem 0.1rem; background: var(--accent); flex: none; }
+.day-bars small { color: var(--muted); font-size: 0.65rem; line-height: 1; }
+.level-progress { list-style: none; margin: 0.5rem 0 1rem; padding: 0; display: grid; gap: 0.6rem; }
+.level-progress li { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: center; gap: 0.6rem; }
+.level-name { font-family: var(--display); font-weight: 600; }
+.level-progress small { color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) {
+  .day-bar { animation: bar-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; transform-origin: bottom; }
+}
+@keyframes bar-grow { from { transform: scaleY(0); } }
 /* Repeat a sentence aloud */
 .sentence-block { display: flex; flex-direction: column; gap: 0.5rem; }
 .repeat-sentence { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; }

@@ -14,6 +14,7 @@ import { InstallDialog } from './features/onboarding/InstallDialog'
 import { markOffered, useInstallMode, wasOffered } from './lib/install'
 import { LessonPage } from './features/lesson/LessonPage'
 import { PathPage } from './features/path/PathPage'
+import { ProfilePage } from './features/profile/ProfilePage'
 import { chapterAfter, neighbours, usePath, usePrefetchCurrentChapter } from './features/path/usePath'
 import { OnboardingPage } from './features/onboarding/OnboardingPage'
 import { PlacementTestPage } from './features/placement/PlacementTestPage'
@@ -23,7 +24,7 @@ import { StudyTimerProvider } from './features/study/StudyTimerContext'
 /** The install offer appears a few seconds after the learner is in the app. */
 const INSTALL_OFFER_DELAY_MS = 4000
 
-type View = 'home' | 'dialogue' | 'review' | 'settings' | 'placement' | 'path' | 'lesson' | 'chapter-test'
+type View = 'home' | 'profile' | 'dialogue' | 'review' | 'settings' | 'placement' | 'path' | 'lesson' | 'chapter-test'
 
 export function App() {
   const { session, recovering, endRecovery } = useAuthSession()
@@ -97,6 +98,7 @@ function SignedInApp({ user }: { user: User }) {
   const menuActions: AppMenuActions = {
     onGoHome: () => setView('home'),
     onOpenPath: () => setView('path'),
+    onOpenProfile: () => setView('profile'),
     onEditGoals: () => setView('settings'),
     onRetakePlacement: () => setView('placement'),
     onInstall: installMode ? () => setInstallOpen(true) : undefined,
@@ -144,6 +146,8 @@ function SignedInApp({ user }: { user: User }) {
         <DialoguePage initialMode={dialogueMode} onExit={() => setView('home')} />
       ) : view === 'review' ? (
         <ReviewPage onExit={() => setView('home')} onSwitchToOral={() => openDialogue('oral')} />
+      ) : view === 'profile' ? (
+        <ProfilePage userId={user.id} menu={menuActions} />
       ) : view === 'path' ? (
         <PathPage userId={user.id} onOpenLesson={openLesson} onOpenTest={openTest} menu={menuActions} />
       ) : view === 'lesson' && lessonId !== null ? (
