@@ -149,13 +149,22 @@ function CardBack({ item }: { item: ReviewItem }) {
   )
 }
 
+// "Good" is the usual answer, so it is the only solid button; "Again" is flagged in the error colour.
+const GRADE_STYLES = ['secondary danger', 'secondary', '', 'secondary']
+
 function GradeButtons({ item, disabled, onGrade }: { item: ReviewItem; disabled: boolean; onGrade: (g: Grade) => void }) {
   const now = new Date()
   const next = previewDue(item, now)
   return (
     <div className="grades">
-      {GRADES.map(({ grade, label }) => (
-        <button key={grade} type="button" disabled={disabled} onClick={() => onGrade(grade)}>
+      {GRADES.map(({ grade, label }, index) => (
+        <button
+          key={grade}
+          type="button"
+          className={GRADE_STYLES[index]}
+          disabled={disabled}
+          onClick={() => onGrade(grade)}
+        >
           <span>{label}</span>
           <small>{formatInterval(next[grade], now)}</small>
         </button>
