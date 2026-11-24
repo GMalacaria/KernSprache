@@ -150,20 +150,25 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   const totalSteps = sections.length + 1
 
   return (
-    <Shell onExit={onExit} title={meta.title}>
+    <Shell
+      onExit={onExit}
+      title={meta.title}
+      progress={
+        !done && (
+          <div className="placement-progress">
+            <small>
+              {inDialogue ? 'Dialogo' : section?.title} · parte {Math.min(sectionIndex + 1, totalSteps)} di {totalSteps}
+            </small>
+            <div className="bar">
+              <span style={{ width: `${(sectionIndex / totalSteps) * 100}%` }} />
+            </div>
+          </div>
+        )
+      }
+      resetKey={`${sectionIndex}-${phase.kind}-${phase.kind === 'quiz' ? phase.index : 0}`}
+    >
       <StudyTimerBar />
       <StudyPrompts onSwitchToOral={canRecord() ? () => setDialogueMode('oral') : undefined} onExit={onExit} />
-
-      {!done && (
-        <div className="placement-progress">
-          <small>
-            {inDialogue ? 'Dialogo' : section?.title} · parte {Math.min(sectionIndex + 1, totalSteps)} di {totalSteps}
-          </small>
-          <div className="bar">
-            <span style={{ width: `${(sectionIndex / totalSteps) * 100}%` }} />
-          </div>
-        </div>
-      )}
 
       {section && phase.kind === 'learn' && (
         <section>
@@ -332,7 +337,22 @@ function LessonDone({
   )
 }
 
-function Shell({ title, onExit, children }: { title: string; onExit: () => void; children: ReactNode }) {
+interface ShellProps {
+  title: string
+  onExit: () => void
+  /** Pinned under the title, like the title itself. */
+  progress?: ReactNode
+  /** When it changes the content scrolls back to the top (next question, next part). */
+  resetKey?: string
+  children: ReactNode
+}
+
+/** Title and progress stay put; only the lesson content scrolls, so the answer and Avanti are never off screen. */
+function Shell({ title, onExit, progress, resetKey, children }: ShellProps) {
+  const bodyRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    bodyRef.current?.scrollTo({ top: 0 })
+  }, [resetKey])
   return (
     <main className="page lesson">
       <header className="row">
@@ -348,7 +368,10 @@ function Shell({ title, onExit, children }: { title: string; onExit: () => void;
           Esci
         </button>
       </header>
-      {children}
+      {progress}
+      <div className="lesson-body" ref={bodyRef}>
+        {children}
+      </div>
     </main>
   )
 }

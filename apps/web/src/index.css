@@ -376,3 +376,34 @@ button .emoji { margin-right: 0.15em; }
 .dictation-attempt .word-wrong { color: var(--error); text-decoration: underline wavy; text-underline-offset: 0.2em; font-weight: 700; }
 .dictation-score { margin: 0.5rem 0; }
 .dictation-rules { margin: 0; font-size: 0.85rem; }
+
+/* Lesson: header and progress stay put, the content scrolls underneath. */
+.page.lesson {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  padding-bottom: 0;
+  overflow: hidden;
+}
+.page.lesson > header, .page.lesson > .placement-progress { flex: none; }
+.lesson-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 2rem; }
+.lesson-body > section, .lesson-body > .stack { margin-top: 1.25rem; }
+.lesson-body .quiz { margin-top: 0; }
+/* The verdict and Avanti are pinned over the bottom of the screen; the content scrolls behind them. */
+.page.lesson { position: relative; }
+.lesson-body { padding-bottom: calc(var(--dock-height, 0px) + 2rem); }
+.quiz-dock {
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  z-index: 10;
+  max-height: 65%;
+  overflow-y: auto;
+  margin: 0;
+  box-shadow: 0 -4px 24px rgb(8 12 28 / 0.18), 0 0 0 1px var(--line);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .quiz-dock { animation: dock-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+}
+@keyframes dock-up { from { transform: translateY(100%); } }
