@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { AppMenu, type AppMenuActions } from '../home/AppMenu'
+import { MenuButton } from '../home/SideMenu'
 import { LEVELS, type ChapterView } from './progress'
 import { usePath } from './usePath'
 
@@ -6,7 +8,7 @@ interface PathPageProps {
   userId: string
   onOpenLesson: (lessonId: number) => void
   onOpenTest: (chapterId: number) => void
-  onExit: () => void
+  menu: AppMenuActions
 }
 
 const STATUS_LABEL: Record<ChapterView['status'], string> = {
@@ -26,7 +28,8 @@ function OpenLock() {
   )
 }
 
-export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageProps) {
+export function PathPage({ userId, onOpenLesson, onOpenTest, menu }: PathPageProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
   const { path, isError } = usePath(userId)
   const currentRef = useRef<HTMLLIElement>(null)
 
@@ -39,9 +42,7 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageP
     <main className="page">
       <header className="row sticky-header">
         <h1>Percorso</h1>
-        <button type="button" className="link" onClick={onExit}>
-          Home
-        </button>
+        <MenuButton onClick={() => setMenuOpen(true)} />
       </header>
       {isError && <p className="error">Impossibile caricare il percorso.</p>}
       {!path && !isError && <p>Caricamento…</p>}
@@ -131,6 +132,7 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, onExit }: PathPageP
             </ol>
           </section>
         ))}
+      <AppMenu open={menuOpen} onClose={() => setMenuOpen(false)} userId={userId} current="path" actions={menu} />
     </main>
   )
 }
