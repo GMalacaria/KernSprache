@@ -1,14 +1,15 @@
 import { Emoji } from '../../components/Emoji'
+import { GoalMissing } from './GoalRing'
 import { formatClock } from './studyMath'
 import { useStudyTimer } from './useStudyTimer'
 import { Waiting } from '../../components/Waiting'
 
-/** Daily timer: total time, written half and oral half. */
+/** Daily timer: total time, written half and oral half (the goal needs both halves). */
 export function StudyTimerBar() {
   const { ready, goalSeconds, writtenSeconds, oralSeconds, status, isCounting, activeMode } = useStudyTimer()
   if (!ready) return <section className="study-timer"><Waiting title="Carico il tempo di oggi" compact /></section>
   const half = status.halfSeconds
-  const pct = (value: number, max: number) => `${Math.min(100, (value / max) * 100)}%`
+  const pct = (value: number) => `${Math.min(100, (value / half) * 100)}%`
 
   return (
     <section className="study-timer" aria-label="Tempo di studio di oggi">
@@ -20,23 +21,26 @@ export function StudyTimerBar() {
         {status.goalReached && <span className="tag success">Obiettivo raggiunto</span>}
       </div>
       <div className="halves">
-        <div className={`half${activeMode === 'written' ? ' current' : ''}`}>
+        <div className={`half written${activeMode === 'written' ? ' current' : ''}`}>
           <div className="bar">
-            <span style={{ width: pct(writtenSeconds, half) }} />
+            <span style={{ width: pct(writtenSeconds) }} />
           </div>
           <small>
-            Scritto {formatClock(Math.min(writtenSeconds, half))} / {formatClock(half)}
+            Scritto {formatClock(writtenSeconds)} / {formatClock(half)}
+            {status.writtenHalfDone && ' ✓'}
           </small>
         </div>
-        <div className={`half${activeMode === 'oral' ? ' current' : ''}`}>
+        <div className={`half oral${activeMode === 'oral' ? ' current' : ''}`}>
           <div className="bar">
-            <span style={{ width: pct(oralSeconds, goalSeconds - half) }} />
+            <span style={{ width: pct(oralSeconds) }} />
           </div>
           <small>
-            Orale {formatClock(Math.min(oralSeconds, goalSeconds - half))} / {formatClock(goalSeconds - half)}
+            Orale {formatClock(oralSeconds)} / {formatClock(half)}
+            {status.oralHalfDone && ' ✓'}
           </small>
         </div>
       </div>
+      <GoalMissing />
     </section>
   )
 }

@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { formatClock, IDLE_AFTER_MS, isLearnerActive, localDay, studyStatus } from './studyMath'
+import { formatClock, formatMinutesLeft, IDLE_AFTER_MS, isLearnerActive, localDay, studyStatus } from './studyMath'
+
+describe('formatMinutesLeft', () => {
+  it.each([
+    [480, '8 min'],
+    [61, '2 min'],
+    [1, '1 min'],
+    [0, '1 min'],
+  ])('%i -> %s', (s, out) => expect(formatMinutesLeft(s)).toBe(out))
+})
 
 describe('studyStatus', () => {
   it('recommends written until half the goal is written, then oral', () => {
@@ -10,9 +19,19 @@ describe('studyStatus', () => {
     expect(half.goalReached).toBe(false)
   })
 
-  it('reaches the goal on total time, whatever the split', () => {
-    expect(studyStatus({ goalSeconds: 1200, writtenSeconds: 900, oralSeconds: 300 }).goalReached).toBe(true)
-    expect(studyStatus({ goalSeconds: 1200, writtenSeconds: 900, oralSeconds: 299 }).goalReached).toBe(false)
+  it('reaches the goal only with half written and half oral, not on the total', () => {
+    expect(studyStatus({ goalSeconds: 1200, writtenSeconds: 600, oralSeconds: 600 }).goalReached).toBe(true)
+    expect(studyStatus({ goalSeconds: 1200, writtenSeconds: 1500, oralSeconds: 600 }).goalReached).toBe(true)
+    const oralShort = studyStatus({ goalSeconds: 1200, writtenSeconds: 1080, oralSeconds: 120 })
+    expect(oralShort.totalSeconds).toBe(1200)
+    expect(oralShort.goalReached).toBe(false)
+    expect(oralShort.oralMissingSeconds).toBe(480)
+    expect(oralShort.writtenMissingSeconds).toBe(0)
+    expect(studyStatus({ goalSeconds: 1200, writtenSeconds: 599, oralSeconds: 900 }).goalReached).toBe(false)
+  })
+
+  it('goes back to written when only the oral half is done', () => {
+    expect(studyStatus({ goalSeconds: 1200, writtenSeconds: 100, oralSeconds: 700 }).recommendedMode).toBe('written')
   })
 
   it('rounds the half up for odd goals', () => {

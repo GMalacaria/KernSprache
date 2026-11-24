@@ -1,6 +1,6 @@
 -- Study time: RLS on study_days and the add_study_time RPC. Run with: pnpm test:db
 begin;
-select plan(8);
+select plan(9);
 
 insert into auth.users (id, email) values
   ('33333333-3333-3333-3333-333333333333', 'carla@example.com'),
@@ -27,8 +27,12 @@ select ok(
   'not completed below the goal (290s of 300s)'
 );
 select ok(
-  (select completed_at is not null from public.add_study_time(current_date, 'oral', 15)),
-  'completed_at is set when written + oral reaches the goal'
+  (select completed_at is null from public.add_study_time(current_date, 'written', 110)),
+  'not completed when the total passes the goal but the oral half is missing (300s written + 100s oral)'
+);
+select ok(
+  (select completed_at is not null from public.add_study_time(current_date, 'oral', 50)),
+  'completed_at is set once both halves are reached (150s oral of a 300s goal)'
 );
 
 select throws_ok(

@@ -41,10 +41,10 @@ export function StudyPrompts({ onSwitchToOral, onExit }: StudyPromptsProps) {
     return (
       <aside className="halfway" role="status">
         <p>
-          <strong>Prima metà completata!</strong>{' '}
+          <strong>Metà scritta completata!</strong>{' '}
           {onSwitchToOral
-            ? 'Ora passa alla parte orale: rispondi a voce al tutor.'
-            : 'Su questo dispositivo il microfono non è disponibile: puoi continuare con lo scritto.'}
+            ? "Ora passa alla parte orale: l'obiettivo di oggi si raggiunge solo con l'altra metà a voce."
+            : "Su questo dispositivo il microfono non è disponibile, e senza la parte orale l'obiettivo di oggi non si raggiunge: per continuare a voce apri l'app sul telefono."}
         </p>
         <div className="row">
           {onSwitchToOral && (

@@ -111,7 +111,7 @@ Provato dal proprietario su telefono: tutto fino alla #21. Da provare: traduzion
 
 Regole scritte in `CLAUDE.md` (Obiettivi del prodotto). Vanno fatte **prima** del piano multilingua (`PLAN-multilingua.md`), perché sono più piccole e toccano gli stessi file: lezione, home e menu. Una PR per punto, da `main`.
 
-1. **`feat(db): reach the daily goal only with half written and half oral`**
+1. ✅ **`feat(db): reach the daily goal only with half written and half oral`** (fatta: migration `20261125120000_goal_half_split`, anello a due colori)
    - Migration nuova che ridefinisce `add_study_time`: `completed_at` si imposta solo quando `written_seconds >= goal_minutes * 30` **e** `oral_seconds >= goal_minutes * 30`, non più sulla somma.
    - I giorni già chiusi restano come sono.
    - Test pgTAP: 18 + 2 minuti non chiude il giorno, 10 + 10 sì.
