@@ -1,13 +1,30 @@
 # Kern Sprache: multilingua + i18n
 
-> Piano pronto. Aggiornato il 2026-11-24 su `main` a `14c5bf9` (PR #30): le PR dalla #21 alla #30 sono mergiate e non ci sono altri branch aperti. Il refactoring tocca quasi tutti i file, quindi va fatto **da solo**, senza altre sessioni che scrivono in parallelo.
+> Aggiornato il 2026-11-24 su `main` a `4f7ef72` (PR #35). La PR 1 (nome e icona) è fatta (#31). **Prima del resto** va fatto il blocco "scritto + orale e navigazione" di `PLAN.md`: tocca gli stessi file (lezione, obiettivo giornaliero, menu) ed è più piccolo. Il refactoring tocca quasi tutti i file, quindi va fatto **da solo**, senza altre sessioni che scrivono in parallelo.
 
 ## Prerequisiti prima di partire
-1. Nessun'altra sessione al lavoro sul repo e `main` aggiornato (`git pull`, `gh pr list`). ✅ al 2026-11-24.
-2. Mappatura dei punti legati all'inglese rifatta su `14c5bf9`: è quella di "Cosa è cambiato" più sotto. Se nel frattempo arrivano altre PR, va ripetuta (`git grep -n "English Tutor\|Italian.*English\|lang=\"en\""`).
-3. Ultima migration su `main`: `20261124190000_drop_elapsed_days.sql`. Le nuove devono avere timestamp successivi.
-4. Dump di produzione prima della PR 3, su richiesta esplicita.
-5. Si parte dalla PR 1, un branch alla volta, sempre da `main`.
+1. Nessun'altra sessione al lavoro sul repo e `main` aggiornato (`git pull`, `gh pr list`).
+2. Il blocco "scritto + orale e navigazione" di `PLAN.md` è mergiato.
+3. Mappatura dei punti legati all'inglese rifatta su `4f7ef72`: è quella di "Cosa è cambiato" più sotto. Se nel frattempo arrivano altre PR, va ripetuta (`git grep -n "English Tutor\|Italian.*English\|lang=\"en\""`).
+4. Ultima migration su `main`: `20261125100000_pronunciation_mistakes.sql`. Le nuove devono avere timestamp successivi.
+5. Dump di produzione prima della PR 3, su richiesta esplicita.
+6. Si riparte dalla PR 2, un branch alla volta, sempre da `main`.
+
+## Cosa è cambiato dopo (PR #32–#35 e regole nuove)
+- **Ripasso con voto dato dall'app (#35)**:
+  - `features/review/grading.ts`: `normalizeItalian` toglie gli articoli **italiani** (`ARTICLES`) e gli accenti. Dipende dalla lingua madre, quindi con il multilingua servono articoli per lingua madre, o almeno vanno legati a `native_language`;
+  - prompt `review-check.v1` ("Italian learner of English", traduzione in italiano): va parametrizzato nella PR 4 come `review-check.v2`;
+  - `ReviewCards.tsx`: `lang` e testi da controllare con gli altri `lang="en"`.
+- **Carte di pronuncia (#35)**: categoria `pronunciation` in `mistakes` (migration `20261125100000`), salvate da `transcribe` con `save_mistakes` (`_shared/pronunciation-cards.ts`). Nella PR 3 prendono la `language` come gli altri errori.
+- **Audio della lezione preparato in anticipo (#33)**: `prefetchSpeech` in `LessonPage.tsx` usa `listening.text_en` e le frasi del dettato. I nomi dei campi cambiano nella PR 4, e `speak` deve ricevere la lingua.
+- **Intestazione della lezione fissa e attesa animata (#32, #34)**: `useDock.ts` e `Waiting` hanno testi italiani da mettere nel catalogo i18n (PR 2).
+- **Regole decise il 2026-11-24** (in `CLAUDE.md`, da fare prima di questo piano, vedi `PLAN.md`):
+  - lezione finita solo con scritto e orale, selettore Scritto | Orale, freccia indietro;
+  - obiettivo raggiunto solo con almeno metà scritto e metà orale;
+  - barra in basso Home | Percorso | Profilo | Impostazioni al posto del menu laterale.
+  - Effetti su questo piano:
+    - nella PR 9 il cambio di lingua va nel **Profilo** e nell'intestazione della Home, non più in `AppMenu.tsx`, che sarà stato tolto;
+    - `lesson_progress` avrà `written_done_at`/`oral_done_at`, che valgono per lingua tramite la lezione.
 
 ## Cosa è cambiato rispetto alla prima stesura (PR #21–#30)
 Queste novità sono già su `main` e cambiano il piano:
@@ -72,7 +89,7 @@ Decisioni prese:
 
 ## PR in ordine (branch brevi da `main`)
 
-1. **`chore(web): rename the app to Kern Sprache`**:
+1. ✅ **`chore(web): rename the app to Kern Sprache`** (fatta, #31):
    - `vite.config.ts` (manifest e descrizione "Il tuo tutor personale di inglese"), `index.html` (title e `apple-mobile-web-app-title`), `src/sw/sw.ts`, `HomePage.tsx`, `SideMenu.tsx`, `LoginPage.tsx`, `InstallDialog.tsx`, `lib/install.ts`, root `package.json`, `CLAUDE.md` (titolo e descrizione: "app per imparare le lingue"), `PLAN.md`;
    - `supabase/config.toml` `project_id`: se si cambia, cambiano anche i nomi dei container Docker locali (`supabase_db_english-tutor`, citato in `PLAN.md`) e il database locale riparte vuoto. Lo si cambia e si aggiornano le note;
    - **Nuova icona** (famiglia aiTool "Kern"), variante **A · Cobalto + limone** scelta dall'utente:
@@ -153,7 +170,7 @@ Decisioni prese:
      - in alto la parte globale: serie, tempo di studio, grafico;
      - sotto una scheda per ogni lingua: livello, scopo, avanzamento per livello, risposte da `lesson_stats` filtrate per lingua, carte nel ripasso, esiti di pronuncia e dettato;
      - si può aggiungere una lingua e cambiare quella attiva. `fetchProfileData` e `profileStats.ts` diventano per lingua;
-   - cambio rapido della lingua anche dal menu (`AppMenu.tsx`);
+   - cambio rapido della lingua dall'intestazione della Home (il menu laterale sarà stato tolto dalla barra in basso);
    - le query TanStack Query includono la lingua nella `queryKey`;
    - `audio.ts`:
      - `speak(text, lang)` passa la lingua alla function `speak`;
