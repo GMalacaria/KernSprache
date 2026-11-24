@@ -22,6 +22,8 @@ export const transcribeRequestSchema = z.object({
   assess: z.boolean().default(false),
   /** With `assess`: the sentence the learner was reading aloud, so the pronunciation is judged against it. */
   expected_text: z.string().trim().min(1).max(300).optional(),
+  /** With `assess`: store the mispronounced words as review cards (dialogue and exercises, never the review itself). */
+  save_mistakes: z.boolean().default(false),
   mime_type: z.string().transform((m) => m.split(';')[0]!.trim().toLowerCase())
     .pipe(z.enum(AUDIO_MIME_TYPES)),
 })

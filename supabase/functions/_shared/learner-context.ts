@@ -31,6 +31,8 @@ export async function loadLearnerSnapshot(
       .from('mistakes')
       .select('original, corrected, category')
       .eq('user_id', userId)
+      // Mispronounced words are review cards, not grammar the tutor should work on.
+      .neq('category', 'pronunciation')
       .order('created_at', { ascending: false })
       .limit(RECENT_MISTAKES),
     db
