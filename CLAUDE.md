@@ -8,6 +8,8 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - Lezione: 6-8 minuti con inizio e fine (nel tempo giornaliero ne stanno una o più). Parti: grammatica, 5 parole nuove, 3 espressioni, 1 modo di dire, 3 verbi, ascolto e comprensione, lettura e comprensione, dialogo di 3 turni con il tutor. Parole ed espressioni finiscono nel ripasso.
 - Il contenuto di ogni lezione è generato dall'IA per livello e scopo dell'utente e salvato in `lesson_contents` (rigenerato se cambia lo scopo); le lezioni del capitolo in corso vengono preparate in anticipo, e aprendo l'ultima lezione di un capitolo si prepara il successivo.
 - Correzione di ogni errore: frase originale, correzione, spiegazione breve **in italiano**.
+- Negli esercizi a scelta, dopo la risposta compare in basso la frase inglese con il pulsante per ascoltarla (`speak`) e la traduzione italiana (componente `SentenceFeedback`): nei quiz della lezione dalle traduzioni già nel contenuto, nella verifica di capitolo nella revisione finale (le risposte si vedono solo alla fine), con `sentence_en` e `translation_it` generati dall'IA (prompt `chapter-test.v2`; i test salvati prima non li hanno). Il test di livello non li mostra.
+- Statistiche degli esercizi: per ogni lezione completata si salvano risposte, giuste e serie massima di risposte giuste di fila (`lesson_stats`); a fine lezione si vedono quelle della lezione, all'ultima lezione del capitolo e nel risultato della verifica i totali del capitolo (errori, serie massima, percentuale di successo). Serviranno per una futura pagina di profilo.
 - Dialoghi in inglese semplice, scritti e vocali.
 - Ripasso con spaced repetition degli errori e delle parole nuove.
 - Notifiche: al massimo una al giorno all'ora scelta dall'utente (ora locale del suo fuso): serie a rischio (almeno 2 giorni di fila), altrimenti ripassi in scadenza, altrimenti l'obiettivo del giorno; nessuna se l'obiettivo è già raggiunto. Si attivano dalla home, solo dopo un clic.
@@ -73,8 +75,9 @@ Formato delle correzioni:
 - `chapters`: id, level, sort_order, slug, title, description_it, grammar_focus (sola lettura)
 - `lessons`: id, chapter_id, sort_order, slug, title, focus (sola lettura)
 - `lesson_progress`: user_id, lesson_id, score, completed_at
+- `lesson_stats`: user_id, lesson_id, chapter_id (preso dalla lezione), answers, correct, best_streak, completed_at; una riga per lezione (ripetendola si sovrascrive). Si scrive solo con la RPC `record_lesson_stats`, che rifiuta numeri impossibili (giuste > risposte, serie incompatibile con gli errori, più di 100 risposte): il quiz è corretto nel browser, quindi i numeri non sono dimostrabili.
 - `lesson_contents`: user_id, lesson_id, purpose, content (JSON), prompt_version; scritta solo dalla function `lesson`
-- `chapter_tests`: id, user_id, chapter_id, questions (con le risposte giuste), oral_tasks, prompt_version; nessun accesso per gli utenti, solo la function `chapter-test` (service role)
+- `chapter_tests`: id, user_id, chapter_id, questions (con le risposte giuste e, da `chapter-test.v2`, `sentence_en` e `translation_it`), oral_tasks, prompt_version; nessun accesso per gli utenti, solo la function `chapter-test` (service role)
 - `chapter_test_attempts`: id, user_id, chapter_id, test_id, written_score, oral_score, score, passed, feedback; select dei propri record, scritta solo dalla function `chapter-test`
 - `sessions`: id, user_id, chapter_id, lesson_id, kind (lesson|dialogue|review), started_at, ended_at
 - `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at, campi FSRS (gli errori sono anche carte di ripasso)
