@@ -137,3 +137,8 @@ Regole scritte in `CLAUDE.md` (Obiettivi del prodotto). Vanno fatte **prima** de
    - Nuova pagina Impostazioni: promemoria (`NotificationSettings`), effetti sonori, installa l'app, cambio password (`ChangePassword`), esci.
    - Si tolgono `AppMenu.tsx` e `SideMenu.tsx`.
    - Barra rispettosa della safe area di iOS (`env(safe-area-inset-bottom)`). Si prova in emulazione mobile e su telefono.
+4. **`feat(web): require the oral part of chapter tests`**
+   - Come per le lezioni, senza microfono non si va avanti.
+   - Si toglie il ripiego `TypedAnswer` in `ChapterTestPage.tsx` (oggi lo usa quando `canRecord()` è falso). Senza microfono la verifica, compresa quella di salto, non parte e mostra lo stesso messaggio della lezione: dare il permesso, oppure aprire l'app sul telefono.
+   - La function `chapter-test` riceve le trascrizioni come testo, quindi non può distinguere una risposta scritta da una detta. Il controllo è nella PWA. Se servisse una garanzia sul server, la function dovrebbe ricevere l'audio e trascriverlo lei: costa di più, per ora non serve.
+   - Da decidere a parte: il test di livello oggi, senza microfono, salta l'orale (`PlacementTestPage.tsx`).
