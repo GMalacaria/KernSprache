@@ -106,3 +106,34 @@ Provato dal proprietario su telefono: tutto fino alla #21. Da provare: traduzion
 3. **Dettato (esercizio di ascolto)**: fatto (PR `feat/dictation`): parte "Dettato" della lezione dopo l'ascolto, 3 frasi brevi da espressioni ed esempi; confronto parola per parola con le parole sbagliate sottolineate, si ripete finché è giusto, il testo si può leggere; −20 punti per ogni tentativo sbagliato e −30 per il testo mostrato (punteggio della frase 0-100); ogni tentativo sbagliato e la lettura del testo contano come errori in `lesson_stats`.
 4. **Pagina di profilo**: fatta (`features/profile`, voce "Profilo" nel menu): serie e record di giorni con obiettivo, giorni e tempo di studio, grafico degli ultimi 14 giorni, risposte da `lesson_stats`, carte nel ripasso, avanzamento per livello. Da aggiungere quando ci sono i dati: esiti di pronuncia e punteggi del dettato salvati.
 5. **Debito tecnico residuo** (sezione sopra): niente di urgente; lock sulla generazione delle lezioni nel piano multilingua.
+
+## Prossimo blocco: scritto + orale e navigazione (deciso il 2026-11-24)
+
+Regole scritte in `CLAUDE.md` (Obiettivi del prodotto). Vanno fatte **prima** del piano multilingua (`PLAN-multilingua.md`), perché sono più piccole e toccano gli stessi file: lezione, home e menu. Una PR per punto, da `main`.
+
+1. **`feat(db): reach the daily goal only with half written and half oral`**
+   - Migration nuova che ridefinisce `add_study_time`: `completed_at` si imposta solo quando `written_seconds >= goal_minutes * 30` **e** `oral_seconds >= goal_minutes * 30`, non più sulla somma.
+   - I giorni già chiusi restano come sono.
+   - Test pgTAP: 18 + 2 minuti non chiude il giorno, 10 + 10 sì.
+   - PWA: anello e banner (`features/study`, `GoalRing`, `StudyPrompts`) mostrano il totale e le due metà. "Obiettivo raggiunto" compare solo con le due metà; con il totale già pieno ma una metà mancante, il messaggio dice cosa manca ("ancora 4 minuti di orale").
+   - Da ricontrollare: la serie in `profileStats.ts` e la scelta del promemoria in `_shared/reminders.ts` usano `completed_at`, quindi seguono da sole. Va verificato.
+2. **`feat(web): split lessons into written and oral parts`**
+   - Il selettore Scritto | Orale in cima alla lezione si può cambiare in qualsiasi momento.
+     - **Scritto:** grammatica, parole, quiz, dettato, lettura, dialogo scritto.
+     - **Orale:** ascolto, "Ripeti la frase" sulle frasi della lezione, dialogo a voce.
+   - Ogni parte ha il suo segno di completata.
+   - DB: `lesson_progress` con `written_done_at` e `oral_done_at`. `completed_at` si imposta quando ci sono tutte e due. Le righe esistenti restano completate.
+   - Percorso, sblocco della lezione successiva e verifica di capitolo usano `completed_at` come oggi.
+   - Lezione già completata: si riapre e si può rifare l'una o l'altra parte. Il punteggio e `lesson_stats` restano quelli dell'ultima volta.
+   - **Freccia indietro** al posto di "Esci". Il punto raggiunto in ciascuna parte si salva, così riaprendo si riprende da lì.
+   - Senza microfono **non si va avanti**, come deciso dal proprietario: non c'è un ripiego scritto per l'orale.
+     - La lezione resta non conclusa e la successiva bloccata.
+     - La parte scritta si può fare e segnare come fatta.
+     - Nella parte orale un messaggio spiega che serve il microfono e come attivarlo: permesso del browser, oppure l'app installata sul telefono. Va distinto il "permesso negato" da "nessun microfono" (`canRecord()` e l'errore di `getUserMedia`).
+   - Si rifà la mappatura del flusso attuale (`LessonPage.tsx`: sezioni in fila, poi dialogo in un solo modo), dopo le PR #33-#35.
+3. **`feat(web): replace the side menu with a bottom tab bar`**
+   - Barra in basso con Home | Percorso | Profilo | Impostazioni, solo nelle schermate principali; dentro le attività c'è la freccia indietro.
+   - Profilo: le statistiche di oggi, poi "Obiettivo e scopo" e "Rifai il test di livello", spostati dal menu.
+   - Nuova pagina Impostazioni: promemoria (`NotificationSettings`), effetti sonori, installa l'app, cambio password (`ChangePassword`), esci.
+   - Si tolgono `AppMenu.tsx` e `SideMenu.tsx`.
+   - Barra rispettosa della safe area di iOS (`env(safe-area-inset-bottom)`). Si prova in emulazione mobile e su telefono.
