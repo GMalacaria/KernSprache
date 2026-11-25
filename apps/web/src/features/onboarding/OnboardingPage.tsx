@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { GOAL_OPTIONS } from '../study/studyMath'
 import { Emoji } from '../../components/Emoji'
+import { BackHeader } from '../../components/BackHeader'
 import { PURPOSES, type LearningPurpose } from './purposes'
 
 interface OnboardingPageProps {
@@ -52,7 +53,7 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
 
   return (
     <main className="page">
-      <h1>{editing ? 'I tuoi obiettivi' : 'Benvenuto!'}</h1>
+      {editing ? <BackHeader title="I tuoi obiettivi" onBack={onDone} /> : <h1>Benvenuto!</h1>}
       <form onSubmit={onSubmit} className="stack">
         <label htmlFor="purpose">Perché vuoi imparare l'inglese?</label>
         <select
@@ -101,11 +102,6 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
         <button type="submit" disabled={!purpose || save.isPending}>
           {editing ? 'Salva' : 'Avanti'}
         </button>
-        {editing && (
-          <button type="button" className="link" onClick={onDone}>
-            Annulla
-          </button>
-        )}
         {save.isError && <p className="error">Non sono riuscito a salvare. Riprova.</p>}
       </form>
     </main>
