@@ -152,7 +152,8 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   // The part opened first: the one still to do, or the one the daily timer suggests.
   const part: LessonPart =
     chosenPart ?? initialPart(progress.data, voice ? timer.status.recommendedMode : 'written')
-  const { markActivity } = useStudyActivity(part)
+  // The clock runs only while studying: not on the end-of-part summary, nor on the "microphone needed" notice.
+  const { markActivity } = useStudyActivity(finished || (part === 'oral' && !voice) ? null : part)
 
   const content = lesson.data?.content
   const sections = useMemo(() => (content ? sectionsFor(content, part) : []), [content, part])
