@@ -9,6 +9,7 @@ import { CorrectionList } from './CorrectionList'
 import type { DialogueTurn, Pronunciation } from './types'
 import { PronunciationNote } from './PronunciationNote'
 import { BackHeader } from '../../components/BackHeader'
+import { scrollToEnd } from '../../lib/scrollToEnd'
 import { VoiceComposer } from './VoiceComposer'
 
 const MAX_CHARS = 2000
@@ -73,7 +74,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
   // Every new message (the learner's, the tutor's, "sta scrivendo") brings the end of the chat into view,
   // answer box included: the marker sits after the composer and is aligned to the bottom of the screen.
   useEffect(() => {
-    bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    scrollToEnd(bottom.current)
   }, [turns, send.isPending])
 
   useEffect(() => stopSpeaking, [])

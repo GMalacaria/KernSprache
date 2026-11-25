@@ -109,6 +109,10 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .turn { display: flex; flex-direction: column; gap: 0.25rem; }
 .turn-user { align-items: flex-end; }
 .turn-assistant { align-items: flex-start; }
+/* "Il tutor sta scrivendo" and its dots on one line (a turn is a column, which put the dots below). */
+.turn.muted[role='status'] { flex-direction: row; align-items: baseline; gap: 0.35rem; }
+/* On the baseline, like a written "…", not halfway up the letters. */
+.turn.muted[role='status'] .dots { vertical-align: baseline; }
 .bubble { margin: 0; padding: 0.65rem 0.95rem; border-radius: var(--radius-panel); max-width: 85%; white-space: pre-wrap; }
 .turn-user .bubble { background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 0.4rem; }
 .turn-assistant .bubble { background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 0.4rem; }
