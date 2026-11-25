@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { startRecording, type Recording } from './audio'
 
 export const MIC_ERROR = 'Non riesco a usare il microfono. Controlla di aver dato il permesso al browser.'
+export const NO_SPEECH = 'Non ho sentito niente. Parla vicino al microfono e riprova.'
 
 interface Options {
   /** Called with the audio when the recording ends, by the learner or at the time limit. */
@@ -40,7 +41,14 @@ export function useVoiceRecorder({ onRecorded, onTick }: Options) {
     const current = recording.current
     recording.current = null
     setIsRecording(false)
-    if (current) onRecordedRef.current(await current.stop())
+    if (!current) return
+    const audio = await current.stop()
+    // A silent recording is not sent: nothing to transcribe, and nothing to grade.
+    if (!current.heardSpeech()) {
+      setMicError(NO_SPEECH)
+      return
+    }
+    onRecordedRef.current(audio)
   }, [])
 
   const start = useCallback(async () => {

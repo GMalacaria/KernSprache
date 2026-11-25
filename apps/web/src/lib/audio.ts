@@ -18,6 +18,50 @@ export interface Recording {
   stop: () => Promise<Blob>
   /** Stops recording and discards the audio. */
   cancel: () => void
+  /** Whether the microphone picked up anything louder than background noise (true if it cannot tell). */
+  heardSpeech: () => boolean
+}
+
+/** Volume (RMS of the waveform, 0-1) above which a moment counts as someone speaking, not room noise. */
+export const SPEECH_RMS = 0.02
+/** Moments above SPEECH_RMS needed to call it speech: about a quarter of a second at one check every 50 ms. */
+export const SPEECH_MOMENTS = 5
+
+/** Whether a series of volume readings contains speech: enough moments louder than background noise. */
+export function containsSpeech(levels: readonly number[]): boolean {
+  return levels.filter((rms) => rms >= SPEECH_RMS).length >= SPEECH_MOMENTS
+}
+
+/**
+ * Listens to the microphone stream while it records and keeps its volume every 50 ms, so a silent
+ * recording is never sent to be transcribed (the model would invent the expected sentence and grade it).
+ */
+function watchLevels(stream: MediaStream): { levels: number[]; close: () => void } | null {
+  const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+  if (!Ctx) return null
+  try {
+    const ctx = new Ctx()
+    const analyser = ctx.createAnalyser()
+    analyser.fftSize = 1024
+    ctx.createMediaStreamSource(stream).connect(analyser)
+    const samples = new Float32Array(analyser.fftSize)
+    const levels: number[] = []
+    const id = window.setInterval(() => {
+      analyser.getFloatTimeDomainData(samples)
+      let sum = 0
+      for (const v of samples) sum += v * v
+      levels.push(Math.sqrt(sum / samples.length))
+    }, 50)
+    return {
+      levels,
+      close: () => {
+        window.clearInterval(id)
+        void ctx.close().catch(() => undefined)
+      },
+    }
+  } catch {
+    return null
+  }
 }
 
 export const MAX_RECORDING_MS = 60_000
@@ -38,19 +82,24 @@ export async function startRecording(onAutoStop: () => void): Promise<Recording>
     }
   })
   recorder.start()
+  const watcher = watchLevels(stream)
   const timer = window.setTimeout(onAutoStop, MAX_RECORDING_MS)
 
   return {
     stop: () => {
       window.clearTimeout(timer)
+      watcher?.close()
       if (recorder.state !== 'inactive') recorder.stop()
       return stopped
     },
     cancel: () => {
       window.clearTimeout(timer)
+      watcher?.close()
       recorder.onstop = () => stream.getTracks().forEach((t) => t.stop())
       if (recorder.state !== 'inactive') recorder.stop()
     },
+    // Without a way to measure (old browser) the recording is sent as before.
+    heardSpeech: () => (watcher ? containsSpeech(watcher.levels) : true),
   }
 }
 
