@@ -148,19 +148,34 @@ export function ReadingView({ content }: { content: LessonContent }) {
   )
 }
 
-/**
- * The lesson's grammar and new words, folded away: open it during the dialogue or the oral part,
- * where those sections are not on screen, to look something up while answering.
- */
+/** Lit light bulb: opens the lesson's grammar and words. */
+export function LightBulbIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+      <g stroke="var(--on-lemon)" strokeWidth="1.6" strokeLinecap="round">
+        <path d="M12 1.5v1.8M4.6 4.6l1.3 1.3M19.4 4.6l-1.3 1.3M2.2 11.5H4M20 11.5h1.8" />
+      </g>
+      <path
+        d="M12 5.2a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2v.5h5.2V18c0-.8.4-1.5 1-2A6 6 0 0 0 12 5.2Z"
+        fill="var(--lemon)"
+        stroke="var(--on-lemon)"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path d="M9.6 20.3h4.8M10.3 22.4h3.4" stroke="var(--on-lemon)" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** The lesson's grammar and new words, on their own page (opened from the light bulb). */
 export function LessonNotes({ content }: { content: LessonContent }) {
   const { t } = useTranslation('lesson')
   return (
-    <details className="lesson-notes">
-      <summary>{t('notes.title')}</summary>
-      <h3 className="small-heading">{t('sections.grammar')}</h3>
+    <>
+      <h2>{t('sections.grammar')}</h2>
       <GrammarView content={content} />
-      <h3 className="small-heading">{t('sections.words')}</h3>
+      <h2>{t('sections.words')}</h2>
       <WordsView content={content} />
-    </details>
+    </>
   )
 }

@@ -36,7 +36,8 @@
     "why": "La lezione si conclude solo con la parte scritta e quella orale: esercitarsi in una sola delle due non basta per imparare bene la lingua."
   },
   "notes": {
-    "title": "Grammatica e parole della lezione"
+    "title": "Grammatica e parole",
+    "open": "Grammatica e parole della lezione"
   },
   "goToDialogue": "Vai al dialogo",
   "partAlreadyDone": "Hai già fatto la parte {{part}} di questa lezione: puoi rifarla per ripassare.",

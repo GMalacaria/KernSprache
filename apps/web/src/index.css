@@ -208,13 +208,13 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .chapter-folded summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 2.75rem; cursor: pointer; font-weight: 600; }
 .chapter-folded summary::-webkit-details-marker { display: none; }
 .chapter-folded[open] summary { margin-bottom: 0.25rem; }
-/* Lesson notes: grammar and words, folded, during the dialogue and the oral part. */
-.lesson-notes { margin-top: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); padding: 0 0.9rem; }
-.lesson-notes summary { display: flex; align-items: center; justify-content: space-between; min-height: 2.75rem; cursor: pointer; font-weight: 600; color: var(--accent); list-style: none; }
-.lesson-notes summary::-webkit-details-marker { display: none; }
-.lesson-notes summary::after { content: '+'; font-size: 1.25rem; line-height: 1; }
-.lesson-notes[open] summary::after { content: '−'; }
-.lesson-notes[open] { padding-bottom: 0.9rem; }
+/* Light bulb in the lesson header: opens the grammar-and-words page, drawn over the lesson. */
+.notes-button { flex: none; margin-left: auto; display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; min-height: 0; padding: 0; border-radius: 999px; background: transparent; box-shadow: none; }
+.notes-button:hover { background: var(--track); }
+.notes-page { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; max-width: 32rem; margin: 0 auto; padding: calc(1.5rem + env(safe-area-inset-top)) 1rem 0; background: var(--bg); }
+.notes-page > header { flex: none; }
+.notes-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); }
+.notes-body > h2 { margin-top: 1.25rem; }
 
 .examples, .cards { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.7rem 0.9rem; }
