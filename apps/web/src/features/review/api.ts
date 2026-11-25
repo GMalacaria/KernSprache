@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 import type { Grade } from 'ts-fsrs'
 import { scheduler, toCard, toColumns, type FsrsColumns } from '../../lib/fsrs'
 import { supabase } from '../../lib/supabase'
@@ -89,7 +90,7 @@ export async function checkAnswer(request: {
   spoken?: boolean
 }): Promise<AnswerCheck> {
   const { data, error } = await supabase.functions.invoke<AnswerCheck>('review-check', { body: request })
-  const fallback = 'Non riesco a controllare la risposta adesso.'
+  const fallback = i18n.t('checkError', { ns: 'review' })
   if (error) throw new Error(await errorMessage(error, fallback))
   if (!data) throw new Error(fallback)
   return data

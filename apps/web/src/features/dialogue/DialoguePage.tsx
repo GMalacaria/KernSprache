@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { ListenButton } from '../../components/ListenButton'
 import { canRecord, speak, stopSpeaking } from '../../lib/audio'
 import { usePracticeActivity } from '../study/useStudyTimer'
@@ -22,6 +23,7 @@ interface DialoguePageProps {
 export function DialoguePage({ initialMode = 'written', onExit }: DialoguePageProps) {
   const queryClient = useQueryClient()
   const voiceAvailable = canRecord()
+  const { t } = useTranslation(['dialogue', 'common'])
   const [mode, setMode] = useState<DialogueMode>(voiceAvailable ? initialMode : 'written')
   // Free dialogue is extra practice: its time is saved for statistics, not counted towards the daily goal.
   const { markActivity } = usePracticeActivity('dialogue')
@@ -95,24 +97,22 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
   return (
     <main className="page dialogue">
       {/* Going back ends the dialogue session (and its corrections stay in the review). */}
-      <BackHeader title="Dialogo" onBack={() => finish.isPending || finish.mutate()} />
+      <BackHeader title={t('title')} onBack={() => finish.isPending || finish.mutate()} />
 
       {voiceAvailable && (
-        <div className="segmented" role="group" aria-label="Modalità">
+        <div className="segmented" role="group" aria-label={t('modeAria')}>
           <button type="button" aria-pressed={mode === 'written'} onClick={() => setMode('written')}>
-            Scritto
+            {t('common:parts.written')}
           </button>
           <button type="button" aria-pressed={mode === 'oral'} onClick={() => setMode('oral')}>
-            Orale
+            {t('common:parts.oral')}
           </button>
         </div>
       )}
 
       {turns.length === 0 && (
         <p className="muted">
-          {mode === 'oral'
-            ? 'Tocca "Parla", rispondi in inglese ad alta voce e tocca di nuovo per inviare. Il tutor ti risponde a voce e corregge ogni errore.'
-            : 'Scrivi in inglese, anche frasi semplici. Il tutor ti risponde e corregge ogni errore.'}
+          {mode === 'oral' ? t('hintOral') : t('hintWritten')}
         </p>
       )}
 
@@ -123,13 +123,13 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
               {turn.content}
             </p>
             {turn.role === 'assistant' && (
-              <ListenButton text={turn.content} className="link listen" label="Ascolta" />
+              <ListenButton text={turn.content} className="link listen" label={t('listen')} />
             )}
             {turn.pronunciation && <PronunciationNote pronunciation={turn.pronunciation} />}
             {turn.corrections && <CorrectionList corrections={turn.corrections} />}
             {turn.newVocab && turn.newVocab.length > 0 && (
               <p className="vocab">
-                Parole nuove:{' '}
+                {t('newWords')}{' '}
                 {turn.newVocab.map((v) => (
                   <span key={v.en} className="tag">
                     {v.en} = {v.it}
@@ -139,7 +139,8 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
             )}
           </li>
         ))}
-        {send.isPending && <li className="turn turn-assistant muted" role="status">Il tutor sta scrivendo <span className="dots" aria-hidden="true" /></li>}
+        {send.isPending && <li className="turn turn-assistant muted" role="status">
+            {t('typing')} <span className="dots" aria-hidden="true" /></li>}
       </ol>
       <div ref={bottom} />
 
@@ -150,7 +151,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
       ) : (
         <form onSubmit={onSubmit} className="composer">
           <textarea
-            aria-label="Il tuo messaggio in inglese"
+            aria-label={t('messageAria')}
             lang="en"
             rows={2}
             maxLength={MAX_CHARS}
@@ -159,10 +160,10 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) onSubmit(e)
             }}
-            placeholder="Write here…"
+            placeholder={t('placeholder')}
           />
           <button type="submit" disabled={send.isPending || !draft.trim()}>
-            Invia
+            {t('send')}
           </button>
         </form>
       )}

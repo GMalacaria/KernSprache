@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Emoji } from '../../components/Emoji'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_RECORDING_MS, stopSpeaking, unlockSpeech } from '../../lib/audio'
@@ -14,6 +15,7 @@ interface VoiceComposerProps {
 
 /** Tap to start speaking, tap again to send. The transcript goes to the tutor like a typed message. */
 export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceComposerProps) {
+  const { t } = useTranslation()
   const transcribe = useMutation({
     mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, undefined, true),
     onSuccess: ({ text, pronunciation }) => onTranscript(text, pronunciation ?? undefined),
@@ -46,11 +48,11 @@ export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceCompo
         disabled={busy && !isRecording}
         aria-pressed={isRecording}
       >
-        {isRecording ? `■ Invia (${seconds}s / ${limit}s)` : transcribe.isPending ? (
-          <>Trascrivo <span className="dots" aria-hidden="true" /></>
+        {isRecording ? t('voice.send', { seconds, limit }) : transcribe.isPending ? (
+          <>{t('voice.transcribing')} <span className="dots" aria-hidden="true" /></>
         ) : (
           <>
-            <Emoji name="microphone" /> Parla
+            <Emoji name="microphone" /> {t('voice.speak')}
           </>
         )}
       </button>
@@ -60,7 +62,7 @@ export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceCompo
           className="link"
           onClick={cancel}
         >
-          Annulla
+          {t('voice.cancel')}
         </button>
       )}
       {micError && <p className="error">{micError}</p>}

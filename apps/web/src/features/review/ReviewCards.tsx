@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { Trans, useTranslation } from 'react-i18next'
+import { i18n } from '../../i18n'
 import type { Grade } from 'ts-fsrs'
 import { Emoji } from '../../components/Emoji'
 import { ListenButton } from '../../components/ListenButton'
@@ -54,17 +56,19 @@ function useAnswerFlow(kind: 'vocab' | 'sentence', onGraded: (grade: Grade) => v
 }
 
 function AttemptsLeft({ wrong }: { wrong: number }) {
+  const { t } = useTranslation('review')
   const left = MAX_ATTEMPTS - wrong
   return (
     <span className="muted">
       {' '}
-      {left === 1 ? 'Ultimo tentativo.' : `Ancora ${left} tentativi.`}
+      {left === 1 ? t('attemptsLast') : t('attemptsLeft', { count: left })}
     </span>
   )
 }
 
 /** English word -> the learner writes the Italian. Checked locally, then by the AI when it differs (synonyms). */
 export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
+  const { t } = useTranslation(['review', 'common'])
   const [value, setValue] = useState('')
   const flow = useAnswerFlow('vocab', onGraded)
 
@@ -74,7 +78,7 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
     if (!answer || flow.outcome || flow.check.isPending) return
     const match = matchTranslation(item.it, answer)
     if (match === 'exact') return flow.finish(true, true, null)
-    if (match === 'typo') return flow.finish(true, false, `Attenzione all'ortografia: si scrive «${item.it}».`)
+    if (match === 'typo') return flow.finish(true, false, i18n.t('spelling', { ns: 'review', word: item.it }))
     try {
       const result = await flow.check.mutateAsync({ kind: 'translation', prompt: item.en, expected: item.it, answer })
       if (result.correct) flow.finish(true, false, result.feedback_it)
@@ -87,7 +91,7 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
   return (
     <>
       <article className="flashcard">
-        <p className="muted">Come si dice in italiano?</p>
+        <p className="muted">{t('vocab.prompt')}</p>
         <div className="card-word">
           <p className="card-main" lang="en">
             {item.en}
@@ -102,7 +106,7 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
       ) : (
         <form className="stack review-answer" onSubmit={(e) => void submit(e)}>
           <label htmlFor="review-translation" className="visually-hidden">
-            Traduzione in italiano
+            {t('vocab.label')}
           </label>
           <input
             id="review-translation"
@@ -111,21 +115,21 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
             onChange={(e) => setValue(e.target.value)}
             autoComplete="off"
             autoCapitalize="off"
-            placeholder="Scrivi la traduzione"
+            placeholder={t('vocab.placeholder')}
             disabled={flow.check.isPending}
           />
           <button type="submit" disabled={!value.trim() || flow.check.isPending}>
-            {flow.check.isPending ? 'Controllo…' : 'Controlla'}
+            {flow.check.isPending ? t('checking') : t('check')}
           </button>
           {flow.hint && (
             <p className="error" role="status">
-              <strong>Non è giusto.</strong> {flow.hint}
+              <strong>{t('notRight')}</strong> {flow.hint}
               <AttemptsLeft wrong={flow.wrong} />
             </p>
           )}
-          {flow.check.isError && <p className="error">{flow.check.error.message} Riprova.</p>}
+          {flow.check.isError && <p className="error">{flow.check.error.message} {t('common:actions.retry')}.</p>}
           <button type="button" className="link" onClick={flow.giveUp} disabled={flow.check.isPending}>
-            Non la so
+            {t('dontKnow')}
           </button>
         </form>
       )}
@@ -135,6 +139,7 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
 
 /** A sentence with a mistake -> the learner writes or says it corrected. */
 export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
+  const { t } = useTranslation(['review', 'common'])
   const [value, setValue] = useState('')
   const [attempt, setAttempt] = useState<TypedWord[] | null>(null)
   const [heard, setHeard] = useState<{ text: string; pronunciation: Pronunciation | null } | null>(null)
@@ -197,7 +202,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
   return (
     <>
       <article className="flashcard">
-        <p className="muted">Questa frase ha un errore. Scrivila o dilla corretta.</p>
+        <p className="muted">{t('sentence.prompt')}</p>
         <div className="card-word">
           <p className="card-main card-sentence" lang="en">
             {item.original}
@@ -220,7 +225,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
       {heard && (
         <div className="review-heard">
           <p className="muted">
-            Ho sentito: <span lang="en">{heard.text}</span>
+            <Trans t={t} i18nKey="common:voice.heard" values={{ text: heard.text }} components={{ en: <span lang="en" /> }} />
           </p>
           {heard.pronunciation && <PronunciationNote pronunciation={heard.pronunciation} />}
         </div>
@@ -231,7 +236,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
       ) : (
         <form className="stack review-answer" onSubmit={submit}>
           <label htmlFor="review-sentence" className="visually-hidden">
-            Frase corretta
+            {t('sentence.label')}
           </label>
           <textarea
             id="review-sentence"
@@ -245,12 +250,12 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
-            placeholder="Scrivi la frase corretta"
+            placeholder={t('sentence.placeholder')}
             disabled={busy || recorder.isRecording}
           />
           <div className="row review-actions">
             <button type="submit" disabled={!value.trim() || busy || recorder.isRecording}>
-              {flow.check.isPending ? 'Controllo…' : 'Controlla'}
+              {flow.check.isPending ? t('checking') : t('check')}
             </button>
             {voice && (
               <button
@@ -261,12 +266,12 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
                 aria-pressed={recorder.isRecording}
               >
                 {recorder.isRecording ? (
-                  `■ Fine (${recorder.seconds}s / ${MAX_RECORDING_MS / 1000}s)`
+                  t('common:voice.stop', { seconds: recorder.seconds, limit: MAX_RECORDING_MS / 1000 })
                 ) : transcribe.isPending ? (
-                  'Ascolto…'
+                  t('sentence.listening')
                 ) : (
                   <>
-                    <Emoji name="microphone" /> Dilla
+                    <Emoji name="microphone" /> {t('sayIt')}
                   </>
                 )}
               </button>
@@ -281,20 +286,20 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
                   {attempt.map((w, i) => (
                     <span key={i} className={w.ok ? 'word-ok' : 'word-wrong'}>
                       {w.word}
-                      {!w.ok && <span className="visually-hidden"> (diversa)</span>}{' '}
+                      {!w.ok && <span className="visually-hidden">{t('sentence.different')}</span>}{' '}
                     </span>
                   ))}
                 </p>
               )}
               <p className="error">
-                <strong>Non è giusto.</strong> {flow.hint}
+                <strong>{t('notRight')}</strong> {flow.hint}
                 <AttemptsLeft wrong={flow.wrong} />
               </p>
             </div>
           )}
-          {flow.check.isError && <p className="error">{flow.check.error.message} Riprova.</p>}
+          {flow.check.isError && <p className="error">{flow.check.error.message} {t('common:actions.retry')}.</p>}
           <button type="button" className="link" onClick={flow.giveUp} disabled={busy}>
-            Non la so
+            {t('dontKnow')}
           </button>
         </form>
       )}
@@ -304,6 +309,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
 
 /** A mispronounced word -> the learner listens and says it; the pronunciation score is the grade. */
 export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeItem> & { onSkip: () => void }) {
+  const { t } = useTranslation(['review', 'common'])
   const [result, setResult] = useState<{ text: string; pronunciation: Pronunciation } | null>(null)
   const [unclear, setUnclear] = useState<string | null>(null)
   const voice = canRecord()
@@ -339,7 +345,7 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
   return (
     <>
       <article className="flashcard">
-        <p className="muted">Ascolta e ripeti questa parola.</p>
+        <p className="muted">{t('pron.prompt')}</p>
         <div className="card-word">
           <p className="card-main" lang="en">
             {item.original}
@@ -352,7 +358,7 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
       {result ? (
         <div className="review-heard">
           <p className="muted">
-            Ho sentito: <span lang="en">{result.text}</span>
+            <Trans t={t} i18nKey="common:voice.heard" values={{ text: result.text }} components={{ en: <span lang="en" /> }} />
           </p>
           <PronunciationNote pronunciation={result.pronunciation} />
         </div>
@@ -367,28 +373,28 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
               aria-pressed={recorder.isRecording}
             >
               {recorder.isRecording ? (
-                `■ Fine (${recorder.seconds}s / ${MAX_RECORDING_MS / 1000}s)`
+                t('common:voice.stop', { seconds: recorder.seconds, limit: MAX_RECORDING_MS / 1000 })
               ) : assess.isPending ? (
-                'Valuto la pronuncia…'
+                t('pron.assessing')
               ) : (
                 <>
-                  <Emoji name="microphone" /> Dilla
+                  <Emoji name="microphone" /> {t('sayIt')}
                 </>
               )}
             </button>
           ) : (
-            <p className="muted">Su questo dispositivo il microfono non è disponibile.</p>
+            <p className="muted">{t('pron.noMic')}</p>
           )}
           {unclear !== null && (
             <p className="error">
-              Non riesco a valutarla{unclear ? ` (ho sentito «${unclear}»)` : ''}: riprova avvicinando il telefono.
+              {unclear ? t('pron.unclearHeard', { text: unclear }) : t('pron.unclear')}
             </p>
           )}
           {recorder.micError && <p className="error">{recorder.micError}</p>}
           {assess.isError && <p className="error">{assess.error.message}</p>}
           {(!voice || recorder.micError || assess.isError) && (
             <button type="button" className="link" onClick={onSkip}>
-              Salta per ora (resta da ripassare)
+              {t('pron.skip')}
             </button>
           )}
         </div>
@@ -398,10 +404,11 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
 }
 
 function Outcome({ correct, note }: { correct: boolean; note: string | null }) {
+  const { t } = useTranslation('review')
   return (
     <div className={`quiz-feedback ${correct ? 'is-right' : 'is-wrong'}`} role="status">
       <p className={correct ? 'ok' : 'error'}>
-        <strong>{correct ? 'Giusto!' : 'La risposta giusta è sopra.'}</strong>
+        <strong>{correct ? t('outcome.right') : t('outcome.wrong')}</strong>
       </p>
       {note && <p>{note}</p>}
     </div>

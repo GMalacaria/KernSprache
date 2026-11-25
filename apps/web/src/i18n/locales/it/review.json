@@ -1,0 +1,60 @@
+{
+  "title": "Ripasso",
+  "loading": "Preparo il ripasso",
+  "loadError": "Impossibile caricare le carte da ripassare.",
+  "allSkipped": "Hai lasciato tutte le carte per un'altra volta: restano da ripassare.",
+  "finished": "Ripasso finito: {{count}} carte. Le prossime torneranno quando è il momento giusto.",
+  "left": "Ancora da ripassare: {{count}}",
+  "saveFailed": "Salvataggio non riuscito.",
+  "nothingDue": "Non hai carte da ripassare adesso. Le parole delle lezioni e gli errori dei dialoghi arrivano qui quando è il momento di ripassarli.",
+  "cards_one": "carta da ripassare",
+  "cards_other": "carte da ripassare",
+  "kinds": {
+    "words_one": "{{count}} parola da tradurre",
+    "words_other": "{{count}} parole da tradurre",
+    "grammar_one": "{{count}} errore da correggere",
+    "grammar_other": "{{count}} errori da correggere",
+    "pronunciation_one": "{{count}} parola da pronunciare",
+    "pronunciation_other": "{{count}} parole da pronunciare"
+  },
+  "start": "Inizia ripasso",
+  "grades": {
+    "again": "Da rivedere",
+    "hard": "Con fatica",
+    "good": "Bene",
+    "easy": "Facile"
+  },
+  "attemptsLast": "Ultimo tentativo.",
+  "attemptsLeft": "Ancora {{count}} tentativi.",
+  "checkError": "Non riesco a controllare la risposta adesso.",
+  "spelling": "Attenzione all'ortografia: si scrive «{{word}}».",
+  "vocab": {
+    "prompt": "Come si dice in italiano?",
+    "label": "Traduzione in italiano",
+    "placeholder": "Scrivi la traduzione"
+  },
+  "checking": "Controllo…",
+  "check": "Controlla",
+  "notRight": "Non è giusto.",
+  "dontKnow": "Non la so",
+  "sentence": {
+    "prompt": "Questa frase ha un errore. Scrivila o dilla corretta.",
+    "label": "Frase corretta",
+    "placeholder": "Scrivi la frase corretta",
+    "listening": "Ascolto…",
+    "different": " (diversa)"
+  },
+  "sayIt": "Dilla",
+  "pron": {
+    "prompt": "Ascolta e ripeti questa parola.",
+    "assessing": "Valuto la pronuncia…",
+    "noMic": "Su questo dispositivo il microfono non è disponibile.",
+    "unclear": "Non riesco a valutarla: riprova avvicinando il telefono.",
+    "unclearHeard": "Non riesco a valutarla (ho sentito «{{text}}»): riprova avvicinando il telefono.",
+    "skip": "Salta per ora (resta da ripassare)"
+  },
+  "outcome": {
+    "right": "Giusto!",
+    "wrong": "La risposta giusta è sopra."
+  }
+}
