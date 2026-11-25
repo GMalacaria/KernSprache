@@ -221,6 +221,9 @@ button.danger { color: var(--error); }
 .sentence-feedback .sentence-en { font-weight: 700; }
 .sentence-feedback .sentence-it { color: var(--muted); }
 .listen-button { flex: none; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--line); box-shadow: 0 2px 0 var(--line); }
+/* Without a colour of its own the button inherits the white text of solid buttons, and the loading
+   spinner (drawn in currentColor) disappeared on the white background. */
+.listen-button { color: var(--accent); }
 
 /* End-of-chapter (and end-of-lesson) numbers. */
 .chapter-stats { margin-bottom: 1rem; }
