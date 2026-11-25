@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Grade } from 'ts-fsrs'
-import { formatInterval } from '../../lib/fsrs'
 import { usePracticeActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, startReviewSession, type ReviewItem } from './api'
 import { BackButton } from '../../components/BackButton'
@@ -119,7 +118,6 @@ function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
             <div className="review-result" role="status">
               <p>
                 <strong>{GRADE_LABELS[graded.grade]}</strong>
-                {save.isSuccess && <> · torna tra {formatInterval(new Date(save.data.due), graded.at)}</>}
               </p>
               {save.isError && (
                 <>
