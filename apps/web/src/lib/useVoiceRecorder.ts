@@ -1,8 +1,7 @@
+import { i18n } from '../i18n'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { startRecording, type Recording } from './audio'
 
-export const MIC_ERROR = 'Non riesco a usare il microfono. Controlla di aver dato il permesso al browser.'
-export const NO_SPEECH = 'Non ho sentito niente. Parla vicino al microfono e riprova.'
 
 interface Options {
   /** Called with the audio when the recording ends, by the learner or at the time limit. */
@@ -45,7 +44,7 @@ export function useVoiceRecorder({ onRecorded, onTick }: Options) {
     const audio = await current.stop()
     // A silent recording is not sent: nothing to transcribe, and nothing to grade.
     if (!current.heardSpeech()) {
-      setMicError(NO_SPEECH)
+      setMicError(i18n.t('voice.noSpeech'))
       return
     }
     onRecordedRef.current(audio)
@@ -58,7 +57,7 @@ export function useVoiceRecorder({ onRecorded, onTick }: Options) {
       setSeconds(0)
       setIsRecording(true)
     } catch {
-      setMicError(MIC_ERROR)
+      setMicError(i18n.t('voice.micError'))
     }
   }, [stop])
 

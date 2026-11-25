@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { Trans, useTranslation } from 'react-i18next'
 import { MAX_RECORDING_MS, stopSpeaking, unlockSpeech } from '../lib/audio'
 import { useVoiceRecorder } from '../lib/useVoiceRecorder'
 import { transcribeWithPronunciation } from '../features/dialogue/api'
@@ -13,6 +14,7 @@ interface RepeatSentenceProps {
 
 /** Read a sentence aloud and get its pronunciation judged against the right text. */
 export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
+  const { t } = useTranslation()
   const assess = useMutation({
     mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, sentence, true),
     onSuccess: (result) => {
@@ -35,12 +37,12 @@ export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
   }
 
   const label = isRecording ? (
-    `■ Fine (${seconds}s / ${MAX_RECORDING_MS / 1000}s)`
+    t('voice.stop', { seconds, limit: MAX_RECORDING_MS / 1000 })
   ) : assess.isPending ? (
-    <>Valuto la pronuncia <span className="dots" aria-hidden="true" /></>
+    <>{t('voice.assessing')} <span className="dots" aria-hidden="true" /></>
   ) : (
     <>
-      <Emoji name="microphone" /> {assess.isSuccess ? 'Riprova a ripetere' : 'Ripeti la frase'}
+      <Emoji name="microphone" /> {assess.isSuccess ? t('voice.repeatAgain') : t('voice.repeat')}
     </>
   )
 
@@ -60,12 +62,12 @@ export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
       {assess.isSuccess && (
         <>
           <p className="muted repeat-heard">
-            Ho sentito: <span lang="en">{assess.data.text}</span>
+            <Trans t={t} i18nKey="voice.heard" values={{ text: assess.data.text }} components={{ en: <span lang="en" /> }} />
           </p>
           {assess.data.pronunciation ? (
             <PronunciationNote pronunciation={assess.data.pronunciation} />
           ) : (
-            <p className="muted">Non riesco a valutarla: riprova avvicinando il telefono.</p>
+            <p className="muted">{t('voice.unclear')}</p>
           )}
         </>
       )}

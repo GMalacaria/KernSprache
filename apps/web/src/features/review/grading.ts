@@ -90,9 +90,10 @@ export function gradePronunciation(score: number): Grade {
   return Rating.Again
 }
 
-export const GRADE_LABELS: Record<Grade, string> = {
-  [Rating.Again]: 'Da rivedere',
-  [Rating.Hard]: 'Con fatica',
-  [Rating.Good]: 'Bene',
-  [Rating.Easy]: 'Facile',
-}
+/** Catalog key (`review:grades.*`) of each grade's label. */
+export const GRADE_KEYS = {
+  [Rating.Again]: 'again',
+  [Rating.Hard]: 'hard',
+  [Rating.Good]: 'good',
+  [Rating.Easy]: 'easy',
+} as const satisfies Record<Grade, string>

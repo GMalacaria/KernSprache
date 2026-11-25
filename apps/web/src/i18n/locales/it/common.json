@@ -14,7 +14,8 @@
   },
   "errors": {
     "saveFailed": "Non sono riuscito a salvare. Riprova.",
-    "profileLoad": "Impossibile caricare il profilo. Ricarica la pagina."
+    "profileLoad": "Impossibile caricare il profilo. Ricarica la pagina.",
+    "tutorNoReply": "Il tutor non ha risposto. Riprova tra poco."
   },
   "minutes_one": "{{count}} minuto",
   "minutes_other": "{{count}} minuti",
@@ -42,5 +43,19 @@
   "parts": {
     "written": "Scritto",
     "oral": "Orale"
+  },
+  "voice": {
+    "micError": "Non riesco a usare il microfono. Controlla di aver dato il permesso al browser.",
+    "noSpeech": "Non ho sentito niente. Parla vicino al microfono e riprova.",
+    "heard": "Ho sentito: <en>{{text}}</en>",
+    "stop": "■ Fine ({{seconds}}s / {{limit}}s)",
+    "send": "■ Invia ({{seconds}}s / {{limit}}s)",
+    "transcribing": "Trascrivo",
+    "assessing": "Valuto la pronuncia",
+    "speak": "Parla",
+    "repeat": "Ripeti la frase",
+    "repeatAgain": "Riprova a ripetere",
+    "unclear": "Non riesco a valutarla: riprova avvicinando il telefono.",
+    "cancel": "Annulla"
   }
 }

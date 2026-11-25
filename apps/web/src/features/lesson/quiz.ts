@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 import type { LessonContent, QuizQuestion } from './types'
 
 /** Deterministic shuffle (so a re-render does not reorder options). */
@@ -41,7 +42,7 @@ export function wordQuiz(content: LessonContent): QuizQuestion[] {
   const all = content.words.map((w) => w.en)
   return content.words.map((w, i) =>
     makeQuestion(
-      `Come si dice "${w.it}" in inglese?`,
+      i18n.t('quiz.wordPrompt', { ns: 'lesson', word: w.it }),
       w.en,
       shuffle(
         all.filter((x) => x !== w.en),
@@ -60,7 +61,7 @@ export function verbQuiz(content: LessonContent): QuizQuestion[] {
     const others = content.verbs.filter((x) => x.base !== v.base).map((x) => x.past)
     const regularMistake = v.base.endsWith('e') ? `${v.base}d` : `${v.base}ed`
     return makeQuestion(
-      `Past simple di "${v.base}" (${v.it})?`,
+      i18n.t('quiz.verbPrompt', { ns: 'lesson', verb: v.base, translation: v.it }),
       v.past,
       [regularMistake, v.base, v.past_participle, ...others],
       i + 11,
@@ -75,7 +76,7 @@ export function phraseQuiz(content: LessonContent): QuizQuestion[] {
   const phraseMeanings = content.phrases.map((p) => p.it)
   const idiomQuestions = content.idioms.map((idiom, i) =>
     makeQuestion(
-      `Che cosa significa "${idiom.en}"?`,
+      i18n.t('quiz.meaningPrompt', { ns: 'lesson', text: idiom.en }),
       idiom.meaning_it,
       [idiom.it, ...phraseMeanings],
       i + 21,
@@ -86,7 +87,7 @@ export function phraseQuiz(content: LessonContent): QuizQuestion[] {
   const phraseQuestion = content.phrases[0]
     ? [
         makeQuestion(
-          `Che cosa significa "${content.phrases[0].en}"?`,
+          i18n.t('quiz.meaningPrompt', { ns: 'lesson', text: content.phrases[0].en }),
           content.phrases[0].it,
           phraseMeanings.slice(1),
           31,

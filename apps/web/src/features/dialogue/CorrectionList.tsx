@@ -1,18 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import type { Correction } from './types'
 
-const CATEGORY_LABELS: Record<Correction['category'], string> = {
-  verb_tense: 'Tempo verbale',
-  article: 'Articolo',
-  preposition: 'Preposizione',
-  word_order: 'Ordine delle parole',
-  vocabulary: 'Vocabolario',
-  spelling: 'Ortografia',
-  other: 'Altro',
-}
-
 export function CorrectionList({ corrections }: { corrections: Correction[] }) {
+  const { t } = useTranslation('dialogue')
   if (!corrections.length) {
-    return <p className="correction-ok">Nessun errore in questo messaggio.</p>
+    return <p className="correction-ok">{t('noMistakes')}</p>
   }
   return (
     <ul className="corrections">
@@ -20,7 +12,7 @@ export function CorrectionList({ corrections }: { corrections: Correction[] }) {
         <li key={i} className="correction">
           <p>
             <del>{c.original}</del> → <ins>{c.corrected}</ins>
-            <span className="tag">{CATEGORY_LABELS[c.category]}</span>
+            <span className="tag">{t(`categories.${c.category}`)}</span>
           </p>
           <p className="muted">{c.explanation_it}</p>
         </li>

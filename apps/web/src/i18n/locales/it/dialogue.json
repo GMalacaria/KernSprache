@@ -1,0 +1,24 @@
+{
+  "title": "Dialogo",
+  "modeAria": "Modalità",
+  "hintOral": "Tocca \"Parla\", rispondi in inglese ad alta voce e tocca di nuovo per inviare. Il tutor ti risponde a voce e corregge ogni errore.",
+  "hintWritten": "Scrivi in inglese, anche frasi semplici. Il tutor ti risponde e corregge ogni errore.",
+  "listen": "Ascolta",
+  "newWords": "Parole nuove:",
+  "typing": "Il tutor sta scrivendo",
+  "messageAria": "Il tuo messaggio in inglese",
+  "placeholder": "Write here…",
+  "send": "Invia",
+  "noMistakes": "Nessun errore in questo messaggio.",
+  "categories": {
+    "verb_tense": "Tempo verbale",
+    "article": "Articolo",
+    "preposition": "Preposizione",
+    "word_order": "Ordine delle parole",
+    "vocabulary": "Vocabolario",
+    "spelling": "Ortografia",
+    "other": "Altro",
+    "pronunciation": "Pronuncia"
+  },
+  "pronunciation": "Pronuncia"
+}
