@@ -93,7 +93,9 @@ Formato delle correzioni:
 
 ## Modello dati (essenziale)
 - `profiles`: id (= auth.uid), approved (solo il proprietario/service role può cambiarlo: trigger `protect_profile_approval`), level (A1–B2), purpose (`leisure|travel|work|love`, uno solo), goal (dettagli in parole dell'utente), onboarded_at, reminder_time, timezone, daily_goal_minutes
-- `chapters`: id, level, sort_order, slug, title, description_it, grammar_focus (sola lettura)
+- `learner_languages`: user_id, language (`language_code`: it|en|fr|es|de), level, purpose, goal, onboarded_at, placement_done_at; una riga per lingua studiata (RLS propria). Finché il codice scrive `profiles`, il trigger `profiles_sync_learner_language` copia livello/scopo/goal/onboarded_at nella riga della lingua attiva. `profiles.native_language` (default it) e `profiles.active_language` (default en).
+- Colonna `language` (default `en`) su `chapters`, `sessions`, `mistakes`, `vocab_items`, `placement_results`, `chapter_test_attempts`, `tts_cache`: tutto quello che c'è oggi è inglese.
+- `chapters`: id, language, level, sort_order, slug, title, description_it, grammar_focus (sola lettura; slug e ordine unici per lingua)
 - `lessons`: id, chapter_id, sort_order, slug, title, focus (sola lettura)
 - `lesson_progress`: user_id, lesson_id, written_done_at, oral_done_at, written_stats, oral_stats, score, completed_at; una riga anche per una lezione a metà (una parte fatta). `completed_at` e `score` solo con tutte e due le parti (vincolo `lesson_progress_completed_needs_both_parts`); completata = `completed_at` non nullo
 - `lesson_stats`: user_id, lesson_id, chapter_id (preso dalla lezione), answers, correct, best_streak, completed_at; una riga per lezione (ripetendola si sovrascrive). Si scrive solo con la RPC `record_lesson_stats`, che rifiuta numeri impossibili (giuste > risposte, serie incompatibile con gli errori, più di 100 risposte): il quiz è corretto nel browser, quindi i numeri non sono dimostrabili.
