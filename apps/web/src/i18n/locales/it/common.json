@@ -1,0 +1,18 @@
+{
+  "appName": "Kern Sprache",
+  "actions": {
+    "save": "Salva",
+    "saving": "Salvo…",
+    "next": "Avanti",
+    "cancel": "Annulla",
+    "retry": "Riprova",
+    "signOut": "Esci",
+    "gotIt": "Ho capito",
+    "notNow": "Non ora"
+  },
+  "errors": {
+    "saveFailed": "Non sono riuscito a salvare. Riprova."
+  },
+  "minutes_one": "{{count}} minuto",
+  "minutes_other": "{{count}} minuti"
+}

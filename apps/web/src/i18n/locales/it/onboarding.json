@@ -1,0 +1,26 @@
+{
+  "welcome": "Benvenuto!",
+  "editTitle": "I tuoi obiettivi",
+  "purposeQuestion": "Perché vuoi imparare l'inglese?",
+  "choosePurpose": "Scegli un motivo",
+  "detailsLabel": "Vuoi aggiungere qualcosa? (facoltativo)",
+  "detailsPlaceholder": "Es. tra sei mesi mi trasferisco a Londra per lavoro",
+  "minutesQuestion": "Quanti minuti vuoi studiare al giorno?",
+  "halfSplit": "Metà del tempo è scritto, metà orale.",
+  "purposes": {
+    "leisure": { "label": "Svago", "hint": "film, musica, amici, tempo libero" },
+    "travel": { "label": "Viaggi", "hint": "aeroporti, hotel, ristoranti, indicazioni" },
+    "work": { "label": "Lavoro", "hint": "riunioni, email, colleghi, colloqui" },
+    "love": { "label": "Amore", "hint": "appuntamenti, sentimenti, famiglia" },
+    "none": "non scelto"
+  },
+  "install": {
+    "title": "Installa Kern Sprache sul telefono",
+    "why": "L'app sta nella schermata Home e si apre senza la barra del browser. Serve anche per ricevere i promemoria.",
+    "iosShare": "Tocca <strong>Condividi</strong> (il quadrato con la freccia verso l'alto).",
+    "iosAdd": "Scegli <strong>Aggiungi alla schermata Home</strong>.",
+    "iosConfirm": "Tocca <strong>Aggiungi</strong>, poi apri l'app dall'icona.",
+    "iosSignInAgain": "Alla prima apertura dall'icona dovrai accedere di nuovo con email e password.",
+    "install": "Installa"
+  }
+}

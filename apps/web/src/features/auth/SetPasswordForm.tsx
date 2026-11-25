@@ -1,12 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
 import { authErrorMessage } from './messages'
 
 export const MIN_PASSWORD_LENGTH = 8
 
 /** New password with confirmation, for a signed-in learner (settings or after a reset link). */
-export function SetPasswordForm({ onDone, submitLabel }: { onDone: () => void; submitLabel: string }) {
+export function SetPasswordForm({ onDone, submitLabel }: { onDone: () => void; submitLabel?: string }) {
+  const { t } = useTranslation(['auth', 'common'])
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [mismatch, setMismatch] = useState(false)
@@ -27,7 +29,7 @@ export function SetPasswordForm({ onDone, submitLabel }: { onDone: () => void; s
 
   return (
     <form onSubmit={onSubmit} className="stack">
-      <label htmlFor="new-password">Nuova password (almeno {MIN_PASSWORD_LENGTH} caratteri)</label>
+      <label htmlFor="new-password">{t('password.new', { min: MIN_PASSWORD_LENGTH })}</label>
       <input
         id="new-password"
         type="password"
@@ -37,7 +39,7 @@ export function SetPasswordForm({ onDone, submitLabel }: { onDone: () => void; s
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <label htmlFor="confirm-password">Ripeti la password</label>
+      <label htmlFor="confirm-password">{t('password.confirm')}</label>
       <input
         id="confirm-password"
         type="password"
@@ -47,9 +49,9 @@ export function SetPasswordForm({ onDone, submitLabel }: { onDone: () => void; s
         onChange={(e) => setConfirm(e.target.value)}
       />
       <button type="submit" disabled={save.isPending}>
-        {save.isPending ? 'Salvo…' : submitLabel}
+        {save.isPending ? t('common:actions.saving') : (submitLabel ?? t('password.save'))}
       </button>
-      {mismatch && <p className="error">Le due password non coincidono.</p>}
+      {mismatch && <p className="error">{t('password.mismatch')}</p>}
       {save.isError && <p className="error">{save.error.message}</p>}
     </form>
   )

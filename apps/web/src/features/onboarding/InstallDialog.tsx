@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { type InstallMode, promptInstall } from '../../lib/install'
 
 interface InstallDialogProps {
@@ -9,6 +10,7 @@ interface InstallDialogProps {
 
 /** How to install the app: the system dialog on Android, the Share steps on iOS. */
 export function InstallDialog({ open, mode, onClose }: InstallDialogProps) {
+  const { t } = useTranslation(['onboarding', 'common'])
   const ref = useRef<HTMLDialogElement>(null)
   const visible = open && mode !== null
 
@@ -30,35 +32,35 @@ export function InstallDialog({ open, mode, onClose }: InstallDialogProps) {
 
   return (
     <dialog ref={ref} className="install-dialog" aria-labelledby="install-title" onClose={onClose}>
-      <h2 id="install-title">Installa Kern Sprache sul telefono</h2>
-      <p>L'app sta nella schermata Home e si apre senza la barra del browser. Serve anche per ricevere i promemoria.</p>
+      <h2 id="install-title">{t('install.title')}</h2>
+      <p>{t('install.why')}</p>
       {mode === 'ios' ? (
         <>
           <ol className="install-steps">
             <li>
-              Tocca <strong>Condividi</strong> (il quadrato con la freccia verso l'alto).
+              <Trans t={t} i18nKey="install.iosShare" components={{ strong: <strong /> }} />
             </li>
             <li>
-              Scegli <strong>Aggiungi alla schermata Home</strong>.
+              <Trans t={t} i18nKey="install.iosAdd" components={{ strong: <strong /> }} />
             </li>
             <li>
-              Tocca <strong>Aggiungi</strong>, poi apri l'app dall'icona.
+              <Trans t={t} i18nKey="install.iosConfirm" components={{ strong: <strong /> }} />
             </li>
           </ol>
-          <p className="muted">Alla prima apertura dall'icona dovrai accedere di nuovo con email e password.</p>
+          <p className="muted">{t('install.iosSignInAgain')}</p>
           <div className="dialog-actions">
             <button type="button" onClick={onClose}>
-              Ho capito
+              {t('common:actions.gotIt')}
             </button>
           </div>
         </>
       ) : (
         <div className="dialog-actions">
           <button type="button" className="link" onClick={onClose}>
-            Non ora
+            {t('common:actions.notNow')}
           </button>
           <button type="button" onClick={() => void install()}>
-            Installa
+            {t('install.install')}
           </button>
         </div>
       )}
