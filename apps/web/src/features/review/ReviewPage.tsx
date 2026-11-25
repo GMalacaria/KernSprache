@@ -6,8 +6,10 @@ import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, startReviewSession, type ReviewItem } from './api'
+import { BackButton } from '../../components/BackButton'
 import { Waiting } from '../../components/Waiting'
 import { GRADE_LABELS } from './grading'
+import { dueSummary } from './summary'
 import { PronunciationCard, SentenceCard, VocabCard } from './ReviewCards'
 
 // Cards graded "Again" come back in the same sitting once they are due again (minutes away).
@@ -23,16 +25,17 @@ export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onS
     next()
   }
 
-  if (due.isPending || due.isError) {
+  const [started, setStarted] = useState(false)
+
+  // Landing first: what is due and a button to start. The study timer runs only once the review starts,
+  // so opening the screen (or finding nothing to review) does not count as study time.
+  if (due.isPending || due.isError || !started) {
     return (
       <main className="page review">
-        <header className="row">
-          <h1>Ripasso</h1>
-          <button type="button" className="link" onClick={() => void exit(null)}>
-            Chiudi
-          </button>
-        </header>
-        {due.isPending ? <Waiting title="Preparo il ripasso" compact /> : <p className="error">Impossibile caricare le carte da ripassare.</p>}
+        <ReviewHeader onBack={() => void exit(null)} />
+        {due.isPending && <Waiting title="Preparo il ripasso" compact />}
+        {due.isError && <p className="error">Impossibile caricare le carte da ripassare.</p>}
+        {due.isSuccess && <ReviewIntro items={due.data} onStart={() => setStarted(true)} onBack={() => void exit(null)} />}
       </main>
     )
   }
@@ -95,12 +98,7 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
 
   return (
     <main className="page review">
-      <header className="row">
-        <h1>Ripasso</h1>
-        <button type="button" className="link" onClick={() => onExit(sessionId.current)}>
-          {current ? 'Esci' : 'Chiudi'}
-        </button>
-      </header>
+      <ReviewHeader onBack={() => onExit(sessionId.current)} />
 
       <StudyTimerBar />
       <StudyPrompts
@@ -111,7 +109,7 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
       {!current && (
         <section className="notice">
           {done === 0 ? (
-            <p>Non hai carte da ripassare adesso. Le parole e gli errori dei dialoghi arriveranno qui.</p>
+            <p>Hai lasciato tutte le carte per un'altra volta: restano da ripassare.</p>
           ) : (
             <p>Ripasso finito: {done} carte. Le prossime torneranno quando è il momento giusto.</p>
           )}
@@ -147,6 +145,60 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
         </>
       )}
     </main>
+  )
+}
+
+function ReviewHeader({ onBack }: { onBack: () => void }) {
+  return (
+    <header className="lesson-header">
+      <BackButton onBack={onBack} />
+      <h1>Ripasso</h1>
+    </header>
+  )
+}
+
+function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`
+}
+
+/** The review's landing: how many cards are due and of which kind, and the button that starts it. */
+function ReviewIntro({ items, onStart, onBack }: { items: ReviewItem[]; onStart: () => void; onBack: () => void }) {
+  if (items.length === 0) {
+    return (
+      <section className="notice stack">
+        <p>
+          Non hai carte da ripassare adesso. Le parole delle lezioni e gli errori dei dialoghi arrivano qui quando è il
+          momento di ripassarli.
+        </p>
+        <button type="button" className="secondary" onClick={onBack}>
+          Torna alla home
+        </button>
+      </section>
+    )
+  }
+  const { words, grammar, pronunciation } = dueSummary(items)
+  const parts = [
+    words > 0 && plural(words, 'parola da tradurre', 'parole da tradurre'),
+    grammar > 0 && plural(grammar, 'errore da correggere', 'errori da correggere'),
+    pronunciation > 0 && plural(pronunciation, 'parola da pronunciare', 'parole da pronunciare'),
+  ].filter((p): p is string => Boolean(p))
+  return (
+    <section className="review-intro stack">
+      <p className="review-count">
+        <strong>{items.length}</strong> {items.length === 1 ? 'carta da ripassare' : 'carte da ripassare'}
+      </p>
+      <ul className="review-kinds">
+        {parts.map((p) => (
+          <li key={p}>{p}</li>
+        ))}
+      </ul>
+      <p className="muted">
+        L&apos;app valuta ogni risposta e decide quando riproporti la carta.
+      </p>
+      <button type="button" onClick={onStart}>
+        Inizia ripasso
+      </button>
+    </section>
   )
 }
 
