@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useProfile } from '../home/useProfile'
 import {
@@ -13,6 +14,7 @@ import {
 
 /** Daily reminder: turn push notifications on or off on this device and pick the hour. */
 export function NotificationSettings({ userId }: { userId: string }) {
+  const { t } = useTranslation('settings')
   const queryClient = useQueryClient()
   const profile = useProfile(userId)
   const support = pushSupport()
@@ -36,18 +38,17 @@ export function NotificationSettings({ userId }: { userId: string }) {
   if (support === 'unsupported') {
     return (
       <section className="notice">
-        <h2 className="small-heading">Promemoria</h2>
-        <p className="muted">Questo browser non supporta le notifiche: attivale dall'app installata sul telefono.</p>
+        <h2 className="small-heading">{t('reminders.title')}</h2>
+        <p className="muted">{t('reminders.unsupported')}</p>
       </section>
     )
   }
   if (support === 'needs-install') {
     return (
       <section className="notice">
-        <h2 className="small-heading">Promemoria</h2>
+        <h2 className="small-heading">{t('reminders.title')}</h2>
         <p className="muted">
-          Su iPhone le notifiche funzionano solo con l'app installata: in Safari tocca <strong>Condividi</strong> e poi{' '}
-          <strong>Aggiungi a Home</strong>, poi riapri l'app dalla Home.
+          <Trans t={t} i18nKey="reminders.needsInstall" components={{ strong: <strong /> }} />
         </p>
       </section>
     )
@@ -56,7 +57,7 @@ export function NotificationSettings({ userId }: { userId: string }) {
 
   const hourSelect = (
     <label className="row">
-      <span>Ora del promemoria</span>
+      <span>{t('reminders.hour')}</span>
       <select
         value={hour}
         onChange={(e) => {
@@ -77,25 +78,25 @@ export function NotificationSettings({ userId }: { userId: string }) {
 
   return (
     <section className="notice stack">
-      <h2 className="small-heading">Promemoria</h2>
+      <h2 className="small-heading">{t('reminders.title')}</h2>
       {subscription.data ? (
         <>
           <p className="muted">
-            Ricevi al massimo una notifica al giorno, se non hai ancora raggiunto l'obiettivo.
+            {t('reminders.activeHint')}
           </p>
           {hourSelect}
           <button type="button" className="link" onClick={() => disable.mutate()} disabled={disable.isPending}>
-            Disattiva i promemoria
+            {t('reminders.disable')}
           </button>
         </>
       ) : notificationsBlocked() ? (
-        <p className="muted">Le notifiche sono bloccate nel browser: consentile dalle sue impostazioni per attivare i promemoria.</p>
+        <p className="muted">{t('reminders.blocked')}</p>
       ) : (
         <>
-          <p className="muted">Una notifica al giorno con ripassi in scadenza o serie a rischio.</p>
+          <p className="muted">{t('reminders.inactiveHint')}</p>
           {hourSelect}
           <button type="button" onClick={() => enable.mutate()} disabled={enable.isPending}>
-            Attiva i promemoria
+            {t('reminders.enable')}
           </button>
         </>
       )}

@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js'
+import { Trans, useTranslation } from 'react-i18next'
 import type { DialogueMode } from '../dialogue/DialoguePage'
 import { purposeLabel } from '../onboarding/purposes'
 import { useDueCount } from '../review/useDueCount'
@@ -23,6 +24,7 @@ export function HomePage({
   onOpenLesson,
   onOpenTest,
 }: HomePageProps) {
+  const { t } = useTranslation(['home', 'common'])
   const profile = useProfile(user.id)
   const dueCount = useDueCount()
   const timer = useStudyTimer()
@@ -38,30 +40,34 @@ export function HomePage({
   return (
     <main className="page home">
       <header>
-        <h1>Kern Sprache</h1>
+        <h1>{t('common:appName')}</h1>
       </header>
 
       {profile.data && (
         <p className="profile-summary">
-          Livello <strong>{profile.data.level}</strong> · {purposeLabel(profile.data.purpose)} · {goalMinutes} min al
-          giorno
+          <Trans
+            t={t}
+            i18nKey="summary"
+            values={{ level: profile.data.level, purpose: purposeLabel(profile.data.purpose), minutes: goalMinutes }}
+            components={{ strong: <strong /> }}
+          />
         </p>
       )}
 
       <GoalRing />
       {timer.status.goalReached && (
-        <p className="muted goal-hint">Obiettivo di oggi raggiunto. Puoi continuare ad allenarti quanto vuoi.</p>
+        <p className="muted goal-hint">{t('goalReachedHint')}</p>
       )}
       {goalMinutes !== undefined && timer.ready && timer.goalSeconds !== goalMinutes * 60 && (
         <p className="muted goal-hint">
-          Il nuovo obiettivo di {goalMinutes} minuti vale da domani: quello di oggi è già iniziato.
+          {t('newGoalTomorrow', { minutes: goalMinutes })}
         </p>
       )}
 
       <div className="home-actions">
         {next ? (
           <button type="button" className="primary-action" onClick={() => onOpenLesson(next.lesson.id)}>
-            Continua il percorso: {next.lesson.title}
+            {t('continuePath', { title: next.lesson.title })}
             <small>
               {next.chapter.level} · {next.chapter.title}
             </small>
@@ -69,16 +75,16 @@ export function HomePage({
         ) : (
           testChapter && (
             <button type="button" className="primary-action" onClick={() => onOpenTest(testChapter.id)}>
-              Verifica del capitolo: {testChapter.title}
-              <small>{testChapter.level} · scritto e orale, per passare al capitolo successivo</small>
+              {t('chapterTest', { title: testChapter.title })}
+              <small>{t('chapterTestHint', { level: testChapter.level })}</small>
             </button>
           )
         )}
         <button type="button" className={hasMainAction ? secondary : undefined} onClick={() => onStartDialogue(recommended)}>
-          {recommended === 'oral' ? 'Inizia un dialogo a voce' : 'Inizia un dialogo'}
+          {recommended === 'oral' ? t('startOralDialogue') : t('startDialogue')}
         </button>
         <button type="button" className={secondary} onClick={onStartReview}>
-          Ripasso{dueCount.data !== undefined && ` (${dueCount.data} da fare)`}
+          {dueCount.data !== undefined ? t('reviewDue', { count: dueCount.data }) : t('review')}
         </button>
       </div>
 

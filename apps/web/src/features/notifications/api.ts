@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 import { isIos, isStandalone } from '../../lib/pwa'
 import { supabase } from '../../lib/supabase'
 
@@ -47,7 +48,7 @@ function applicationServerKey(base64Url: string): Uint8Array<ArrayBuffer> {
 /** Asks for permission (call it from a click), subscribes this device and saves the reminder hour. */
 export async function enableReminders(userId: string, hour: number): Promise<void> {
   const permission = await Notification.requestPermission()
-  if (permission !== 'granted') throw new Error('Le notifiche sono bloccate: consentile dalle impostazioni del browser.')
+  if (permission !== 'granted') throw new Error(i18n.t('reminders.errors.denied', { ns: 'settings' }))
 
   const reg = await registration()
   const subscription =
@@ -57,7 +58,7 @@ export async function enableReminders(userId: string, hour: number): Promise<voi
       applicationServerKey: applicationServerKey(import.meta.env.VITE_VAPID_PUBLIC_KEY ?? ''),
     }))
   const { endpoint, keys } = subscription.toJSON()
-  if (!endpoint || !keys?.p256dh || !keys.auth) throw new Error('Il browser non ha creato l\'iscrizione. Riprova.')
+  if (!endpoint || !keys?.p256dh || !keys.auth) throw new Error(i18n.t('reminders.errors.noSubscription', { ns: 'settings' }))
 
   const { error } = await supabase.rpc('register_push_subscription', {
     p_endpoint: endpoint,

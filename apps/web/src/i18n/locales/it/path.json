@@ -1,0 +1,18 @@
+{
+  "title": "Percorso",
+  "loadError": "Impossibile caricare il percorso.",
+  "loading": "Carico il percorso",
+  "level": "Livello {{level}}",
+  "status": {
+    "skipped": "Superato con il test",
+    "done": "Completato",
+    "current": "In corso",
+    "locked": "Bloccato"
+  },
+  "unlockAria": "Sblocca \"{{title}}\" con una verifica",
+  "unlockTitle": "Sblocca con una verifica",
+  "lessonLocked": " (bloccata)",
+  "chapterTest": "Verifica del capitolo",
+  "chapterTestHint": "Scritto e orale: con 70 su 100 passi al capitolo successivo",
+  "lessonsDone": "Lezioni completate: {{done}} di {{total}}. Poi c'è la verifica del capitolo."
+}

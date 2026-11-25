@@ -1,0 +1,20 @@
+{
+  "todayAria": "Tempo di studio di oggi",
+  "goalReached": "Obiettivo raggiunto",
+  "ofGoal": "su {{minutes}} min",
+  "paused": "In pausa",
+  "missing": "Per l'obiettivo servono metà tempo di scritto e metà di orale: mancano ancora {{missing}}.",
+  "missingOral": "{{time}} di orale",
+  "missingWritten": "{{time}} di scritto",
+  "goalDialog": {
+    "title": "Obiettivo di oggi raggiunto!",
+    "body": "Hai studiato {{total}} minuti: {{written}} di scritto e {{oral}} di orale."
+  },
+  "halfway": {
+    "title": "Metà scritta completata!",
+    "switch": "Ora passa alla parte orale: l'obiettivo di oggi si raggiunge solo con l'altra metà a voce.",
+    "noMic": "Su questo dispositivo il microfono non è disponibile, e senza la parte orale l'obiettivo di oggi non si raggiunge: per continuare a voce apri l'app sul telefono.",
+    "goOral": "Passa all'orale",
+    "keepWritten": "Continua con lo scritto"
+  }
+}

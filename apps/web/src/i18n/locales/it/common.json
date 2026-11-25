@@ -4,15 +4,43 @@
     "save": "Salva",
     "saving": "Salvo…",
     "next": "Avanti",
-    "cancel": "Annulla",
     "retry": "Riprova",
     "signOut": "Esci",
     "gotIt": "Ho capito",
-    "notNow": "Non ora"
+    "notNow": "Non ora",
+    "back": "Indietro",
+    "continuePractice": "Continua ad allenarti",
+    "backHome": "Torna alla home"
   },
   "errors": {
-    "saveFailed": "Non sono riuscito a salvare. Riprova."
+    "saveFailed": "Non sono riuscito a salvare. Riprova.",
+    "profileLoad": "Impossibile caricare il profilo. Ricarica la pagina."
   },
   "minutes_one": "{{count}} minuto",
-  "minutes_other": "{{count}} minuti"
+  "minutes_other": "{{count}} minuti",
+  "loading": {
+    "app": "Carico Kern Sprache",
+    "profile": "Carico il tuo profilo",
+    "today": "Carico il tempo di oggi"
+  },
+  "tabs": {
+    "label": "Sezioni",
+    "home": "Home",
+    "path": "Percorso",
+    "profile": "Profilo",
+    "settings": "Impostazioni"
+  },
+  "listen": {
+    "aria": "Ascolta: {{text}}",
+    "preparing": "Preparo l'audio"
+  },
+  "noMicrophone": "Su questo dispositivo il microfono non è disponibile. Apri Kern Sprache sul telefono, oppure usa un browser che permetta di registrare e dai il permesso al microfono quando te lo chiede.",
+  "level": "Livello {{level}}",
+  "minutesShort": "{{count}} min",
+  "hoursShort": "{{hours}} h",
+  "hoursMinutesShort": "{{hours}} h {{minutes}} min",
+  "parts": {
+    "written": "Scritto",
+    "oral": "Orale"
+  }
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Emoji } from '../../components/Emoji'
 import { formatClock } from './studyMath'
 import { useStudyTimer } from './useStudyTimer'
@@ -10,6 +11,7 @@ interface StudyPromptsProps {
 
 /** Halfway invitation to switch to oral, and the goal-reached banner that pauses the exercise. */
 export function StudyPrompts({ onSwitchToOral, onExit }: StudyPromptsProps) {
+  const { t } = useTranslation(['study', 'common'])
   const timer = useStudyTimer()
 
   if (timer.showGoalReached) {
@@ -19,17 +21,20 @@ export function StudyPrompts({ onSwitchToOral, onExit }: StudyPromptsProps) {
           <p className="big">
             <Emoji name="party" size="3rem" />
           </p>
-          <h2 id="goal-title">Obiettivo di oggi raggiunto!</h2>
+          <h2 id="goal-title">{t('goalDialog.title')}</h2>
           <p>
-            Hai studiato {formatClock(timer.status.totalSeconds)} minuti: {formatClock(timer.writtenSeconds)} di
-            scritto e {formatClock(timer.oralSeconds)} di orale.
+            {t('goalDialog.body', {
+              total: formatClock(timer.status.totalSeconds),
+              written: formatClock(timer.writtenSeconds),
+              oral: formatClock(timer.oralSeconds),
+            })}
           </p>
           <div className="stack">
             <button type="button" onClick={timer.continueAfterGoal}>
-              Continua ad allenarti
+              {t('common:actions.continuePractice')}
             </button>
             <button type="button" className="link" onClick={onExit}>
-              Torna alla home
+              {t('common:actions.backHome')}
             </button>
           </div>
         </div>
@@ -41,10 +46,10 @@ export function StudyPrompts({ onSwitchToOral, onExit }: StudyPromptsProps) {
     return (
       <aside className="halfway" role="status">
         <p>
-          <strong>Metà scritta completata!</strong>{' '}
+          <strong>{t('halfway.title')}</strong>{' '}
           {onSwitchToOral
-            ? "Ora passa alla parte orale: l'obiettivo di oggi si raggiunge solo con l'altra metà a voce."
-            : "Su questo dispositivo il microfono non è disponibile, e senza la parte orale l'obiettivo di oggi non si raggiunge: per continuare a voce apri l'app sul telefono."}
+            ? t('halfway.switch')
+            : t('halfway.noMic')}
         </p>
         <div className="row">
           {onSwitchToOral && (
@@ -55,11 +60,11 @@ export function StudyPrompts({ onSwitchToOral, onExit }: StudyPromptsProps) {
                 onSwitchToOral()
               }}
             >
-              Passa all'orale
+              {t('halfway.goOral')}
             </button>
           )}
           <button type="button" className="link" onClick={timer.dismissHalfwayPrompt}>
-            Continua con lo scritto
+            {t('halfway.keepWritten')}
           </button>
         </div>
       </aside>

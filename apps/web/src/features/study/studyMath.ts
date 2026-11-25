@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 /** The two halves of the daily goal: only the path (lessons and chapter tests) counts towards it. */
 export type StudyMode = 'written' | 'oral'
 /** Extra practice: its time is saved per day for statistics but does not count towards the goal. */
@@ -57,7 +58,7 @@ export function studyStatus(p: StudyProgress): StudyStatus {
 
 /** "4 min" (rounded up, so "1 min" until the very last second). */
 export function formatMinutesLeft(seconds: number): string {
-  return `${Math.max(1, Math.ceil(seconds / 60))} min`
+  return i18n.t('minutesShort', { count: Math.max(1, Math.ceil(seconds / 60)) })
 }
 
 /** The learner is "really on the site": page visible, window focused, recent interaction. */
