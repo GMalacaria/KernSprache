@@ -68,8 +68,10 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
     onSettled: onExit,
   })
 
+  // Every new message (the learner's, the tutor's, "sta scrivendo") brings the end of the chat into view,
+  // answer box included: the marker sits after the composer and is aligned to the bottom of the screen.
   useEffect(() => {
-    bottom.current?.scrollIntoView({ behavior: 'smooth' })
+    bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [turns, send.isPending])
 
   useEffect(() => stopSpeaking, [])
@@ -141,7 +143,6 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
         ))}
         {send.isPending && <li className="turn turn-assistant muted" role="status">Il tutor sta scrivendo <span className="dots" aria-hidden="true" /></li>}
       </ol>
-      <div ref={bottom} />
 
       {send.isError && <p className="error">{send.error.message}</p>}
 
@@ -166,6 +167,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
           </button>
         </form>
       )}
+      <div ref={bottom} />
     </main>
   )
 }

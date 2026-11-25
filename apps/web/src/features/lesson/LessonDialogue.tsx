@@ -1,5 +1,5 @@
 import { ListenButton } from '../../components/ListenButton'
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { speak } from '../../lib/audio'
 import { sendTutorTurn } from '../dialogue/api'
@@ -26,6 +26,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
   const [draft, setDraft] = useState('')
   const sessionId = useRef<string | undefined>(undefined)
   const learnerTurns = turns.filter((t) => t.role === 'user' && t.corrections).length
+  const bottom = useRef<HTMLDivElement>(null)
 
   const send = useMutation({
     mutationFn: sendTutorTurn,
@@ -67,6 +68,11 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
   }
 
   const finished = learnerTurns >= LESSON_DIALOGUE_TURNS
+
+  // Every new message brings the end of the chat into view, answer box included (the lesson body scrolls).
+  useEffect(() => {
+    if (turns.length > 1 || send.isPending) bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [turns, send.isPending])
 
   return (
     <div>
@@ -117,6 +123,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
           )}
         </>
       )}
+      <div ref={bottom} />
     </div>
   )
 }
