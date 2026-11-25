@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { ListenButton } from '../../components/ListenButton'
 import { canSpeak } from '../../lib/audio'
 import type { LessonContent } from './types'
@@ -41,9 +42,10 @@ export function WordsView({ content }: { content: LessonContent }) {
 }
 
 export function PhrasesView({ content }: { content: LessonContent }) {
+  const { t } = useTranslation('lesson')
   return (
     <>
-      <h3 className="small-heading">Espressioni utili</h3>
+      <h3 className="small-heading">{t('views.usefulPhrases')}</h3>
       <ul className="cards">
         {content.phrases.map((p) => (
           <li key={p.en} className="card">
@@ -55,15 +57,15 @@ export function PhrasesView({ content }: { content: LessonContent }) {
       </ul>
       {content.idioms.length > 0 && (
         <>
-          <h3 className="small-heading">Modi di dire</h3>
+          <h3 className="small-heading">{t('views.idioms')}</h3>
           <ul className="cards">
             {content.idioms.map((i) => (
               <li key={i.en} className="card">
                 <strong lang="en">{i.en}</strong> <Listen text={i.en} />
                 <br />
-                <small className="muted">Letteralmente: {i.it}</small>
+                <small className="muted">{t('views.literally', { text: i.it })}</small>
                 <br />
-                Significa: {i.meaning_it}
+                {t('views.means', { text: i.meaning_it })}
               </li>
             ))}
           </ul>
@@ -74,14 +76,15 @@ export function PhrasesView({ content }: { content: LessonContent }) {
 }
 
 export function VerbsView({ content }: { content: LessonContent }) {
+  const { t } = useTranslation('lesson')
   return (
     <table className="verbs">
       <thead>
         <tr>
-          <th>Base</th>
-          <th>Past simple</th>
-          <th>Past participle</th>
-          <th>Italiano</th>
+          <th>{t('views.verbBase')}</th>
+          <th>{t('views.verbPast')}</th>
+          <th>{t('views.verbParticiple')}</th>
+          <th>{t('views.verbNative')}</th>
         </tr>
       </thead>
       <tbody>
@@ -99,38 +102,33 @@ export function VerbsView({ content }: { content: LessonContent }) {
 }
 
 export function DictationIntro({ count }: { count: number }) {
+  const { t } = useTranslation('lesson')
   return (
     <div className="stack">
-      <p>
-        Ascolterai {count} {count === 1 ? 'frase' : 'frasi'} e le scriverai. Se sbagli, vedrai sottolineate le parole che non
-        coincidono e riproverai finché la frase è giusta.
-      </p>
-      <p className="muted">
-        Puoi leggere il testo, ma ogni tentativo sbagliato e la lettura del testo abbassano il punteggio.
-      </p>
+      <p>{t('views.dictationIntro', { count })}</p>
+      <p className="muted">{t('views.dictationRules')}</p>
     </div>
   )
 }
 
 export function RepeatIntro({ count }: { count: number }) {
+  const { t } = useTranslation('lesson')
   return (
     <div className="stack">
-      <p>
-        Ascolta {count} {count === 1 ? 'frase' : 'frasi'} e {count === 1 ? 'ripetila' : 'ripetile'} a voce: valuto la
-        pronuncia parola per parola.
-      </p>
-      <p className="muted">Conta il primo tentativo valutato; puoi riprovare quante volte vuoi per migliorare.</p>
+      <p>{t('views.repeatIntro', { count })}</p>
+      <p className="muted">{t('views.repeatRules')}</p>
     </div>
   )
 }
 
 export function ListeningView({ content, showText }: { content: LessonContent; showText: boolean }) {
+  const { t } = useTranslation('lesson')
   return (
     <div className="stack">
       {canSpeak() ? (
-        <ListenButton text={content.listening.text_en} label="Ascolta il testo" />
+        <ListenButton text={content.listening.text_en} label={t('views.listenText')} />
       ) : (
-        <p className="muted">La sintesi vocale non è disponibile: leggi il testo.</p>
+        <p className="muted">{t('views.noSpeech')}</p>
       )}
       {(showText || !canSpeak()) && (
         <p className="passage" lang="en">

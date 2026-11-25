@@ -1,0 +1,124 @@
+{
+  "title": "Lezione",
+  "backTitle": "Indietro: il punto raggiunto resta salvato",
+  "loading": {
+    "title": "Preparo la lezione per te",
+    "hint1": "La prima volta può richiedere qualche secondo.",
+    "hint2": "Scelgo parole ed esempi adatti al tuo scopo.",
+    "hint3": "Scrivo il dialogo con il tutor."
+  },
+  "errors": {
+    "open": "Non riesco ad aprire la lezione. Riprova tra poco.",
+    "empty": "Risposta vuota dal server.",
+    "progress": "Non riesco a leggere i tuoi progressi. Riprova tra poco.",
+    "save": "Non sono riuscito a salvare i progressi."
+  },
+  "partName": {
+    "written": "scritta",
+    "oral": "orale"
+  },
+  "partsAria": "Parte della lezione",
+  "partDoneMark": " (fatta)",
+  "dialogue": "Dialogo",
+  "step": "{{title}} · passo {{current}} di {{total}}",
+  "sections": {
+    "listening": "Ascolto",
+    "repeat": "Ripeti la frase",
+    "grammar": "Grammatica",
+    "words": "Parole nuove",
+    "phrases": "Espressioni e modi di dire",
+    "verbs": "Verbi",
+    "dictation": "Dettato",
+    "reading": "Lettura"
+  },
+  "noMic": {
+    "title": "Per la parte orale serve il microfono",
+    "why": "La lezione si conclude solo con la parte scritta e quella orale: esercitarsi in una sola delle due non basta per imparare bene la lingua."
+  },
+  "partAlreadyDone": "Hai già fatto la parte {{part}} di questa lezione: puoi rifarla per ripassare.",
+  "tryIt": "Mettiti alla prova",
+  "dialogueTitle": {
+    "written": "Dialogo scritto",
+    "oral": "Dialogo a voce"
+  },
+  "done": {
+    "lesson": "Lezione completata",
+    "part": "Parte {{part}} completata",
+    "allLesson": "Tutta la lezione ({{count}} risposte)",
+    "thisPart": "Questa parte ({{count}} risposte)",
+    "saving": "Salvo i progressi",
+    "missingPart": "Per concludere la lezione manca la parte {{part}}: servono tutte e due per imparare bene la lingua.",
+    "noMicForOral": "Su questo dispositivo il microfono non è disponibile: per la parte orale apri Kern Sprache sul telefono.",
+    "switchPart": "Passa alla parte {{part}}",
+    "backToPath": "Torna al percorso",
+    "added": "{{count}} tra parole ed espressioni aggiunte al ripasso.",
+    "alreadyInReview": "Le parole di questa lezione erano già nel ripasso.",
+    "chapterInNumbers": "Il capitolo in numeri",
+    "nextLesson": "Prossima lezione"
+  },
+  "stats": {
+    "mistakes_one": "errore",
+    "mistakes_other": "errori",
+    "bestRun": "giuste di fila (record)",
+    "correct": "risposte giuste",
+    "chapterLessons": "Le lezioni del capitolo",
+    "heading_one": "{{title}} ({{count}} lezione, {{answers}} risposte)",
+    "heading_other": "{{title}} ({{count}} lezioni, {{answers}} risposte)"
+  },
+  "views": {
+    "usefulPhrases": "Espressioni utili",
+    "idioms": "Modi di dire",
+    "literally": "Letteralmente: {{text}}",
+    "means": "Significa: {{text}}",
+    "verbBase": "Base",
+    "verbPast": "Past simple",
+    "verbParticiple": "Past participle",
+    "verbNative": "Italiano",
+    "dictationIntro_one": "Ascolterai {{count}} frase e la scriverai. Se sbagli, vedrai sottolineate le parole che non coincidono e riproverai finché la frase è giusta.",
+    "dictationIntro_other": "Ascolterai {{count}} frasi e le scriverai. Se sbagli, vedrai sottolineate le parole che non coincidono e riproverai finché la frase è giusta.",
+    "dictationRules": "Puoi leggere il testo, ma ogni tentativo sbagliato e la lettura del testo abbassano il punteggio.",
+    "repeatIntro_one": "Ascolta {{count}} frase e ripetila a voce: valuto la pronuncia parola per parola.",
+    "repeatIntro_other": "Ascolta {{count}} frasi e ripetile a voce: valuto la pronuncia parola per parola.",
+    "repeatRules": "Conta il primo tentativo valutato; puoi riprovare quante volte vuoi per migliorare.",
+    "listenText": "Ascolta il testo",
+    "noSpeech": "La sintesi vocale non è disponibile: leggi il testo."
+  },
+  "quiz": {
+    "right": "Giusto!",
+    "wrong": "Non proprio: la risposta giusta è \"{{answer}}\".",
+    "wordPrompt": "Come si dice \"{{word}}\" in inglese?",
+    "verbPrompt": "Past simple di \"{{verb}}\" ({{translation}})?",
+    "meaningPrompt": "Che cosa significa \"{{text}}\"?"
+  },
+  "dictation": {
+    "score": "Punteggio della frase: <strong>{{score}}/100</strong>",
+    "wrongAttempts_one": "{{count}} tentativo sbagliato",
+    "wrongAttempts_other": "{{count}} tentativi sbagliati",
+    "textShown": "testo mostrato",
+    "listen": "Ascolta la frase",
+    "write": "Scrivi quello che hai sentito",
+    "check": "Controlla",
+    "wrongWord": " (sbagliata)",
+    "notYet": "Non ancora: le parole sottolineate non coincidono.",
+    "missing_one": " Manca {{count}} parola.",
+    "missing_other": " Mancano {{count}} parole.",
+    "tryAgain": " Riascolta e riprova.",
+    "showText": "Mostra il testo (−{{points}} punti)",
+    "penalty": "Ogni tentativo sbagliato toglie {{points}} punti alla frase."
+  },
+  "roleplay": {
+    "listen": "Ascolta",
+    "typing": "Il tutor sta scrivendo",
+    "finish": {
+      "written": "Concludi la parte scritta",
+      "oral": "Concludi la parte orale"
+    },
+    "turnsLeft_one": "Rispondi ancora {{count}} volta.",
+    "turnsLeft_other": "Rispondi ancora {{count}} volte.",
+    "answerAria": "La tua risposta in inglese",
+    "placeholder": "Write here…",
+    "send": "Invia"
+  },
+  "sentenceOf": "{{title}}: frase {{current}} di {{total}}",
+  "questionOf": "{{title}}: domanda {{current}} di {{total}}"
+}

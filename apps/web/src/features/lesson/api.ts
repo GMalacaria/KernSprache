@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 import { FunctionsHttpError } from '@supabase/supabase-js'
 import { supabase } from '../../lib/supabase'
 import {
@@ -28,8 +29,8 @@ export async function getLesson(lessonId: number): Promise<LessonResponse> {
   const { data, error } = await supabase.functions.invoke<LessonResponse>('lesson', {
     body: { action: 'get', lesson_id: lessonId },
   })
-  if (error) throw await functionError(error, 'Non riesco ad aprire la lezione. Riprova tra poco.')
-  if (!data) throw new Error('Risposta vuota dal server.')
+  if (error) throw await functionError(error, i18n.t('errors.open', { ns: 'lesson' }))
+  if (!data) throw new Error(i18n.t('errors.empty', { ns: 'lesson' }))
   return data
 }
 
