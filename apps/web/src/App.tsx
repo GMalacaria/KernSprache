@@ -149,7 +149,7 @@ function SignedInApp({ user }: { user: User }) {
       {view === 'dialogue' ? (
         <DialoguePage initialMode={dialogueMode} onExit={() => setView('home')} />
       ) : view === 'review' ? (
-        <ReviewPage onExit={() => setView('home')} onSwitchToOral={() => openDialogue('oral')} />
+        <ReviewPage onExit={() => setView('home')} />
       ) : view === 'profile' ? (
         <ProfilePage
           userId={user.id}

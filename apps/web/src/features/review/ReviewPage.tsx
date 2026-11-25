@@ -2,9 +2,7 @@ import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Grade } from 'ts-fsrs'
 import { formatInterval } from '../../lib/fsrs'
-import { StudyPrompts } from '../study/StudyPrompts'
-import { StudyTimerBar } from '../study/StudyTimerBar'
-import { useStudyActivity } from '../study/useStudyTimer'
+import { usePracticeActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, startReviewSession, type ReviewItem } from './api'
 import { BackButton } from '../../components/BackButton'
 import { Waiting } from '../../components/Waiting'
@@ -15,7 +13,7 @@ import { PronunciationCard, SentenceCard, VocabCard } from './ReviewCards'
 // Cards graded "Again" come back in the same sitting once they are due again (minutes away).
 const REQUEUE_WITHIN_MS = 30 * 60_000
 
-export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onSwitchToOral?: () => void }) {
+export function ReviewPage({ onExit }: { onExit: () => void }) {
   const queryClient = useQueryClient()
   const due = useQuery({ queryKey: ['review', 'due-items'], queryFn: () => fetchDueItems(new Date()), staleTime: 0, gcTime: 0 })
 
@@ -27,8 +25,8 @@ export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onS
 
   const [started, setStarted] = useState(false)
 
-  // Landing first: what is due and a button to start. The study timer runs only once the review starts,
-  // so opening the screen (or finding nothing to review) does not count as study time.
+  // Landing first: what is due and a button to start. The practice time is counted only once the review
+  // starts, so opening the screen (or finding nothing to review) is not saved as review time.
   if (due.isPending || due.isError || !started) {
     return (
       <main className="page review">
@@ -43,7 +41,6 @@ export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onS
     <ReviewSession
       initialItems={due.data}
       onExit={(id) => void exit(id)}
-      onSwitchToOral={onSwitchToOral ? (id) => void exit(id, onSwitchToOral) : undefined}
     />
   )
 }
@@ -51,11 +48,11 @@ export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onS
 interface ReviewSessionProps {
   initialItems: ReviewItem[]
   onExit: (sessionId: Promise<string> | null) => void
-  onSwitchToOral?: (sessionId: Promise<string> | null) => void
 }
 
-function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionProps) {
-  useStudyActivity('written')
+function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
+  // Review is extra practice: its time is saved for statistics, not counted towards the daily goal.
+  usePracticeActivity('review')
   const [queue, setQueue] = useState(initialItems)
   const [done, setDone] = useState(0)
   // The grade the app gave the current card and when: the next due date is computed from that moment.
@@ -100,11 +97,6 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
     <main className="page review">
       <ReviewHeader onBack={() => onExit(sessionId.current)} />
 
-      <StudyTimerBar />
-      <StudyPrompts
-        onSwitchToOral={onSwitchToOral ? () => onSwitchToOral(sessionId.current) : undefined}
-        onExit={() => onExit(sessionId.current)}
-      />
 
       {!current && (
         <section className="notice">
