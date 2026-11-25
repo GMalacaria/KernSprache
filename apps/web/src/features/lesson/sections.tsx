@@ -147,3 +147,20 @@ export function ReadingView({ content }: { content: LessonContent }) {
     </article>
   )
 }
+
+/**
+ * The lesson's grammar and new words, folded away: open it during the dialogue or the oral part,
+ * where those sections are not on screen, to look something up while answering.
+ */
+export function LessonNotes({ content }: { content: LessonContent }) {
+  const { t } = useTranslation('lesson')
+  return (
+    <details className="lesson-notes">
+      <summary>{t('notes.title')}</summary>
+      <h3 className="small-heading">{t('sections.grammar')}</h3>
+      <GrammarView content={content} />
+      <h3 className="small-heading">{t('sections.words')}</h3>
+      <WordsView content={content} />
+    </details>
+  )
+}

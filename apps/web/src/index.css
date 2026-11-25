@@ -208,6 +208,13 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px
 .chapter-folded summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 2.75rem; cursor: pointer; font-weight: 600; }
 .chapter-folded summary::-webkit-details-marker { display: none; }
 .chapter-folded[open] summary { margin-bottom: 0.25rem; }
+/* Lesson notes: grammar and words, folded, during the dialogue and the oral part. */
+.lesson-notes { margin-top: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); padding: 0 0.9rem; }
+.lesson-notes summary { display: flex; align-items: center; justify-content: space-between; min-height: 2.75rem; cursor: pointer; font-weight: 600; color: var(--accent); list-style: none; }
+.lesson-notes summary::-webkit-details-marker { display: none; }
+.lesson-notes summary::after { content: '+'; font-size: 1.25rem; line-height: 1; }
+.lesson-notes[open] summary::after { content: '−'; }
+.lesson-notes[open] { padding-bottom: 0.9rem; }
 
 .examples, .cards { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.7rem 0.9rem; }

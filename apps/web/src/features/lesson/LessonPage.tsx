@@ -33,6 +33,7 @@ import {
   GrammarView,
   ListeningView,
   PhrasesView,
+  LessonNotes,
   ReadingView,
   RepeatIntro,
   VerbsView,
@@ -316,6 +317,9 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
               </button>
             </div>
           )}
+
+          {/* Grammar and words stay at hand where their own sections are not shown: dialogue and oral part. */}
+          {(inDialogue || part === 'oral') && <LessonNotes content={lessonContent} />}
 
           {section && phase.kind === 'learn' && (
             <section>
