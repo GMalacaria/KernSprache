@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { AppMenu, type AppMenuActions } from '../home/AppMenu'
-import { MenuButton } from '../home/SideMenu'
+import { useEffect, useRef } from 'react'
 import { LEVELS, type ChapterView } from './progress'
 import { usePath } from './usePath'
 import { Waiting } from '../../components/Waiting'
@@ -9,7 +7,8 @@ interface PathPageProps {
   userId: string
   onOpenLesson: (lessonId: number) => void
   onOpenTest: (chapterId: number) => void
-  menu: AppMenuActions
+  /** First visit: scroll to the chapter in progress. Later visits come back where the learner left the list. */
+  landOnCurrent: boolean
 }
 
 const STATUS_LABEL: Record<ChapterView['status'], string> = {
@@ -29,21 +28,22 @@ function OpenLock() {
   )
 }
 
-export function PathPage({ userId, onOpenLesson, onOpenTest, menu }: PathPageProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
+export function PathPage({ userId, onOpenLesson, onOpenTest, landOnCurrent }: PathPageProps) {
   const { path, isError } = usePath(userId)
   const currentRef = useRef<HTMLLIElement>(null)
 
-  // Land on the chapter in progress instead of the top of a long list.
+  // First visit: land on the chapter in progress instead of the top of a long list (only once per visit).
+  const landed = useRef(!landOnCurrent)
   useEffect(() => {
-    if (path) currentRef.current?.scrollIntoView({ block: 'start' })
+    if (!path || landed.current) return
+    landed.current = true
+    currentRef.current?.scrollIntoView({ block: 'start' })
   }, [path])
 
   return (
     <main className="page">
-      <header className="row sticky-header">
+      <header className="sticky-header">
         <h1>Percorso</h1>
-        <MenuButton onClick={() => setMenuOpen(true)} />
       </header>
       {isError && <p className="error">Impossibile caricare il percorso.</p>}
       {!path && !isError && <Waiting title="Carico il percorso" compact />}
@@ -133,7 +133,6 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, menu }: PathPagePro
             </ol>
           </section>
         ))}
-      <AppMenu open={menuOpen} onClose={() => setMenuOpen(false)} userId={userId} current="path" actions={menu} />
     </main>
   )
 }

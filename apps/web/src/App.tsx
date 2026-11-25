@@ -7,7 +7,6 @@ import { SetPasswordPage } from './features/auth/SetPasswordPage'
 import { useAuthSession } from './features/auth/useAuthSession'
 import { ChapterTestPage } from './features/chapter-test/ChapterTestPage'
 import { DialoguePage, type DialogueMode } from './features/dialogue/DialoguePage'
-import type { AppMenuActions } from './features/home/AppMenu'
 import { HomePage } from './features/home/HomePage'
 import { useProfile } from './features/home/useProfile'
 import { InstallDialog } from './features/onboarding/InstallDialog'
@@ -15,6 +14,9 @@ import { markOffered, useInstallMode, wasOffered } from './lib/install'
 import { LessonPage } from './features/lesson/LessonPage'
 import { PathPage } from './features/path/PathPage'
 import { ProfilePage } from './features/profile/ProfilePage'
+import { rememberScroll, savedScroll, useRestoreScroll } from './features/nav/scrollMemory'
+import { TabBar, type Tab } from './features/nav/TabBar'
+import { SettingsPage } from './features/settings/SettingsPage'
 import { chapterAfter, neighbours, usePath, usePrefetchCurrentChapter } from './features/path/usePath'
 import { OnboardingPage } from './features/onboarding/OnboardingPage'
 import { PlacementTestPage } from './features/placement/PlacementTestPage'
@@ -25,7 +27,14 @@ import { Waiting } from './components/Waiting'
 /** The install offer appears a few seconds after the learner is in the app. */
 const INSTALL_OFFER_DELAY_MS = 4000
 
-type View = 'home' | 'profile' | 'dialogue' | 'review' | 'settings' | 'placement' | 'path' | 'lesson' | 'chapter-test'
+type View = Tab | 'dialogue' | 'review' | 'goals' | 'placement' | 'lesson' | 'chapter-test'
+
+/** Main screens: they show the tab bar. Activities have their own way back. */
+const TABS: readonly View[] = ['home', 'path', 'profile', 'settings']
+
+function isTab(view: View): view is Tab {
+  return TABS.includes(view)
+}
 
 export function App() {
   const { session, recovering, endRecovery } = useAuthSession()
@@ -50,8 +59,11 @@ export function App() {
 function SignedInApp({ user }: { user: User }) {
   const profile = useProfile(user.id)
   const [view, setViewNow] = useState<View>('home')
+  // Main screens come back where they were left; activities and screens opened for the first time start at the top.
+  useRestoreScroll(view, isTab(view))
   // Cross-fade between screens where the browser supports view transitions.
   function setView(next: View) {
+    if (isTab(view)) rememberScroll(view)
     if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setViewNow(next)
       return
@@ -94,15 +106,6 @@ function SignedInApp({ user }: { user: User }) {
   function openDialogue(mode: DialogueMode) {
     setDialogueMode(mode)
     setView('dialogue')
-  }
-
-  const menuActions: AppMenuActions = {
-    onGoHome: () => setView('home'),
-    onOpenPath: () => setView('path'),
-    onOpenProfile: () => setView('profile'),
-    onEditGoals: () => setView('settings'),
-    onRetakePlacement: () => setView('placement'),
-    onInstall: installMode ? () => setInstallOpen(true) : undefined,
   }
 
   if (profile.isPending) {
@@ -148,9 +151,24 @@ function SignedInApp({ user }: { user: User }) {
       ) : view === 'review' ? (
         <ReviewPage onExit={() => setView('home')} onSwitchToOral={() => openDialogue('oral')} />
       ) : view === 'profile' ? (
-        <ProfilePage userId={user.id} menu={menuActions} />
+        <ProfilePage
+          userId={user.id}
+          onEditGoals={() => setView('goals')}
+          onRetakePlacement={() => setView('placement')}
+        />
+      ) : view === 'settings' ? (
+        <SettingsPage
+          userId={user.id}
+          email={user.email}
+          onInstall={installMode ? () => setInstallOpen(true) : undefined}
+        />
       ) : view === 'path' ? (
-        <PathPage userId={user.id} onOpenLesson={openLesson} onOpenTest={openTest} menu={menuActions} />
+        <PathPage
+          userId={user.id}
+          onOpenLesson={openLesson}
+          onOpenTest={openTest}
+          landOnCurrent={savedScroll('path') === undefined}
+        />
       ) : view === 'lesson' && lessonId !== null ? (
         <LessonPage
           key={lessonId}
@@ -172,18 +190,18 @@ function SignedInApp({ user }: { user: User }) {
         />
       ) : view === 'placement' ? (
         <PlacementTestPage userId={user.id} firstRun={false} onDone={() => setView('home')} />
-      ) : view === 'settings' ? (
-        <OnboardingPage userId={user.id} initial={initial} editing onDone={() => setView('home')} />
+      ) : view === 'goals' ? (
+        <OnboardingPage userId={user.id} initial={initial} editing onDone={() => setView('profile')} />
       ) : (
         <HomePage
           user={user}
           onStartDialogue={openDialogue}
           onStartReview={() => setView('review')}
-          menu={menuActions}
           onOpenLesson={openLesson}
           onOpenTest={openTest}
         />
       )}
+      {isTab(view) && <TabBar current={view} onSelect={setView} />}
       <InstallDialog open={installOpen} mode={installMode} onClose={() => setInstallOpen(false)} />
     </StudyTimerProvider>
   )

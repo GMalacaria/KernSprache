@@ -1,7 +1,4 @@
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { AppMenu, type AppMenuActions } from '../home/AppMenu'
-import { MenuButton } from '../home/SideMenu'
 import { useProfile } from '../home/useProfile'
 import { purposeLabel } from '../onboarding/purposes'
 import { summarizeStats } from '../lesson/stats'
@@ -30,9 +27,14 @@ function Stat({ value, label }: { value: string | number; label: string }) {
   )
 }
 
+interface ProfilePageProps {
+  userId: string
+  onEditGoals: () => void
+  onRetakePlacement: () => void
+}
+
 /** The learner's profile: level and purpose, streaks, study time, answers and progress through the path. */
-export function ProfilePage({ userId, menu }: { userId: string; menu: AppMenuActions }) {
-  const [menuOpen, setMenuOpen] = useState(false)
+export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfilePageProps) {
   const profile = useProfile(userId)
   const { path } = usePath(userId)
   const data = useQuery({ queryKey: ['profile-data'], queryFn: fetchProfileData })
@@ -41,14 +43,16 @@ export function ProfilePage({ userId, menu }: { userId: string; menu: AppMenuAct
   const days = data.data?.days ?? []
   const answers = summarizeStats(data.data?.lessonStats ?? [])
   const bars = lastDaysMinutes(days, today)
-  const maxMinutes = Math.max(15, ...bars.map((b) => b.minutes))
+  const goalMinutes = profile.data?.daily_goal_minutes ?? 20
+  // Round the scale up to a multiple of 10 above both the busiest day and the goal, so no bar touches the top.
+  const scaleMinutes = Math.ceil((Math.max(goalMinutes, ...bars.map((b) => b.minutes)) * 1.1) / 10) * 10
+  const pct = (minutes: number) => `${Math.min(100, (minutes / scaleMinutes) * 100)}%`
   const hasStudied = days.length > 0 || answers.lessons > 0
 
   return (
     <main className="page profile">
-      <header className="row sticky-header">
+      <header className="sticky-header">
         <h1>Profilo</h1>
-        <MenuButton onClick={() => setMenuOpen(true)} />
       </header>
 
       {profile.data && (
@@ -60,9 +64,14 @@ export function ProfilePage({ userId, menu }: { userId: string; menu: AppMenuAct
             {purposeLabel(profile.data.purpose)} · {profile.data.daily_goal_minutes} min al giorno
           </p>
           {profile.data.goal && <p className="muted">«{profile.data.goal}»</p>}
-          <button type="button" className="link" onClick={menu.onEditGoals}>
-            Modifica obiettivo e scopo
-          </button>
+          <div className="profile-actions">
+            <button type="button" className="link" onClick={onEditGoals}>
+              Modifica obiettivo e scopo
+            </button>
+            <button type="button" className="link" onClick={onRetakePlacement}>
+              Rifai il test di livello
+            </button>
+          </div>
         </section>
       )}
 
@@ -83,15 +92,40 @@ export function ProfilePage({ userId, menu }: { userId: string; menu: AppMenuAct
               <Stat value={studiedDays(days)} label="giorni di studio" />
               <Stat value={formatDuration(totalStudySeconds(days))} label="tempo totale" />
             </ul>
-            <ol className="day-bars" aria-label="Minuti studiati negli ultimi 14 giorni">
-              {bars.map((bar) => (
-                <li key={bar.day} title={`${bar.day}: ${bar.minutes} min`}>
-                  <span className="day-bar" style={{ height: `${Math.max(3, (bar.minutes / maxMinutes) * 100)}%` }} />
-                  <small>{WEEKDAYS[new Date(`${bar.day}T12:00:00Z`).getUTCDay()]}</small>
-                  <span className="visually-hidden">{bar.minutes} minuti</span>
-                </li>
-              ))}
-            </ol>
+            <figure className="day-chart">
+              <figcaption>
+                Minuti di studio al giorno, ultimi 14 giorni
+                <span className="day-chart-legend">
+                  <span className="goal-dash" aria-hidden="true" /> obiettivo ({goalMinutes} min)
+                </span>
+              </figcaption>
+              <div className="day-chart-body">
+                <div className="day-chart-axis" aria-hidden="true">
+                  <span>{scaleMinutes}</span>
+                  <span>{scaleMinutes / 2}</span>
+                  <span>0</span>
+                </div>
+                <div className="day-chart-plot">
+                  <span className="day-chart-goal" style={{ bottom: pct(goalMinutes) }} aria-hidden="true" />
+                  <ol aria-label="Minuti studiati negli ultimi 14 giorni">
+                    {bars.map((bar) => (
+                      <li key={bar.day} title={`${bar.day}: ${bar.minutes} min`}>
+                        <span className="day-bar" style={{ height: bar.minutes > 0 ? pct(bar.minutes) : '3px' }} />
+                        <span className="visually-hidden">
+                          {bar.day}: {bar.minutes} minuti
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <span aria-hidden="true" />
+                <ol className="day-chart-days" aria-hidden="true">
+                  {bars.map((bar) => (
+                    <li key={bar.day}>{WEEKDAYS[new Date(`${bar.day}T12:00:00Z`).getUTCDay()]}</li>
+                  ))}
+                </ol>
+              </div>
+            </figure>
           </section>
 
           <section>
@@ -132,13 +166,9 @@ export function ProfilePage({ userId, menu }: { userId: string; menu: AppMenuAct
               </li>
             ))}
           </ul>
-          <button type="button" className="secondary" onClick={menu.onOpenPath}>
-            Vai al percorso
-          </button>
         </section>
       )}
 
-      <AppMenu open={menuOpen} onClose={() => setMenuOpen(false)} userId={userId} current="profile" actions={menu} />
     </main>
   )
 }
