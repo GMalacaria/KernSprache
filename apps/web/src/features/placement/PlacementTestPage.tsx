@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { canRecord } from '../../lib/audio'
 import { skipPlacement, startPlacement, submitPlacement, type PlacementResult } from './api'
 import { SpokenAnswer } from './SpokenAnswer'
+import { BackHeader } from '../../components/BackHeader'
 import { Waiting } from '../../components/Waiting'
 
 interface PlacementTestPageProps {
@@ -33,6 +34,8 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
   })
 
   const skip = useMutation({ mutationFn: () => skipPlacement(userId), onSuccess: finish })
+  // Retaken from the profile: a back arrow leaves at any step. The first run has no way back, only "Salta".
+  const title = firstRun ? <h1>Test di livello</h1> : <BackHeader title="Test di livello" onBack={onDone} />
 
   if (test.isPending) return <Shell>Carico il test…</Shell>
   if (test.isError) return <Shell error>{test.error.message}</Shell>
@@ -52,7 +55,7 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
   if (step.kind === 'intro') {
     return (
       <main className="page">
-        <h1>Test di livello</h1>
+        {title}
         <p>
           Circa 10 minuti per capire da dove partire: {questions.length} domande scritte a scelta multipla e{' '}
           {voice ? `${prompts.length} risposte a voce` : 'nessuna risposta a voce (microfono non disponibile)'}.
@@ -62,13 +65,9 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
           <button type="button" onClick={() => setStep({ kind: 'written', index: 0 })}>
             Inizia il test
           </button>
-          {firstRun ? (
+          {firstRun && (
             <button type="button" className="link" onClick={() => skip.mutate()} disabled={skip.isPending}>
               Salta, parto dal livello A1
-            </button>
-          ) : (
-            <button type="button" className="link" onClick={onDone}>
-              Annulla
             </button>
           )}
           {skip.isError && <p className="error">Non sono riuscito a salvare. Riprova.</p>}
@@ -112,6 +111,7 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
     }
     return (
       <main className="page">
+        {!firstRun && title}
         <Progress label="Parte scritta" current={step.index + 1} total={questions.length} />
         <p className="muted">Scegli la parola giusta:</p>
         <p className="card-main question" lang="en">
@@ -136,6 +136,7 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
     if (!p) return null
     return (
       <main className="page">
+        {!firstRun && title}
         <Progress label="Parte orale" current={step.index + 1} total={prompts.length} />
         <p className="muted">Rispondi in inglese, con qualche frase:</p>
         <p className="card-main question">{p.prompt_it}</p>

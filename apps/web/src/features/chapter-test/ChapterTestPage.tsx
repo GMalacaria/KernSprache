@@ -12,6 +12,7 @@ import { SpokenAnswer } from '../placement/SpokenAnswer'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity } from '../study/useStudyTimer'
 import { type ChapterTest, type ChapterTestResult, startChapterTest, submitChapterTest } from './api'
+import { BackHeader } from '../../components/BackHeader'
 import { Waiting } from '../../components/Waiting'
 
 interface ChapterTestPageProps {
@@ -141,12 +142,7 @@ export function ChapterTestPage({
   if (step.kind === 'intro') {
     return (
       <main className="page">
-        <header className="row">
-          <h1>Verifica del capitolo</h1>
-          <button type="button" className="link" onClick={onExit}>
-            Esci
-          </button>
-        </header>
+        <BackHeader title="Verifica del capitolo" onBack={onExit} />
         <p>
           <strong>{chapterTitle}</strong>: {questions.length} domande scritte a scelta multipla e {tasks.length} risposte a
           voce.
@@ -341,12 +337,7 @@ function Progress({ label, current, total }: { label: string; current: number; t
 function Shell({ children, error = false, onExit }: { children: ReactNode; error?: boolean; onExit: () => void }) {
   return (
     <main className="page">
-      <header className="row">
-        <h1>Verifica del capitolo</h1>
-        <button type="button" className="link" onClick={onExit}>
-          Esci
-        </button>
-      </header>
+      <BackHeader title="Verifica del capitolo" onBack={onExit} />
       <div className={error ? 'error' : undefined}>{children}</div>
     </main>
   )

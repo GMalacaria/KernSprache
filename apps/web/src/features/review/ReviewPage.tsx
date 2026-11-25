@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Grade } from 'ts-fsrs'
 import { usePracticeActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, startReviewSession, type ReviewItem } from './api'
-import { BackButton } from '../../components/BackButton'
+import { BackHeader } from '../../components/BackHeader'
 import { Waiting } from '../../components/Waiting'
 import { GRADE_LABELS } from './grading'
 import { dueSummary } from './summary'
@@ -32,7 +32,7 @@ export function ReviewPage({ onExit }: { onExit: () => void }) {
         <ReviewHeader onBack={() => void exit(null)} />
         {due.isPending && <Waiting title="Preparo il ripasso" compact />}
         {due.isError && <p className="error">Impossibile caricare le carte da ripassare.</p>}
-        {due.isSuccess && <ReviewIntro items={due.data} onStart={() => setStarted(true)} onBack={() => void exit(null)} />}
+        {due.isSuccess && <ReviewIntro items={due.data} onStart={() => setStarted(true)} />}
       </main>
     )
   }
@@ -139,12 +139,7 @@ function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
 }
 
 function ReviewHeader({ onBack }: { onBack: () => void }) {
-  return (
-    <header className="lesson-header">
-      <BackButton onBack={onBack} />
-      <h1>Ripasso</h1>
-    </header>
-  )
+  return <BackHeader title="Ripasso" onBack={onBack} />
 }
 
 function plural(n: number, one: string, many: string): string {
@@ -152,17 +147,14 @@ function plural(n: number, one: string, many: string): string {
 }
 
 /** The review's landing: how many cards are due and of which kind, and the button that starts it. */
-function ReviewIntro({ items, onStart, onBack }: { items: ReviewItem[]; onStart: () => void; onBack: () => void }) {
+function ReviewIntro({ items, onStart }: { items: ReviewItem[]; onStart: () => void }) {
   if (items.length === 0) {
     return (
-      <section className="notice stack">
+      <section className="notice">
         <p>
           Non hai carte da ripassare adesso. Le parole delle lezioni e gli errori dei dialoghi arrivano qui quando è il
           momento di ripassarli.
         </p>
-        <button type="button" className="secondary" onClick={onBack}>
-          Torna alla home
-        </button>
       </section>
     )
   }

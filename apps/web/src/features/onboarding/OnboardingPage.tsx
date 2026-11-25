@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
 import { GOAL_OPTIONS } from '../study/studyMath'
 import { Emoji } from '../../components/Emoji'
+import { BackHeader } from '../../components/BackHeader'
 import { PURPOSES, purposeHint, purposeLabel, type LearningPurpose } from './purposes'
 
 interface OnboardingPageProps {
@@ -54,7 +55,7 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
 
   return (
     <main className="page">
-      <h1>{editing ? t('editTitle') : t('welcome')}</h1>
+      {editing ? <BackHeader title={t('editTitle')} onBack={onDone} /> : <h1>{t('welcome')}</h1>}
       <form onSubmit={onSubmit} className="stack">
         <label htmlFor="purpose">{t('purposeQuestion')}</label>
         <select
@@ -103,11 +104,6 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
         <button type="submit" disabled={!purpose || save.isPending}>
           {editing ? t('common:actions.save') : t('common:actions.next')}
         </button>
-        {editing && (
-          <button type="button" className="link" onClick={onDone}>
-            {t('common:actions.cancel')}
-          </button>
-        )}
         {save.isError && <p className="error">{t('common:errors.saveFailed')}</p>}
       </form>
     </main>
