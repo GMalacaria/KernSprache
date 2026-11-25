@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { NoMicrophone } from '../../components/NoMicrophone'
 import { SentenceFeedback } from '../../components/SentenceFeedback'
 import { canRecord } from '../../lib/audio'
 import { useProfile } from '../home/useProfile'
@@ -36,11 +37,14 @@ export function ChapterTestPage({
   onExit,
 }: ChapterTestPageProps) {
   const queryClient = useQueryClient()
+  // The oral half is required: without a microphone the test does not start (and is not generated).
+  const voice = canRecord()
   // A new attempt (after a failed one) asks the server for a fresh test.
   const [attempt, setAttempt] = useState(0)
   const test = useQuery({
     queryKey: ['chapter-test', chapterId, attempt],
     queryFn: () => startChapterTest(chapterId),
+    enabled: voice,
     staleTime: Infinity,
     gcTime: 0,
     retry: false,
@@ -52,7 +56,6 @@ export function ChapterTestPage({
   const profile = useProfile(userId)
   // Level when the test opened: the profile is refreshed after a pass, so a change means a level-up.
   const [levelBefore] = useState(profile.data?.level)
-  const voice = canRecord()
   // Written half first, then the oral half: the study timer counts each in its own half of the day.
   useStudyActivity(step.kind === 'oral' ? 'oral' : 'written')
 
@@ -75,6 +78,16 @@ export function ChapterTestPage({
     submit.reset()
   }
 
+  if (!voice) {
+    return (
+      <Shell onExit={onExit}>
+        <NoMicrophone
+          title="Per la verifica serve il microfono"
+          why="La verifica è metà scritta e metà orale, e la parte orale si fa a voce: senza microfono non si può fare."
+        />
+      </Shell>
+    )
+  }
   if (test.isPending) {
     return (
       <Shell onExit={onExit}>
@@ -135,8 +148,8 @@ export function ChapterTestPage({
           </button>
         </header>
         <p>
-          <strong>{chapterTitle}</strong>: {questions.length} domande scritte a scelta multipla e {tasks.length} risposte{' '}
-          {voice ? 'a voce' : 'scritte (microfono non disponibile)'}.
+          <strong>{chapterTitle}</strong>: {questions.length} domande scritte a scelta multipla e {tasks.length} risposte a
+          voce.
         </p>
         <p className="muted">
           {skipAhead
@@ -191,13 +204,9 @@ export function ChapterTestPage({
       <main className="page">
         <StudyTimerBar />
         <Progress label="Parte orale" current={step.index + 1} total={tasks.length} />
-        <p className="muted">{voice ? 'Rispondi a voce in inglese, con qualche frase:' : 'Rispondi per iscritto in inglese:'}</p>
+        <p className="muted">Rispondi a voce in inglese, con qualche frase:</p>
         <p className="card-main question">{task.prompt_it}</p>
-        {voice ? (
-          <SpokenAnswer key={task.id} onDone={done} onSkip={() => nextAfterOral(step.index, oral)} />
-        ) : (
-          <TypedAnswer key={task.id} onDone={done} />
-        )}
+        <SpokenAnswer key={task.id} onDone={done} onSkip={() => nextAfterOral(step.index, oral)} />
       </main>
     )
   }
@@ -213,18 +222,6 @@ export function ChapterTestPage({
       onRetry={retry}
       onExit={onExit}
     />
-  )
-}
-
-function TypedAnswer({ onDone }: { onDone: (text: string) => void }) {
-  const [text, setText] = useState('')
-  return (
-    <div className="stack">
-      <textarea lang="en" rows={4} value={text} onChange={(e) => setText(e.target.value)} />
-      <button type="button" disabled={text.trim().length === 0} onClick={() => onDone(text)}>
-        Avanti
-      </button>
-    </div>
   )
 }
 

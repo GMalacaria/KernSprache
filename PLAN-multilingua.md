@@ -1,10 +1,10 @@
 # Kern Sprache: multilingua + i18n
 
-> Aggiornato il 2026-11-25 su `main` a `aa4da98` (PR #39). La PR 1 (nome e icona) è fatta (#31). Il blocco "scritto + orale e navigazione" di `PLAN.md` è mergiato nei punti 1-3 (#37-#39); resta il punto 4 (orale obbligatorio nelle verifiche di capitolo). Il refactoring tocca quasi tutti i file, quindi va fatto **da solo**, senza altre sessioni che scrivono in parallelo.
+> Aggiornato il 2026-11-25 su `main` a `aa4da98` (PR #39). La PR 1 (nome e icona) è fatta (#31). Il blocco "scritto + orale e navigazione" di `PLAN.md` è chiuso (#37-#39 e la PR 0, orale obbligatorio nelle verifiche di capitolo). Il refactoring tocca quasi tutti i file, quindi va fatto **da solo**, senza altre sessioni che scrivono in parallelo.
 
 ## Prerequisiti prima di partire
 1. Nessun'altra sessione al lavoro sul repo e `main` aggiornato (`git pull`, `gh pr list`). Al 2026-11-25 nessuna PR aperta.
-2. Il blocco "scritto + orale e navigazione" di `PLAN.md` è mergiato: ✅ punti 1-3; il punto 4 (`ChapterTestPage.tsx` senza `TypedAnswer`) è piccolo e tocca un file che la PR 2 sposta nel catalogo, quindi conviene farlo **prima** della PR 2.
+2. ✅ Il blocco "scritto + orale e navigazione" di `PLAN.md` è mergiato, compreso il punto 4 (PR 0 `feat(web): require the oral part of chapter tests`, fatta prima della PR 2 perché tocca `ChapterTestPage.tsx`).
 3. ✅ Mappatura dei punti legati all'inglese rifatta su `aa4da98` (`git grep -n "Italian.*English\|lang=\"en\"\|_it\b\|\.en\b"`): circa 65 file, vedi "Cosa è cambiato (PR #36–#39)". Se arrivano altre PR, va ripetuta.
 4. Ultima migration su `main`: `20261125160000_practice_time.sql`. Le nuove devono avere timestamp successivi.
 5. Dump di produzione prima della PR 3, su richiesta esplicita.
