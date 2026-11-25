@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ListenButton } from '../../components/ListenButton'
 import { RepeatSentence } from '../../components/RepeatSentence'
 import type { DictationSentence } from './dictation'
@@ -13,6 +14,7 @@ interface RepeatExerciseProps {
 
 /** Oral part: listen to a sentence and read it aloud; the pronunciation score is the grade. */
 export function RepeatExercise({ sentence, onAnswered, onDone }: RepeatExerciseProps) {
+  const { t } = useTranslation()
   const [best, setBest] = useState<number | null>(null)
 
   function assessed(score: number) {
@@ -34,7 +36,7 @@ export function RepeatExercise({ sentence, onAnswered, onDone }: RepeatExerciseP
       <RepeatSentence sentence={sentence.en} onAssessed={assessed} />
       {best !== null && (
         <button type="button" className="next-step" onClick={onDone}>
-          Avanti
+          {t('actions.next')}
         </button>
       )}
     </div>

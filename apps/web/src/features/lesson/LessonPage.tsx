@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../i18n'
 import { canRecord, prefetchSpeech, stopSpeaking } from '../../lib/audio'
 import { NoMicrophone } from '../../components/NoMicrophone'
 import { StudyPrompts } from '../study/StudyPrompts'
@@ -16,7 +18,6 @@ import {
   initialPart,
   loadResume,
   otherPart,
-  PART_LABEL,
   partDone,
   repeatSentences,
   saveResume,
@@ -79,33 +80,33 @@ function sectionsFor(content: LessonContent, part: LessonPart): Section[] {
     return [
       {
         key: 'listening',
-        title: 'Ascolto',
+        title: i18n.t('sections.listening', { ns: 'lesson' }),
         learn: (showAll) => <ListeningView content={content} showText={showAll} />,
         quiz: comprehensionQuiz(content.listening.questions),
         keepDuringQuiz: true,
       },
       ...(repeat.length
-        ? [{ key: 'repeat', title: 'Ripeti la frase', learn: () => <RepeatIntro count={repeat.length} />, quiz: [], repeat }]
+        ? [{ key: 'repeat', title: i18n.t('sections.repeat', { ns: 'lesson' }), learn: () => <RepeatIntro count={repeat.length} />, quiz: [], repeat }]
         : []),
     ]
   }
   const dictation = dictationSentences(content)
   return [
-    { key: 'grammar', title: 'Grammatica', learn: () => <GrammarView content={content} />, quiz: [] },
-    { key: 'words', title: 'Parole nuove', learn: () => <WordsView content={content} />, quiz: wordQuiz(content) },
+    { key: 'grammar', title: i18n.t('sections.grammar', { ns: 'lesson' }), learn: () => <GrammarView content={content} />, quiz: [] },
+    { key: 'words', title: i18n.t('sections.words', { ns: 'lesson' }), learn: () => <WordsView content={content} />, quiz: wordQuiz(content) },
     {
       key: 'phrases',
-      title: 'Espressioni e modi di dire',
+      title: i18n.t('sections.phrases', { ns: 'lesson' }),
       learn: () => <PhrasesView content={content} />,
       quiz: phraseQuiz(content),
     },
-    { key: 'verbs', title: 'Verbi', learn: () => <VerbsView content={content} />, quiz: verbQuiz(content) },
+    { key: 'verbs', title: i18n.t('sections.verbs', { ns: 'lesson' }), learn: () => <VerbsView content={content} />, quiz: verbQuiz(content) },
     ...(dictation.length
-      ? [{ key: 'dictation', title: 'Dettato', learn: () => <DictationIntro count={dictation.length} />, quiz: [], dictation }]
+      ? [{ key: 'dictation', title: i18n.t('sections.dictation', { ns: 'lesson' }), learn: () => <DictationIntro count={dictation.length} />, quiz: [], dictation }]
       : []),
     {
       key: 'reading',
-      title: 'Lettura',
+      title: i18n.t('sections.reading', { ns: 'lesson' }),
       learn: () => <ReadingView content={content} />,
       quiz: comprehensionQuiz(content.reading.questions),
       keepDuringQuiz: true,
@@ -138,6 +139,7 @@ interface Finished {
 }
 
 export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOpenLesson, onExit }: LessonPageProps) {
+  const { t } = useTranslation(['lesson', 'common'])
   const lesson = useQuery({ queryKey: ['lesson', lessonId], queryFn: () => getLesson(lessonId), staleTime: Infinity })
   const progress = useQuery({ queryKey: ['lesson-progress-row', lessonId], queryFn: () => fetchLessonProgress(lessonId) })
   const timer = useStudyTimer()
@@ -182,22 +184,18 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
 
   if (lesson.isPending || progress.isPending) {
     return (
-      <Shell onExit={onExit} title="Lezione">
+      <Shell onExit={onExit} title={t('title')}>
         <Waiting
-          title="Preparo la lezione per te"
-          hints={[
-            'La prima volta può richiedere qualche secondo.',
-            'Scelgo parole ed esempi adatti al tuo scopo.',
-            'Scrivo il dialogo con il tutor.',
-          ]}
+          title={t('loading.title')}
+          hints={[t('loading.hint1'), t('loading.hint2'), t('loading.hint3')]}
         />
       </Shell>
     )
   }
   if (lesson.isError || progress.isError) {
     return (
-      <Shell onExit={onExit} title="Lezione">
-        <p className="error">{lesson.error?.message ?? 'Non riesco a leggere i tuoi progressi. Riprova tra poco.'}</p>
+      <Shell onExit={onExit} title={t('title')}>
+        <p className="error">{lesson.error?.message ?? t('errors.progress')}</p>
       </Shell>
     )
   }
@@ -252,19 +250,22 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
       title={meta.title}
       progress={
         <>
-          <div className="segmented part-tabs" role="group" aria-label="Parte della lezione">
+          <div className="segmented part-tabs" role="group" aria-label={t('partsAria')}>
             {(['written', 'oral'] as const).map((p) => (
               <button key={p} type="button" aria-pressed={p === part} onClick={() => switchPart(p)}>
-                {PART_LABEL[p]}
-                {partDone(row, p) && <span aria-label=" (fatta)"> ✓</span>}
+                {t(`common:parts.${p}`)}
+                {partDone(row, p) && <span aria-label={t('partDoneMark')}> ✓</span>}
               </button>
             ))}
           </div>
           {!finished && !blockedByMic && (
             <div className="placement-progress">
               <small>
-                {inDialogue ? 'Dialogo' : section?.title} · passo {Math.min(state.sectionIndex + 1, totalSteps)} di{' '}
-                {totalSteps}
+                {t('step', {
+                  title: inDialogue ? t('dialogue') : section?.title,
+                  current: Math.min(state.sectionIndex + 1, totalSteps),
+                  total: totalSteps,
+                })}
               </small>
               <div className="bar">
                 <span style={{ width: `${(state.sectionIndex / totalSteps) * 100}%` }} />
@@ -293,15 +294,14 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
         />
       ) : blockedByMic ? (
         <NoMicrophone
-          title="Per la parte orale serve il microfono"
-          why="La lezione si conclude solo con la parte scritta e quella orale: esercitarsi in una sola delle due non basta per imparare bene la lingua."
+          title={t('noMic.title')}
+          why={t('noMic.why')}
         />
       ) : (
         <>
           {partDone(row, part) && state.sectionIndex === 0 && phase.kind === 'learn' && (
             <p className="notice">
-              Hai già fatto la parte {part === 'oral' ? 'orale' : 'scritta'} di questa lezione: puoi rifarla per
-              ripassare.
+              {t('partAlreadyDone', { part: t(`partName.${part}`) })}
             </p>
           )}
 
@@ -316,7 +316,7 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
                   exerciseCount(section) ? update((s) => ({ ...s, phase: { kind: 'quiz', index: 0 } })) : nextSection()
                 }
               >
-                {exerciseCount(section) ? 'Mettiti alla prova' : 'Avanti'}
+                {exerciseCount(section) ? t('tryIt') : t('common:actions.next')}
               </button>
             </section>
           )}
@@ -324,7 +324,7 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
           {section && phase.kind === 'quiz' && section.dictation?.[phase.index] && (
             <section>
               <h2>
-                {section.title}: frase {phase.index + 1} di {section.dictation.length}
+                {t('sentenceOf', { title: section.title, current: phase.index + 1, total: section.dictation.length })}
               </h2>
               <Dictation
                 key={`${section.key}-${phase.index}`}
@@ -339,7 +339,7 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
           {section && phase.kind === 'quiz' && section.repeat?.[phase.index] && (
             <section>
               <h2>
-                {section.title}: frase {phase.index + 1} di {section.repeat.length}
+                {t('sentenceOf', { title: section.title, current: phase.index + 1, total: section.repeat.length })}
               </h2>
               <RepeatExercise
                 key={`${section.key}-${phase.index}`}
@@ -353,7 +353,7 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
           {section && phase.kind === 'quiz' && section.quiz[phase.index] && (
             <section>
               <h2>
-                {section.title}: domanda {phase.index + 1} di {section.quiz.length}
+                {t('questionOf', { title: section.title, current: phase.index + 1, total: section.quiz.length })}
               </h2>
               {section.keepDuringQuiz && section.learn(false)}
               <MultipleChoice
@@ -369,7 +369,7 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
 
           {inDialogue && (
             <section>
-              <h2>{part === 'oral' ? 'Dialogo a voce' : 'Dialogo scritto'}</h2>
+              <h2>{t(`dialogueTitle.${part}`)}</h2>
               <LessonDialogue
                 key={part}
                 lessonId={meta.id}
@@ -412,6 +412,7 @@ function PartDone({
   onOpenLesson,
   onExit,
 }: PartDoneProps) {
+  const { t } = useTranslation(['lesson', 'common'])
   const { part, stats } = finished
   const other = otherPart(part)
   const lastOfChapter = nextLessonId === undefined
@@ -450,21 +451,21 @@ function PartDone({
 
   return (
     <section className="success-card notice">
-      <h2>{completed ? 'Lezione completata' : `Parte ${part === 'oral' ? 'orale' : 'scritta'} completata`}</h2>
+      <h2>{completed ? t('done.lesson') : t('done.part', { part: t(`partName.${part}`) })}</h2>
       {shown.answers > 0 && (
         <>
           <h3 className="small-heading">
-            {completed ? 'Tutta la lezione' : 'Questa parte'} ({shown.answers} risposte)
+            {completed ? t('done.allLesson', { count: shown.answers }) : t('done.thisPart', { count: shown.answers })}
           </h3>
           <StatsGrid summary={summarizeStats([{ lesson_id: lessonId, ...shown }])} />
         </>
       )}
-      {save.isPending && <Waiting title="Salvo i progressi" compact />}
+      {save.isPending && <Waiting title={t('done.saving')} compact />}
       {save.isError && (
         <p className="error">
-          Non sono riuscito a salvare i progressi.{' '}
+          {t('errors.save')}{' '}
           <button type="button" className="link" onClick={() => save.mutate()}>
-            Riprova
+            {t('common:actions.retry')}
           </button>
         </p>
       )}
@@ -472,20 +473,19 @@ function PartDone({
       {save.isSuccess && !completed && (
         <>
           <p>
-            Per concludere la lezione manca la parte {other === 'oral' ? 'orale' : 'scritta'}: servono tutte e due per
-            imparare bene la lingua.
+            {t('done.missingPart', { part: t(`partName.${other}`) })}
           </p>
           {other === 'oral' && !canRecord() ? (
             <p className="muted">
-              Su questo dispositivo il microfono non è disponibile: per la parte orale apri Kern Sprache sul telefono.
+              {t('done.noMicForOral')}
             </p>
           ) : (
             <div className="stack">
               <button type="button" onClick={() => onSwitchPart(other)}>
-                Passa alla parte {other === 'oral' ? 'orale' : 'scritta'}
+                {t('done.switchPart', { part: t(`partName.${other}`) })}
               </button>
               <button type="button" className="link" onClick={onExit}>
-                Torna al percorso
+                {t('done.backToPath')}
               </button>
             </div>
           )}
@@ -495,20 +495,18 @@ function PartDone({
       {save.isSuccess && completed && (
         <>
           <p>
-            {save.data.added > 0
-              ? `${save.data.added} tra parole ed espressioni aggiunte al ripasso.`
-              : 'Le parole di questa lezione erano già nel ripasso.'}
+            {save.data.added > 0 ? t('done.added', { count: save.data.added }) : t('done.alreadyInReview')}
           </p>
           {/* Last lesson: the chapter's totals, read back once this lesson is saved. */}
-          {lastOfChapter && <ChapterStats chapterId={chapterId} title="Il capitolo in numeri" />}
+          {lastOfChapter && <ChapterStats chapterId={chapterId} title={t('done.chapterInNumbers')} />}
           <div className="stack">
             {nextLessonId !== undefined && (
               <button type="button" onClick={() => onOpenLesson(nextLessonId)}>
-                Prossima lezione
+                {t('done.nextLesson')}
               </button>
             )}
             <button type="button" className={nextLessonId !== undefined ? 'link' : undefined} onClick={onExit}>
-              Torna al percorso
+              {t('done.backToPath')}
             </button>
           </div>
         </>
@@ -536,7 +534,7 @@ function Shell({ title, onExit, progress, resetKey, children }: ShellProps) {
   return (
     <main className="page lesson">
       <header className="lesson-header">
-        <BackButton onBack={onExit} title="Indietro: il punto raggiunto resta salvato" />
+        <BackButton onBack={onExit} title={i18n.t('backTitle', { ns: 'lesson' })} />
         <h1>{title}</h1>
       </header>
       {progress}

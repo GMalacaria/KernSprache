@@ -1,6 +1,7 @@
 import { ListenButton } from '../../components/ListenButton'
 import { useRef, useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { speak } from '../../lib/audio'
 import { sendTutorTurn } from '../dialogue/api'
 import { CorrectionList } from '../dialogue/CorrectionList'
@@ -22,10 +23,11 @@ interface LessonDialogueProps {
 
 /** Short role-play with the tutor at the end of each part of a lesson: three learner turns. */
 export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, onFinished }: LessonDialogueProps) {
+  const { t } = useTranslation('lesson')
   const [turns, setTurns] = useState<DialogueTurn[]>([{ id: 'opening', role: 'assistant', content: opening }])
   const [draft, setDraft] = useState('')
   const sessionId = useRef<string | undefined>(undefined)
-  const learnerTurns = turns.filter((t) => t.role === 'user' && t.corrections).length
+  const learnerTurns = turns.filter((turn) => turn.role === 'user' && turn.corrections).length
 
   const send = useMutation({
     mutationFn: sendTutorTurn,
@@ -78,40 +80,40 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
               {turn.content}
             </p>
             {turn.role === 'assistant' && (
-              <ListenButton text={turn.content} className="link listen" label="Ascolta" />
+              <ListenButton text={turn.content} className="link listen" label={t('roleplay.listen')} />
             )}
             {turn.corrections && <CorrectionList corrections={turn.corrections} />}
           </li>
         ))}
-        {send.isPending && <li className="turn turn-assistant muted" role="status">Il tutor sta scrivendo <span className="dots" aria-hidden="true" /></li>}
+        {send.isPending && <li className="turn turn-assistant muted" role="status">
+            {t('roleplay.typing')} <span className="dots" aria-hidden="true" /></li>}
       </ol>
       {send.isError && <p className="error">{send.error.message}</p>}
 
       {finished ? (
         <button type="button" onClick={onFinished}>
-          {mode === 'oral' ? 'Concludi la parte orale' : 'Concludi la parte scritta'}
+          {t(`roleplay.finish.${mode}`)}
         </button>
       ) : (
         <>
           <p className="muted">
-            Rispondi ancora {LESSON_DIALOGUE_TURNS - learnerTurns}{' '}
-            {LESSON_DIALOGUE_TURNS - learnerTurns === 1 ? 'volta' : 'volte'}.
+            {t('roleplay.turnsLeft', { count: LESSON_DIALOGUE_TURNS - learnerTurns })}
           </p>
           {mode === 'oral' ? (
             <VoiceComposer disabled={send.isPending} onTranscript={sendText} onActivity={onActivity} />
           ) : (
             <form onSubmit={onSubmit} className="composer">
               <textarea
-                aria-label="La tua risposta in inglese"
+                aria-label={t('roleplay.answerAria')}
                 lang="en"
                 rows={2}
                 maxLength={2000}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder="Write here…"
+                placeholder={t('roleplay.placeholder')}
               />
               <button type="submit" disabled={send.isPending || !draft.trim()}>
-                Invia
+                {t('roleplay.send')}
               </button>
             </form>
           )}

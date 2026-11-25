@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useDock } from './useDock'
 import { SentenceFeedback } from '../../components/SentenceFeedback'
 import { playCorrect, playWrong } from '../../lib/sounds'
@@ -11,6 +12,7 @@ interface MultipleChoiceProps {
 
 /** One question: pick an option, see right/wrong, then continue. */
 export function MultipleChoice({ question, onAnswered }: MultipleChoiceProps) {
+  const { t } = useTranslation(['lesson', 'common'])
   const [chosen, setChosen] = useState<number | null>(null)
   const answered = chosen !== null
   const correct = chosen === question.answer
@@ -44,12 +46,12 @@ export function MultipleChoice({ question, onAnswered }: MultipleChoiceProps) {
         <div ref={dock} className={`quiz-feedback quiz-dock ${correct ? 'is-right' : 'is-wrong'}`} role="status">
           <p className={correct ? 'ok' : 'error'}>
             <strong>
-              {correct ? 'Giusto!' : `Non proprio: la risposta giusta è "${question.options[question.answer]}".`}
+              {correct ? t('quiz.right') : t('quiz.wrong', { answer: question.options[question.answer] })}
             </strong>
           </p>
           {question.feedback && <SentenceFeedback en={question.feedback.en} it={question.feedback.it} />}
           <button type="button" onClick={() => onAnswered(correct)}>
-            Avanti
+            {t('common:actions.next')}
           </button>
         </div>
       )}

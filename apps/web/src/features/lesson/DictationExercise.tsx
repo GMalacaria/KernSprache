@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { useDock } from './useDock'
 import { SentenceFeedback } from '../../components/SentenceFeedback'
 import { ListenButton } from '../../components/ListenButton'
@@ -23,6 +24,7 @@ interface DictationProps {
 
 /** Listen to a sentence and write it. Wrong words are marked and the learner tries again until it is right. */
 export function Dictation({ sentence, onAttempt, onTextShown, onDone }: DictationProps) {
+  const { t } = useTranslation(['lesson', 'common'])
   const [value, setValue] = useState('')
   const [wrong, setWrong] = useState(0)
   const [shown, setShown] = useState(false)
@@ -56,22 +58,22 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone }: Dictatio
     return (
       <div ref={dock} className="quiz-feedback quiz-dock is-right" role="status">
         <p className="ok">
-          <strong>Giusto!</strong>
+          <strong>{t('quiz.right')}</strong>
         </p>
         <SentenceFeedback en={sentence.en} it={sentence.it} />
         <p className="dictation-score">
-          Punteggio della frase: <strong>{score}/100</strong>
+          <Trans t={t} i18nKey="dictation.score" values={{ score }} components={{ strong: <strong /> }} />
           {(wrong > 0 || shown) && (
             <span className="muted">
               {' '}
-              ({[wrong > 0 && `${wrong} ${wrong === 1 ? 'tentativo sbagliato' : 'tentativi sbagliati'}`, shown && 'testo mostrato']
+              ({[wrong > 0 && t('dictation.wrongAttempts', { count: wrong }), shown && t('dictation.textShown')]
                 .filter(Boolean)
                 .join(', ')})
             </span>
           )}
         </p>
         <button type="button" onClick={onDone}>
-          Avanti
+          {t('common:actions.next')}
         </button>
       </div>
     )
@@ -79,9 +81,9 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone }: Dictatio
 
   return (
     <form className="stack dictation" onSubmit={check}>
-      <ListenButton text={sentence.en} className="secondary" label="Ascolta la frase" />
+      <ListenButton text={sentence.en} className="secondary" label={t('dictation.listen')} />
       <label htmlFor="dictation-input" className="visually-hidden">
-        Scrivi quello che hai sentito
+        {t('dictation.write')}
       </label>
       <textarea
         id="dictation-input"
@@ -95,10 +97,10 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone }: Dictatio
         autoCapitalize="off"
         autoCorrect="off"
         spellCheck={false}
-        placeholder="Scrivi quello che hai sentito"
+        placeholder={t('dictation.write')}
       />
       <button type="submit" disabled={!value.trim()}>
-        Controlla
+        {t('dictation.check')}
       </button>
 
       {result && !result.correct && (
@@ -107,13 +109,14 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone }: Dictatio
             {result.words.map((w, i) => (
               <span key={i} className={w.ok ? 'word-ok' : 'word-wrong'}>
                 {w.word}
-                {!w.ok && <span className="visually-hidden"> (sbagliata)</span>}{' '}
+                {!w.ok && <span className="visually-hidden">{t('dictation.wrongWord')}</span>}{' '}
               </span>
             ))}
           </p>
           <p className="error">
-            <strong>Non ancora: le parole sottolineate non coincidono.</strong>
-            {result.missing > 0 && ` Mancano ${result.missing} ${result.missing === 1 ? 'parola' : 'parole'}.`} Riascolta e riprova.
+            <strong>{t('dictation.notYet')}</strong>
+            {result.missing > 0 && t('dictation.missing', { count: result.missing })}
+            {t('dictation.tryAgain')}
           </p>
         </div>
       )}
@@ -121,11 +124,11 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone }: Dictatio
       {shown && <SentenceFeedback en={sentence.en} it={sentence.it} />}
       {wrong > 0 && !shown && (
         <button type="button" className="link" onClick={showText}>
-          Mostra il testo (−{TEXT_SHOWN_PENALTY} punti)
+          {t('dictation.showText', { points: TEXT_SHOWN_PENALTY })}
         </button>
       )}
       <p className="muted dictation-rules">
-        Ogni tentativo sbagliato toglie {WRONG_ATTEMPT_PENALTY} punti alla frase.
+        {t('dictation.penalty', { points: WRONG_ATTEMPT_PENALTY })}
       </p>
     </form>
   )

@@ -6,7 +6,6 @@ import type { LessonContent } from './types'
 
 export type LessonPart = 'written' | 'oral'
 
-export const PART_LABEL: Record<LessonPart, string> = { written: 'Scritto', oral: 'Orale' }
 
 export function otherPart(part: LessonPart): LessonPart {
   return part === 'written' ? 'oral' : 'written'
