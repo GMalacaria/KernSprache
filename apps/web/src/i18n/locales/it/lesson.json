@@ -35,6 +35,7 @@
     "title": "Per la parte orale serve il microfono",
     "why": "La lezione si conclude solo con la parte scritta e quella orale: esercitarsi in una sola delle due non basta per imparare bene la lingua."
   },
+  "goToDialogue": "Vai al dialogo",
   "partAlreadyDone": "Hai già fatto la parte {{part}} di questa lezione: puoi rifarla per ripassare.",
   "tryIt": "Mettiti alla prova",
   "dialogueTitle": {
@@ -112,6 +113,10 @@
     "finish": {
       "written": "Concludi la parte scritta",
       "oral": "Concludi la parte orale"
+    },
+    "keepGoing": {
+      "written": "Hai fatto i turni richiesti. Puoi concludere la parte scritta oppure continuare a scrivere al tutor: il tempo conta per la metà scritta dell'obiettivo.",
+      "oral": "Hai fatto i turni richiesti. Puoi concludere la parte orale oppure continuare a parlare con il tutor: il tempo conta per la metà orale dell'obiettivo."
     },
     "turnsLeft_one": "Rispondi ancora {{count}} volta.",
     "turnsLeft_other": "Rispondi ancora {{count}} volte.",

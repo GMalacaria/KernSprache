@@ -7,6 +7,7 @@ import { sendTutorTurn } from '../dialogue/api'
 import { CorrectionList } from '../dialogue/CorrectionList'
 import type { DialogueMode } from '../dialogue/DialoguePage'
 import type { ChatMessage, DialogueTurn } from '../dialogue/types'
+import { scrollToEnd } from '../../lib/scrollToEnd'
 import { VoiceComposer } from '../dialogue/VoiceComposer'
 
 export const LESSON_DIALOGUE_TURNS = 3
@@ -73,7 +74,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
 
   // Every new message brings the end of the chat into view, answer box included (the lesson body scrolls).
   useEffect(() => {
-    if (turns.length > 1 || send.isPending) bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    if (turns.length > 1 || send.isPending) scrollToEnd(bottom.current)
   }, [turns, send.isPending])
 
   return (
@@ -97,33 +98,34 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
       {send.isError && <p className="error">{send.error.message}</p>}
 
       {finished ? (
-        <button type="button" onClick={onFinished}>
-          {t(`roleplay.finish.${mode}`)}
-        </button>
+        // The required turns are done: the part can end here, or the learner keeps talking with the tutor,
+        // and that time keeps counting towards this half of the daily goal.
+        <div className="roleplay-done stack">
+          <p className="muted">{t(`roleplay.keepGoing.${mode}`)}</p>
+          <button type="button" onClick={onFinished}>
+            {t(`roleplay.finish.${mode}`)}
+          </button>
+        </div>
       ) : (
-        <>
-          <p className="muted">
-            {t('roleplay.turnsLeft', { count: LESSON_DIALOGUE_TURNS - learnerTurns })}
-          </p>
-          {mode === 'oral' ? (
-            <VoiceComposer disabled={send.isPending} onTranscript={sendText} onActivity={onActivity} />
-          ) : (
-            <form onSubmit={onSubmit} className="composer">
-              <textarea
-                aria-label={t('roleplay.answerAria')}
-                lang="en"
-                rows={2}
-                maxLength={2000}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder={t('roleplay.placeholder')}
-              />
-              <button type="submit" disabled={send.isPending || !draft.trim()}>
-                {t('roleplay.send')}
-              </button>
-            </form>
-          )}
-        </>
+        <p className="muted">{t('roleplay.turnsLeft', { count: LESSON_DIALOGUE_TURNS - learnerTurns })}</p>
+      )}
+      {mode === 'oral' ? (
+        <VoiceComposer disabled={send.isPending} onTranscript={sendText} onActivity={onActivity} />
+      ) : (
+        <form onSubmit={onSubmit} className="composer">
+          <textarea
+            aria-label={t('roleplay.answerAria')}
+            lang="en"
+            rows={2}
+            maxLength={2000}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={t('roleplay.placeholder')}
+          />
+          <button type="submit" disabled={send.isPending || !draft.trim()}>
+            {t('roleplay.send')}
+          </button>
+        </form>
       )}
       <div ref={bottom} />
     </div>

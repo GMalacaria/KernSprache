@@ -301,9 +301,20 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
       ) : (
         <>
           {partDone(row, part) && state.sectionIndex === 0 && phase.kind === 'learn' && (
-            <p className="notice">
-              {t('partAlreadyDone', { part: t(`partName.${part}`) })}
-            </p>
+            <div className="notice stack">
+              <p>{t('partAlreadyDone', { part: t(`partName.${part}`) })}</p>
+              {/* A part already done can go straight to its dialogue, e.g. to practise speaking for longer. */}
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  stopSpeaking()
+                  update((s) => ({ ...s, sectionIndex: sections.length, phase: { kind: 'learn' } }))
+                }}
+              >
+                {t('goToDialogue')}
+              </button>
+            </div>
           )}
 
           {section && phase.kind === 'learn' && (
