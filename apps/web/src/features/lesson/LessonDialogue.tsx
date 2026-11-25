@@ -1,5 +1,5 @@
 import { ListenButton } from '../../components/ListenButton'
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { speak } from '../../lib/audio'
@@ -7,6 +7,7 @@ import { sendTutorTurn } from '../dialogue/api'
 import { CorrectionList } from '../dialogue/CorrectionList'
 import type { DialogueMode } from '../dialogue/DialoguePage'
 import type { ChatMessage, DialogueTurn } from '../dialogue/types'
+import { scrollToEnd } from '../../lib/scrollToEnd'
 import { VoiceComposer } from '../dialogue/VoiceComposer'
 
 export const LESSON_DIALOGUE_TURNS = 3
@@ -28,6 +29,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
   const [draft, setDraft] = useState('')
   const sessionId = useRef<string | undefined>(undefined)
   const learnerTurns = turns.filter((turn) => turn.role === 'user' && turn.corrections).length
+  const bottom = useRef<HTMLDivElement>(null)
 
   const send = useMutation({
     mutationFn: sendTutorTurn,
@@ -70,6 +72,11 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
 
   const finished = learnerTurns >= LESSON_DIALOGUE_TURNS
 
+  // Every new message brings the end of the chat into view, answer box included (the lesson body scrolls).
+  useEffect(() => {
+    if (turns.length > 1 || send.isPending) scrollToEnd(bottom.current)
+  }, [turns, send.isPending])
+
   return (
     <div>
       <p className="notice">{scenario}</p>
@@ -91,34 +98,36 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
       {send.isError && <p className="error">{send.error.message}</p>}
 
       {finished ? (
-        <button type="button" onClick={onFinished}>
-          {t(`roleplay.finish.${mode}`)}
-        </button>
+        // The required turns are done: the part can end here, or the learner keeps talking with the tutor,
+        // and that time keeps counting towards this half of the daily goal.
+        <div className="roleplay-done stack">
+          <p className="muted">{t(`roleplay.keepGoing.${mode}`)}</p>
+          <button type="button" onClick={onFinished}>
+            {t(`roleplay.finish.${mode}`)}
+          </button>
+        </div>
       ) : (
-        <>
-          <p className="muted">
-            {t('roleplay.turnsLeft', { count: LESSON_DIALOGUE_TURNS - learnerTurns })}
-          </p>
-          {mode === 'oral' ? (
-            <VoiceComposer disabled={send.isPending} onTranscript={sendText} onActivity={onActivity} />
-          ) : (
-            <form onSubmit={onSubmit} className="composer">
-              <textarea
-                aria-label={t('roleplay.answerAria')}
-                lang="en"
-                rows={2}
-                maxLength={2000}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder={t('roleplay.placeholder')}
-              />
-              <button type="submit" disabled={send.isPending || !draft.trim()}>
-                {t('roleplay.send')}
-              </button>
-            </form>
-          )}
-        </>
+        <p className="muted">{t('roleplay.turnsLeft', { count: LESSON_DIALOGUE_TURNS - learnerTurns })}</p>
       )}
+      {mode === 'oral' ? (
+        <VoiceComposer disabled={send.isPending} onTranscript={sendText} onActivity={onActivity} />
+      ) : (
+        <form onSubmit={onSubmit} className="composer">
+          <textarea
+            aria-label={t('roleplay.answerAria')}
+            lang="en"
+            rows={2}
+            maxLength={2000}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={t('roleplay.placeholder')}
+          />
+          <button type="submit" disabled={send.isPending || !draft.trim()}>
+            {t('roleplay.send')}
+          </button>
+        </form>
+      )}
+      <div ref={bottom} />
     </div>
   )
 }

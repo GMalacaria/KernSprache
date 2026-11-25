@@ -31,8 +31,11 @@ export function useStudyTimer(): StudyTimer {
   return ctx
 }
 
-/** Declares the half of the goal the screen is studying (lessons and chapter tests) while it is mounted. */
-export function useStudyActivity(mode: StudyMode): StudyTimer {
+/**
+ * Declares the half of the goal the screen is studying (lessons and chapter tests) while it is mounted.
+ * Pass null while nothing is being studied on it (an end-of-lesson summary): the clock then stops.
+ */
+export function useStudyActivity(mode: StudyMode | null): StudyTimer {
   const timer = useStudyTimer()
   const { setActiveMode } = timer
   useEffect(() => {

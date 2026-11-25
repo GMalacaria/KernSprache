@@ -50,3 +50,8 @@ Deno.test('pronunciation: a known sentence is quoted safely and judged against',
   assertStringIncludes(text, '"Sag \\"hallo\\""')
   assertStringIncludes(text, 'against that sentence')
 })
+
+Deno.test('pronunciation: keeps the silence rule, with and without a known sentence', () => {
+  assertStringIncludes(pronunciationPrompt(german), 'Silence and noise')
+  assertStringIncludes(pronunciationPrompt(german, 'Hallo'), 'Silence and noise')
+})

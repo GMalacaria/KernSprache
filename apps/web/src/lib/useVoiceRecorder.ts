@@ -40,7 +40,14 @@ export function useVoiceRecorder({ onRecorded, onTick }: Options) {
     const current = recording.current
     recording.current = null
     setIsRecording(false)
-    if (current) onRecordedRef.current(await current.stop())
+    if (!current) return
+    const audio = await current.stop()
+    // A silent recording is not sent: nothing to transcribe, and nothing to grade.
+    if (!current.heardSpeech()) {
+      setMicError(i18n.t('voice.noSpeech'))
+      return
+    }
+    onRecordedRef.current(audio)
   }, [])
 
   const start = useCallback(async () => {

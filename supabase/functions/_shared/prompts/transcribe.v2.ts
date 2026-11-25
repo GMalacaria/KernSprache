@@ -1,13 +1,14 @@
 // Versioned prompts: change the text => bump the version (it is logged in ai_usage).
-// v2 / pronunciation.v3: the language pair comes from the backend; pronunciation tips are about the sounds of the
-// studied language, explained to a speaker of the native one.
+// transcribe.v2 / pronunciation.v4: the language pair comes from the backend; pronunciation tips are about the sounds
+// of the studied language, explained to a speaker of the native one. pronunciation.v4 keeps the silence rule of v3.
 import type { PairNames } from '../languages.ts'
 
 export const TRANSCRIBE_PROMPT_VERSION = 'transcribe.v2'
-export const PRONUNCIATION_PROMPT_VERSION = 'pronunciation.v3'
+export const PRONUNCIATION_PROMPT_VERSION = 'pronunciation.v4'
 
 export { NO_SPEECH_MARKER } from './transcribe.v1.ts'
 import { NO_SPEECH_MARKER } from './transcribe.v1.ts'
+import { SILENCE_RULE } from './pronunciation.v3.ts'
 
 export function transcribePrompt({ native, target }: PairNames): string {
   return `Transcribe this recording of a ${native} learner speaking ${target}.
@@ -39,13 +40,13 @@ pronunciation
 - If the learner says fewer than 3 words, set pronunciation to null: there is too little to judge.`
 }
 
-/** With `expectedText` the learner was reading that sentence aloud and is judged against it (as in v2). */
+/** With `expectedText` the learner was reading that sentence aloud and is judged against it (as in v2); silence gets no grade (v3). */
 export function pronunciationPrompt(
   names: PairNames,
   expectedText?: string,
 ): string {
   const base = basePronunciationPrompt(names)
-  if (!expectedText) return base
+  if (!expectedText) return `${base}\n${SILENCE_RULE}`
   return `${base}
 
 The learner was asked to read this sentence aloud: ${JSON.stringify(expectedText)}
@@ -53,5 +54,6 @@ The learner was asked to read this sentence aloud: ${JSON.stringify(expectedText
 - Judge the pronunciation against that sentence: a word that is missing, replaced or unclear counts as a mistake, and a word read well is not a mistake. List a replaced or missing word first in "words", with a tip_it that says which word was expected.
 - A missing or replaced word caps the score at 75, and more than one caps it at 60. Do not give above 85 unless every word was clear.
 - feedback_it names the one thing to fix; no generic praise.
-- With a known sentence, do not return null for a short reading: judge it, even if it is one or two words.`
+- With a known sentence, do not return null for a short reading: judge it, even if it is one or two words.
+${SILENCE_RULE}`
 }

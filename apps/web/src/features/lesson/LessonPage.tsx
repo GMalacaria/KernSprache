@@ -33,6 +33,8 @@ import {
   GrammarView,
   ListeningView,
   PhrasesView,
+  LessonNotes,
+  LightBulbIcon,
   ReadingView,
   RepeatIntro,
   VerbsView,
@@ -150,11 +152,16 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
     oral: resumedState(lessonId, 'oral'),
   }))
   const [finished, setFinished] = useState<Finished | null>(null)
+  // The grammar-and-words page, opened from the light bulb: it covers the lesson without unmounting it,
+  // so the dialogue in progress and the point reached stay as they are.
+  const [notesOpen, setNotesOpen] = useState(false)
 
   // The part opened first: the one still to do, or the one the daily timer suggests.
   const part: LessonPart =
     chosenPart ?? initialPart(progress.data, voice ? timer.status.recommendedMode : 'written')
-  const { markActivity } = useStudyActivity(part)
+  // The clock runs only while studying: not on the end-of-part summary, the "microphone needed" notice,
+  // or the grammar-and-words page.
+  const { markActivity } = useStudyActivity(notesOpen || finished || (part === 'oral' && !voice) ? null : part)
 
   const content = lesson.data?.content
   const sections = useMemo(() => (content ? sectionsFor(content, part) : []), [content, part])
@@ -248,6 +255,10 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
     <Shell
       onExit={onExit}
       title={meta.title}
+      onOpenNotes={() => {
+        stopSpeaking()
+        setNotesOpen(true)
+      }}
       progress={
         <>
           <div className="segmented part-tabs" role="group" aria-label={t('partsAria')}>
@@ -300,9 +311,20 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
       ) : (
         <>
           {partDone(row, part) && state.sectionIndex === 0 && phase.kind === 'learn' && (
-            <p className="notice">
-              {t('partAlreadyDone', { part: t(`partName.${part}`) })}
-            </p>
+            <div className="notice stack">
+              <p>{t('partAlreadyDone', { part: t(`partName.${part}`) })}</p>
+              {/* A part already done can go straight to its dialogue, e.g. to practise speaking for longer. */}
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  stopSpeaking()
+                  update((s) => ({ ...s, sectionIndex: sections.length, phase: { kind: 'learn' } }))
+                }}
+              >
+                {t('goToDialogue')}
+              </button>
+            </div>
           )}
 
           {section && phase.kind === 'learn' && (
@@ -382,6 +404,17 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
             </section>
           )}
         </>
+      )}
+      {notesOpen && (
+        <div className="notes-page" role="dialog" aria-modal="true" aria-label={t('notes.title')}>
+          <header className="lesson-header">
+            <BackButton onBack={() => setNotesOpen(false)} />
+            <h1>{t('notes.title')}</h1>
+          </header>
+          <div className="notes-body">
+            <LessonNotes content={lessonContent} />
+          </div>
+        </div>
       )}
     </Shell>
   )
@@ -518,6 +551,8 @@ function PartDone({
 interface ShellProps {
   title: string
   onExit: () => void
+  /** Opens the lesson's grammar and words (light bulb in the header); absent while the lesson loads. */
+  onOpenNotes?: () => void
   /** Pinned under the title, like the title itself. */
   progress?: ReactNode
   /** When it changes the content scrolls back to the top (next question, next part). */
@@ -526,7 +561,7 @@ interface ShellProps {
 }
 
 /** Title and progress stay put; only the lesson content scrolls, so the answer and Avanti are never off screen. */
-function Shell({ title, onExit, progress, resetKey, children }: ShellProps) {
+function Shell({ title, onExit, onOpenNotes, progress, resetKey, children }: ShellProps) {
   const bodyRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     bodyRef.current?.scrollTo({ top: 0 })
@@ -536,6 +571,17 @@ function Shell({ title, onExit, progress, resetKey, children }: ShellProps) {
       <header className="lesson-header">
         <BackButton onBack={onExit} title={i18n.t('backTitle', { ns: 'lesson' })} />
         <h1>{title}</h1>
+        {onOpenNotes && (
+          <button
+            type="button"
+            className="notes-button"
+            aria-label={i18n.t('notes.open', { ns: 'lesson' })}
+            title={i18n.t('notes.open', { ns: 'lesson' })}
+            onClick={onOpenNotes}
+          >
+            <LightBulbIcon />
+          </button>
+        )}
       </header>
       {progress}
       <div className="lesson-body" ref={bodyRef}>
