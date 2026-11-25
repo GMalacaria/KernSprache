@@ -3,11 +3,12 @@
 import { logAiUsage } from '../_shared/ai-usage.ts'
 import { AiError, getAiProvider } from '../_shared/ai/index.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
+import { loadLearner, pairNames } from '../_shared/languages.ts'
 import {
   REVIEW_CHECK_PROMPT_VERSION,
-  REVIEW_CHECK_SYSTEM_PROMPT,
   reviewCheckMessage,
-} from '../_shared/prompts/review-check.v1.ts'
+  reviewCheckPrompt,
+} from '../_shared/prompts/review-check.v2.ts'
 import { reviewCheckRequestSchema, reviewCheckResultSchema } from '../_shared/schemas/review-check.ts'
 import { requireApprovedUser, userClient } from '../_shared/supabase.ts'
 
@@ -15,7 +16,8 @@ const FUNCTION_NAME = 'review-check'
 
 Deno.serve(
   handle(async (req) => {
-    const userId = await requireApprovedUser(userClient(req))
+    const db = userClient(req)
+    const userId = await requireApprovedUser(db)
 
     const body = reviewCheckRequestSchema.safeParse(
       await req.json().catch(() => null),
@@ -24,11 +26,13 @@ Deno.serve(
       throw new HttpError(400, 'bad_request', 'Risposta non valida')
     }
 
+    const { pair } = await loadLearner(db, userId, body.data.language)
+
     let result
     try {
       result = await getAiProvider().generateStructured({
         task: 'correction',
-        system: REVIEW_CHECK_SYSTEM_PROMPT,
+        system: reviewCheckPrompt(pairNames(pair)),
         context: `# Card and answer\n${reviewCheckMessage(body.data)}`,
         messages: [{ role: 'user', content: 'Check the learner answer.' }],
         schema: reviewCheckResultSchema,

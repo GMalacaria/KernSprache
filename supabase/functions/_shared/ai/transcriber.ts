@@ -1,7 +1,7 @@
 import { GeminiApiError, GoogleGenAI, ThinkingLevel } from '../deps.ts'
 import { requireEnv } from '../env.ts'
-import { pronunciationPrompt } from '../prompts/pronunciation.v3.ts'
-import { NO_SPEECH_MARKER, TRANSCRIBE_PROMPT } from '../prompts/transcribe.v1.ts'
+import type { PairNames } from '../languages.ts'
+import { NO_SPEECH_MARKER, pronunciationPrompt, transcribePrompt } from '../prompts/transcribe.v2.ts'
 import { assessedTranscriptSchema, type Pronunciation } from '../schemas/pronunciation.ts'
 import { toTokenUsage } from './gemini.ts'
 import { AiError, type TokenUsage } from './types.ts'
@@ -25,10 +25,14 @@ export interface AssessedTranscript extends Transcript {
 }
 
 export interface Transcriber {
-  transcribe(audio: AudioInput): Promise<Transcript>
+  transcribe(audio: AudioInput, names: PairNames): Promise<Transcript>
   /** Transcript and pronunciation assessment from the same recording, in one model call. */
   /** With `expectedText`, the learner was reading that sentence aloud and is judged against it. */
-  assess(audio: AudioInput, expectedText?: string): Promise<AssessedTranscript>
+  assess(
+    audio: AudioInput,
+    names: PairNames,
+    expectedText?: string,
+  ): Promise<AssessedTranscript>
 }
 
 /**
@@ -42,7 +46,7 @@ export class GeminiTranscriber implements Transcriber {
     }),
   ) {}
 
-  async transcribe(audio: AudioInput): Promise<Transcript> {
+  async transcribe(audio: AudioInput, names: PairNames): Promise<Transcript> {
     const model = requireEnv('AI_MODEL_TRANSCRIBE')
     let response
     try {
@@ -52,7 +56,7 @@ export class GeminiTranscriber implements Transcriber {
           role: 'user',
           parts: [{
             inlineData: { mimeType: audio.mimeType, data: audio.data },
-          }, { text: TRANSCRIBE_PROMPT }],
+          }, { text: transcribePrompt(names) }],
         }],
         config: {
           maxOutputTokens: 1024,
@@ -83,7 +87,11 @@ export class GeminiTranscriber implements Transcriber {
     }
   }
 
-  async assess(audio: AudioInput, expectedText?: string): Promise<AssessedTranscript> {
+  async assess(
+    audio: AudioInput,
+    names: PairNames,
+    expectedText?: string,
+  ): Promise<AssessedTranscript> {
     const model = requireEnv('AI_MODEL_TRANSCRIBE')
     let response
     try {
@@ -93,7 +101,7 @@ export class GeminiTranscriber implements Transcriber {
           role: 'user',
           parts: [{
             inlineData: { mimeType: audio.mimeType, data: audio.data },
-          }, { text: pronunciationPrompt(expectedText) }],
+          }, { text: pronunciationPrompt(names, expectedText) }],
         }],
         config: {
           maxOutputTokens: 1024,
@@ -127,7 +135,7 @@ export class GeminiTranscriber implements Transcriber {
     console.error(
       'Unusable pronunciation assessment, falling back to a plain transcript',
     )
-    const plain = await this.transcribe(audio)
+    const plain = await this.transcribe(audio, names)
     return {
       ...plain,
       pronunciation: null,

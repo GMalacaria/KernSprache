@@ -1,4 +1,5 @@
 import { z } from '../deps.ts'
+import { languageSchema } from '../languages.ts'
 
 /** Formats produced by MediaRecorder on Android/desktop (webm, ogg) and iOS Safari (mp4). */
 export const AUDIO_MIME_TYPES = [
@@ -24,6 +25,8 @@ export const transcribeRequestSchema = z.object({
   expected_text: z.string().trim().min(1).max(300).optional(),
   /** With `assess`: store the mispronounced words as review cards (dialogue and exercises, never the review itself). */
   save_mistakes: z.boolean().default(false),
+  /** Language being spoken; the learner's active language when missing (older clients). */
+  language: languageSchema.optional(),
   mime_type: z.string().transform((m) => m.split(';')[0]!.trim().toLowerCase())
     .pipe(z.enum(AUDIO_MIME_TYPES)),
 })

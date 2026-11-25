@@ -165,7 +165,17 @@ Decisioni prese:
    - `profiles.level/purpose/goal` restano finché il codice non li usa più e si tolgono nella PR 10;
    - aggiornare `handle_new_user` e i test `rls`, `curriculum`, `chapter_tests`, `approval`, `lesson_stats`, `tts_cache`.
 
-4. **`feat(functions): parametrize prompts by language pair`**:
+4. **`feat(functions): parametrize prompts by language pair`**, divisa in due PR:
+   - ✅ **4a** (solo functions, formato JSON invariato, quindi nessun effetto sulla PWA):
+     - `_shared/languages.ts`: `LANGUAGE_NAMES`, `pairNames`, `loadLearner(db, userId, language?)` (coppia madre/studiata dal profilo, livello/scopo/goal da `learner_languages` con ripiego sul profilo);
+     - prompt nuovi come funzioni della coppia: `tutor-chat.v3`, `lesson.v2`, `chapter-test.v3` + `chapter-test-oral.v2`, `placement-oral.v2`, `transcribe.v2` + `pronunciation.v4` (con la regola sul silenzio della v3 arrivata con #48), `review-check.v2`. I nomi dei campi `_en`/`_it` restano (detto nel prompt: "historical"); i consigli di pronuncia riguardano i suoni della lingua studiata per chi parla la madre;
+     - la lingua viene dal capitolo (lezione, verifica, dialogo della lezione) o dalla lingua attiva (dialogo libero, test di livello); `speak`, `transcribe` e `review-check` accettano `language` facoltativa (i client di oggi non la mandano);
+     - righe salvate con `language`: sessioni, errori, parole (cercate per lingua, i sostantivi tedeschi mantengono la maiuscola), carte di pronuncia, tentativi di verifica, test di livello, `tts_cache`; la chiave della voce include la lingua, tranne l'inglese che mantiene la chiave di prima (l'audio già generato resta valido);
+     - `raiseLevel` alza il livello in `learner_languages` per la lingua del capitolo e nel profilo solo se è la lingua attiva;
+     - **rilascio**: richiede la migration della PR 3 in produzione prima del deploy delle functions (leggono `learner_languages` e `language`);
+     - provato con le functions di questa worktree (`deno run` su porte locali) e Gemini vero: dialogo in inglese e in tedesco (correzioni giuste, spiegazioni in italiano, righe salvate con `de`), voce tedesca in cache con `de`, lezione inglese generata con `lesson.v2` e lo scopo della lingua del capitolo.
+   - **4b**: nomi neutri dei campi e verbi generici, con la PWA che legge il formato vecchio e il nuovo.
+   - Piano originale:
    - nuove versioni dei prompt in `_shared/prompts/`: `tutor-chat.v3`, `lesson.v2`, `chapter-test.v3`, `placement-oral.v2`, `transcribe.v2`, `pronunciation.v3`;
      - `{native}`/`{target}` vanno nella parte fissa, così il caching implicito di Gemini resta per coppia;
      - i consigli di pronuncia valgono per i suoni della lingua studiata, spiegati a chi parla la lingua madre;

@@ -23,3 +23,20 @@ Deno.test('cleanReply drops no-op corrections and normalises vocabulary', () => 
   assertEquals(result.corrections.map((c) => c.original), ['I has'])
   assertEquals(result.new_vocab, [{ en: 'job', it: 'lavoro' }])
 })
+
+Deno.test('cleanReply keeps the case of German nouns, still de-duplicating case-insensitively', () => {
+  const result = cleanReply(
+    {
+      reply: 'Schön!',
+      corrections: [],
+      new_vocab: [
+        { en: ' der Kinobesuch ', it: 'la visita al cinema' },
+        { en: 'der kinobesuch', it: 'doppione' },
+        { en: 'Der Film', it: 'il film' },
+      ],
+    },
+    new Set(['der film']),
+    true,
+  )
+  assertEquals(result.new_vocab, [{ en: 'der Kinobesuch', it: 'la visita al cinema' }])
+})

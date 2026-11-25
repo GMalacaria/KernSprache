@@ -6,8 +6,8 @@ import { AiError } from '../_shared/ai/index.ts'
 import { savePronunciationCards } from '../_shared/pronunciation-cards.ts'
 import { getTranscriber } from '../_shared/ai/transcriber.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
-import { PRONUNCIATION_PROMPT_VERSION } from '../_shared/prompts/pronunciation.v3.ts'
-import { TRANSCRIBE_PROMPT_VERSION } from '../_shared/prompts/transcribe.v1.ts'
+import { loadLearner, pairNames } from '../_shared/languages.ts'
+import { PRONUNCIATION_PROMPT_VERSION, TRANSCRIBE_PROMPT_VERSION } from '../_shared/prompts/transcribe.v2.ts'
 import { transcribeRequestSchema } from '../_shared/schemas/transcribe.ts'
 import { requireApprovedUser, userClient } from '../_shared/supabase.ts'
 
@@ -29,6 +29,8 @@ Deno.serve(
       )
     }
 
+    const { pair } = await loadLearner(db, userId, body.data.language)
+    const names = pairNames(pair)
     const promptVersion = body.data.assess ? PRONUNCIATION_PROMPT_VERSION : TRANSCRIBE_PROMPT_VERSION
     const audio = {
       data: body.data.audio_base64,
@@ -36,8 +38,8 @@ Deno.serve(
     }
     let transcript
     try {
-      transcript = body.data.assess ? await getTranscriber().assess(audio, body.data.expected_text) : {
-        ...(await getTranscriber().transcribe(audio)),
+      transcript = body.data.assess ? await getTranscriber().assess(audio, names, body.data.expected_text) : {
+        ...(await getTranscriber().transcribe(audio, names)),
         pronunciation: null,
       }
     } catch (err) {
@@ -76,7 +78,12 @@ Deno.serve(
       )
     }
     if (body.data.assess && body.data.save_mistakes) {
-      await savePronunciationCards(db, userId, transcript.pronunciation)
+      await savePronunciationCards(
+        db,
+        userId,
+        transcript.pronunciation,
+        pair.target,
+      )
     }
     return json({
       text: transcript.text,
