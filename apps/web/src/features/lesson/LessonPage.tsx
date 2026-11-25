@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { canRecord, prefetchSpeech, stopSpeaking } from '../../lib/audio'
+import { NoMicrophone } from '../../components/NoMicrophone'
 import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity, useStudyTimer } from '../study/useStudyTimer'
@@ -291,7 +292,10 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
           onExit={onExit}
         />
       ) : blockedByMic ? (
-        <NoMicrophone />
+        <NoMicrophone
+          title="Per la parte orale serve il microfono"
+          why="La lezione si conclude solo con la parte scritta e quella orale: esercitarsi in una sola delle due non basta per imparare bene la lingua."
+        />
       ) : (
         <>
           {partDone(row, part) && state.sectionIndex === 0 && phase.kind === 'learn' && (
@@ -383,22 +387,6 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   )
 }
 
-/** The oral part needs the microphone: without it the lesson cannot be completed. */
-function NoMicrophone() {
-  return (
-    <section className="notice">
-      <h2>Per la parte orale serve il microfono</h2>
-      <p>
-        La lezione si conclude solo con la parte scritta e quella orale: esercitarsi in una sola delle due non basta per
-        imparare bene la lingua.
-      </p>
-      <p>
-        Su questo dispositivo il microfono non è disponibile. Apri Kern Sprache sul telefono, oppure usa un browser che
-        permetta di registrare e dai il permesso al microfono quando te lo chiede.
-      </p>
-    </section>
-  )
-}
 
 interface PartDoneProps {
   userId: string

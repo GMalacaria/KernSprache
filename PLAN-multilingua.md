@@ -1,16 +1,34 @@
 # Kern Sprache: multilingua + i18n
 
-> Aggiornato il 2026-11-24 su `main` a `4f7ef72` (PR #35). La PR 1 (nome e icona) è fatta (#31). **Prima del resto** va fatto il blocco "scritto + orale e navigazione" di `PLAN.md`: tocca gli stessi file (lezione, obiettivo giornaliero, menu) ed è più piccolo. Il refactoring tocca quasi tutti i file, quindi va fatto **da solo**, senza altre sessioni che scrivono in parallelo.
+> Aggiornato il 2026-11-25 su `main` a `aa4da98` (PR #39). La PR 1 (nome e icona) è fatta (#31). Il blocco "scritto + orale e navigazione" di `PLAN.md` è chiuso (#37-#39 e la PR 0, orale obbligatorio nelle verifiche di capitolo). Il refactoring tocca quasi tutti i file, quindi va fatto **da solo**, senza altre sessioni che scrivono in parallelo.
 
 ## Prerequisiti prima di partire
-1. Nessun'altra sessione al lavoro sul repo e `main` aggiornato (`git pull`, `gh pr list`).
-2. Il blocco "scritto + orale e navigazione" di `PLAN.md` è mergiato.
-3. Mappatura dei punti legati all'inglese rifatta su `4f7ef72`: è quella di "Cosa è cambiato" più sotto. Se nel frattempo arrivano altre PR, va ripetuta (`git grep -n "English Tutor\|Italian.*English\|lang=\"en\""`).
-4. Ultima migration su `main`: `20261125100000_pronunciation_mistakes.sql`. Le nuove devono avere timestamp successivi.
+1. Nessun'altra sessione al lavoro sul repo e `main` aggiornato (`git pull`, `gh pr list`). Al 2026-11-25 nessuna PR aperta.
+2. ✅ Il blocco "scritto + orale e navigazione" di `PLAN.md` è mergiato, compreso il punto 4 (PR 0 `feat(web): require the oral part of chapter tests`, fatta prima della PR 2 perché tocca `ChapterTestPage.tsx`).
+3. ✅ Mappatura dei punti legati all'inglese rifatta su `aa4da98` (`git grep -n "Italian.*English\|lang=\"en\"\|_it\b\|\.en\b"`): circa 65 file, vedi "Cosa è cambiato (PR #36–#39)". Se arrivano altre PR, va ripetuta.
+4. Ultima migration su `main`: `20261125160000_practice_time.sql`. Le nuove devono avere timestamp successivi.
 5. Dump di produzione prima della PR 3, su richiesta esplicita.
 6. Si riparte dalla PR 2, un branch alla volta, sempre da `main`.
 
-## Cosa è cambiato dopo (PR #32–#35 e regole nuove)
+## Cosa è cambiato (PR #36–#39)
+- **Obiettivo giornaliero a metà scritto e metà orale (#37)**: `add_study_time` (migration `20261125120000`), `studyStatus` in `features/study/studyMath.ts`, `GoalRing` a due archi. Resta **globale** (non per lingua), come `study_days`.
+- **Tempo di ripasso e dialogo libero (#38/#39)**: `study_days.review_seconds` / `dialogue_seconds`, RPC `add_practice_time` (migration `20261125160000`), hook `usePracticeActivity`. Statistica globale; se un giorno servisse per lingua, va aggiunta la `language` alla RPC (non previsto).
+- **Lezione in parte scritta e orale (#38)**:
+  - migration `20261125140000_lesson_parts`: `lesson_progress.written_done_at` / `oral_done_at` / `written_stats` / `oral_stats`. Valgono per lingua tramite la lezione, nessuna colonna nuova;
+  - `features/lesson/parts.ts`: `PART_LABEL` (testi da mettere nel catalogo, PR 2), `repeatSentences` costruite da `grammar.examples` con `{ en, it }` e `normalizeWords(sentence.en)`: nella PR 4 diventano `{ text, translation }`, e `normalizeWords` multilingua serve anche qui (PR 9);
+  - `RepeatExercise.tsx` nuovo: `lang="en"`, `sentence.en`, `ListenButton` senza lingua;
+  - `LessonPage.tsx`: `prefetchSpeech` ora usa anche `repeatSentences(...).map(d => d.en)`, `dialogue.scenario_it`, `idioms` con `meaning_it`; messaggi sul microfono in italiano (catalogo);
+  - ripresa a metà in `localStorage` `kernsprache.lesson.<id>.<parte>`: l'id della lezione è già diverso per lingua, nessun cambio.
+- **Barra in basso (#39)**: `features/nav/TabBar.tsx`, `scrollMemory.ts`, `features/settings/SettingsPage.tsx`, `components/BackButton.tsx`; `AppMenu.tsx` e `SideMenu.tsx` eliminati. Effetti:
+  - PR 2: nel catalogo vanno le etichette della barra, la pagina Impostazioni e `BackButton` (al posto di "le voci del menu");
+  - PR 9: il cambio di lingua va nel **Profilo** (che ha già "Obiettivo e scopo" e "Rifai il test di livello", da rendere per lingua) e nell'intestazione della Home.
+- **Ripasso (#35/#38)**: riepilogo con "Inizia ripasso" (`review/summary.ts`); dopo la risposta si vede solo il giudizio (`fsrs.formatInterval` e `GRADES` eliminati, quindi non vanno più nel catalogo). `ReviewCards.tsx` resta il file con più punti legati all'inglese (17). Il resto come già scritto sotto.
+- **Profilo (#38)**: grafico a due barre per giorno (`--written` / `--oral`), `profileStats.lastDaysMinutes` restituisce `written`/`oral`; etichette in `profileStats.ts` (catalogo, PR 2). Il grafico resta globale.
+- **Porte (#39)**: PWA in sviluppo su 5273, anteprima della build su 4273 (`vite.config.ts`, `strictPort`). Le prove nel browser integrato usano queste.
+- **`RepeatSentence`**: "Ho sentito: <span lang="en">" (PR 2 per il testo, PR 9 per `lang`).
+- File con testi italiani nell'interfaccia: circa 30 componenti (stima con `git grep`), quindi la PR 2 va divisa come previsto.
+
+## Cosa è cambiato prima (PR #32–#35 e regole nuove)
 - **Ripasso con voto dato dall'app (#35)**:
   - `features/review/grading.ts`: `normalizeItalian` toglie gli articoli **italiani** (`ARTICLES`) e gli accenti. Dipende dalla lingua madre, quindi con il multilingua servono articoli per lingua madre, o almeno vanno legati a `native_language`;
   - prompt `review-check.v1` ("Italian learner of English", traduzione in italiano): va parametrizzato nella PR 4 come `review-check.v2`;
@@ -112,9 +130,9 @@ Decisioni prese:
      - dialogue + review + pronuncia;
      - test.
    - Vanno nel catalogo anche:
-     - `fsrs.formatInterval`, i `GRADES` di `review/api.ts` e `purposes.ts`;
+     - `purposes.ts` e il giudizio dopo la risposta nel ripasso (`fsrs.formatInterval` e `GRADES` non esistono più);
      - le etichette di `profileStats.ts` e del grafico;
-     - le voci del menu, compresa quella degli effetti sonori.
+     - le etichette della barra in basso (`TabBar`), la pagina Impostazioni (effetti sonori compresi), `BackButton`, `PART_LABEL` e i messaggi sul microfono della lezione.
    - Messaggi di errore delle functions: restituire un `code` stabile oltre al testo, così il client li traduce.
 
 3. **`feat(db): track languages per learner`** (migration + pgTAP + `db:types`):
@@ -176,7 +194,7 @@ Decisioni prese:
      - `speak(text, lang)` passa la lingua alla function `speak`;
      - il ripiego `speechSynthesis` sceglie la voce per lingua (`en-GB`, `fr-FR`, `es-ES`, `de-DE`, poi la prima che inizia con il codice);
    - **dettato multilingua**: `normalizeWords` con `\p{L}\p{N}` e NFC, `DictationSentence { text, translation }`, test per FR/ES/DE (accenti, ß, ñ, apostrofo francese, `¿¡`);
-   - gli attributi `lang="en"` scritti nel codice diventano la lingua attiva: ReviewPage, sections, DialoguePage, LessonDialogue, ChapterTestPage, PlacementTestPage, PronunciationNote, DictationExercise, SentenceFeedback, RepeatSentence, SpokenAnswer;
+   - gli attributi `lang="en"` scritti nel codice diventano la lingua attiva: ReviewCards, sections, DialoguePage, LessonDialogue, ChapterTestPage, PlacementTestPage, PronunciationNote, DictationExercise, SentenceFeedback, RepeatSentence, RepeatExercise, SpokenAnswer;
    - `send-reminders`: il promemoria usa la lingua attiva (testi ancora in italiano).
 
 10. **`chore(db): drop single-language columns`**:
