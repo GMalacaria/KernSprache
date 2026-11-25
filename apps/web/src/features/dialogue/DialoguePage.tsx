@@ -7,6 +7,7 @@ import { endSession, sendTutorTurn } from './api'
 import { CorrectionList } from './CorrectionList'
 import type { DialogueTurn, Pronunciation } from './types'
 import { PronunciationNote } from './PronunciationNote'
+import { BackHeader } from '../../components/BackHeader'
 import { VoiceComposer } from './VoiceComposer'
 
 const MAX_CHARS = 2000
@@ -93,12 +94,8 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
 
   return (
     <main className="page dialogue">
-      <header className="row">
-        <h1>Dialogo</h1>
-        <button type="button" className="link" onClick={() => finish.mutate()} disabled={finish.isPending}>
-          Termina
-        </button>
-      </header>
+      {/* Going back ends the dialogue session (and its corrections stay in the review). */}
+      <BackHeader title="Dialogo" onBack={() => finish.isPending || finish.mutate()} />
 
       {voiceAvailable && (
         <div className="segmented" role="group" aria-label="Modalità">
