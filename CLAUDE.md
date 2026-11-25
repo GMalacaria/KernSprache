@@ -159,15 +159,15 @@ pnpm db:start                                  # avvia Supabase locale, stampa U
 cp apps/web/.env.example apps/web/.env.local   # incolla la PUBLISHABLE_KEY stampata da db:start
 cp supabase/functions/.env.example supabase/functions/.env   # inserisci GEMINI_API_KEY
 pnpm fn:serve                                  # Edge Functions su http://127.0.0.1:54321/functions/v1/
-pnpm dev                                       # PWA su http://localhost:5173
+pnpm dev                                       # PWA su http://localhost:5273
 ```
 
 ### Sviluppo quotidiano
 | Comando | Cosa fa |
 |---|---|
-| `pnpm dev` | PWA in sviluppo su http://localhost:5173 (service worker attivo anche in dev) |
+| `pnpm dev` | PWA in sviluppo su http://localhost:5273 (service worker attivo anche in dev) |
 | `pnpm build` | typecheck + build di produzione in `apps/web/dist` |
-| `pnpm --filter web preview` | serve la build su http://localhost:4173 |
+| `pnpm --filter web preview` | serve la build su http://localhost:4273 |
 | `pnpm lint` | ESLint sulla PWA |
 | `pnpm typecheck` | solo controllo dei tipi |
 | `pnpm test` | test unitari della PWA (Vitest, `*.test.ts`) |
