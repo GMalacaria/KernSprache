@@ -1,6 +1,7 @@
 // Microphone recording (MediaRecorder) and text-to-speech: a Gemini voice (function `speak`,
 // cached on the server) with the browser's own voice (speechSynthesis) as a fallback.
 import { supabase } from './supabase'
+import { containsSpeech } from './speechLevel'
 
 /** First container the browser can record: webm/ogg on Android and desktop, mp4 on iOS Safari. */
 export function pickRecordingMimeType(): string | undefined {
@@ -18,6 +19,40 @@ export interface Recording {
   stop: () => Promise<Blob>
   /** Stops recording and discards the audio. */
   cancel: () => void
+  /** Whether the microphone picked up anything louder than background noise (true if it cannot tell). */
+  heardSpeech: () => boolean
+}
+
+/**
+ * Listens to the microphone stream while it records and keeps its volume every 50 ms, so a silent
+ * recording is never sent to be transcribed (the model would invent the expected sentence and grade it).
+ */
+function watchLevels(stream: MediaStream): { levels: number[]; close: () => void } | null {
+  const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+  if (!Ctx) return null
+  try {
+    const ctx = new Ctx()
+    const analyser = ctx.createAnalyser()
+    analyser.fftSize = 1024
+    ctx.createMediaStreamSource(stream).connect(analyser)
+    const samples = new Float32Array(analyser.fftSize)
+    const levels: number[] = []
+    const id = window.setInterval(() => {
+      analyser.getFloatTimeDomainData(samples)
+      let sum = 0
+      for (const v of samples) sum += v * v
+      levels.push(Math.sqrt(sum / samples.length))
+    }, 50)
+    return {
+      levels,
+      close: () => {
+        window.clearInterval(id)
+        void ctx.close().catch(() => undefined)
+      },
+    }
+  } catch {
+    return null
+  }
 }
 
 export const MAX_RECORDING_MS = 60_000
@@ -38,19 +73,24 @@ export async function startRecording(onAutoStop: () => void): Promise<Recording>
     }
   })
   recorder.start()
+  const watcher = watchLevels(stream)
   const timer = window.setTimeout(onAutoStop, MAX_RECORDING_MS)
 
   return {
     stop: () => {
       window.clearTimeout(timer)
+      watcher?.close()
       if (recorder.state !== 'inactive') recorder.stop()
       return stopped
     },
     cancel: () => {
       window.clearTimeout(timer)
+      watcher?.close()
       recorder.onstop = () => stream.getTracks().forEach((t) => t.stop())
       if (recorder.state !== 'inactive') recorder.stop()
     },
+    // Without a way to measure (old browser) the recording is sent as before.
+    heardSpeech: () => (watcher ? containsSpeech(watcher.levels) : true),
   }
 }
 

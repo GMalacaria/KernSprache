@@ -101,11 +101,18 @@ button.secondary:active:not(:disabled) { box-shadow: 0 0 0 var(--line); }
 button.danger { color: var(--error); }
 
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* Text fields span the whole width: an outer ring would stick out of the screen (or be cut by the
+   scrolling lesson body), so theirs is drawn inside the border, which turns blue as well. */
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 .turns { list-style: none; padding: 0; margin: 1rem 0; display: flex; flex-direction: column; gap: 0.75rem; }
 .turn { display: flex; flex-direction: column; gap: 0.25rem; }
 .turn-user { align-items: flex-end; }
 .turn-assistant { align-items: flex-start; }
+/* "Il tutor sta scrivendo" and its dots on one line (a turn is a column, which put the dots below). */
+.turn.muted[role='status'] { flex-direction: row; align-items: baseline; gap: 0.35rem; }
+/* On the baseline, like a written "…", not halfway up the letters. */
+.turn.muted[role='status'] .dots { vertical-align: baseline; }
 .bubble { margin: 0; padding: 0.65rem 0.95rem; border-radius: var(--radius-panel); max-width: 85%; white-space: pre-wrap; }
 .turn-user .bubble { background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 0.4rem; }
 .turn-assistant .bubble { background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 0.4rem; }
@@ -201,6 +208,13 @@ button.danger { color: var(--error); }
 .chapter-folded summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 2.75rem; cursor: pointer; font-weight: 600; }
 .chapter-folded summary::-webkit-details-marker { display: none; }
 .chapter-folded[open] summary { margin-bottom: 0.25rem; }
+/* Light bulb in the lesson header: opens the grammar-and-words page, drawn over the lesson. */
+.notes-button { flex: none; margin-left: auto; display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; min-height: 0; padding: 0; border-radius: 999px; background: transparent; box-shadow: none; }
+.notes-button:hover { background: var(--track); }
+.notes-page { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; max-width: 32rem; margin: 0 auto; padding: calc(1.5rem + env(safe-area-inset-top)) 1rem 0; background: var(--bg); }
+.notes-page > header { flex: none; }
+.notes-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(2rem + env(safe-area-inset-bottom)); }
+.notes-body > h2 { margin-top: 1.25rem; }
 
 .examples, .cards { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.7rem 0.9rem; }
