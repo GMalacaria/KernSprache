@@ -110,7 +110,7 @@ function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
       {current && (
         <>
           <p className="muted">
-            Ancora da ripassare: {queue.length}. L&apos;app valuta la risposta e decide quando riproporti la carta.
+            Ancora da ripassare: {queue.length}
           </p>
           <ReviewCard key={`${current.kind}-${current.id}-${current.reps}`} item={current} onGraded={onGraded} onSkip={skip} />
 
@@ -182,9 +182,6 @@ function ReviewIntro({ items, onStart, onBack }: { items: ReviewItem[]; onStart:
           <li key={p}>{p}</li>
         ))}
       </ul>
-      <p className="muted">
-        L&apos;app valuta ogni risposta e decide quando riproporti la carta.
-      </p>
       <button type="button" onClick={onStart}>
         Inizia ripasso
       </button>
