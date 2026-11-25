@@ -1,6 +1,7 @@
 // Microphone recording (MediaRecorder) and text-to-speech: a Gemini voice (function `speak`,
 // cached on the server) with the browser's own voice (speechSynthesis) as a fallback.
 import { supabase } from './supabase'
+import { containsSpeech } from './speechLevel'
 
 /** First container the browser can record: webm/ogg on Android and desktop, mp4 on iOS Safari. */
 export function pickRecordingMimeType(): string | undefined {
@@ -20,16 +21,6 @@ export interface Recording {
   cancel: () => void
   /** Whether the microphone picked up anything louder than background noise (true if it cannot tell). */
   heardSpeech: () => boolean
-}
-
-/** Volume (RMS of the waveform, 0-1) above which a moment counts as someone speaking, not room noise. */
-export const SPEECH_RMS = 0.02
-/** Moments above SPEECH_RMS needed to call it speech: about a quarter of a second at one check every 50 ms. */
-export const SPEECH_MOMENTS = 5
-
-/** Whether a series of volume readings contains speech: enough moments louder than background noise. */
-export function containsSpeech(levels: readonly number[]): boolean {
-  return levels.filter((rms) => rms >= SPEECH_RMS).length >= SPEECH_MOMENTS
 }
 
 /**

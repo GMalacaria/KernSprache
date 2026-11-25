@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { containsSpeech, SPEECH_MOMENTS, SPEECH_RMS } from './audio'
+import { containsSpeech, SPEECH_MOMENTS, SPEECH_RMS } from './speechLevel'
 
 describe('containsSpeech', () => {
   it('treats silence and room noise as no speech', () => {
