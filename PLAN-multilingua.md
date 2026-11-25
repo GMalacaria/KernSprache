@@ -22,8 +22,9 @@
 - **Barra in basso (#39)**: `features/nav/TabBar.tsx`, `scrollMemory.ts`, `features/settings/SettingsPage.tsx`, `components/BackButton.tsx`; `AppMenu.tsx` e `SideMenu.tsx` eliminati. Effetti:
   - PR 2: nel catalogo vanno le etichette della barra, la pagina Impostazioni e `BackButton` (al posto di "le voci del menu");
   - PR 9: il cambio di lingua va nel **Profilo** (che ha già "Obiettivo e scopo" e "Rifai il test di livello", da rendere per lingua) e nell'intestazione della Home.
-- **Ripasso (#35/#38)**: riepilogo con "Inizia ripasso" (`review/summary.ts`), `ReviewCards.tsx` resta il file con più punti legati all'inglese (17). Il resto come già scritto sotto.
-- **Profilo (#38)**: grafico a due barre per giorno (`--written` / `--oral`), etichette in `profileStats.ts` (catalogo, PR 2).
+- **Ripasso (#35/#38)**: riepilogo con "Inizia ripasso" (`review/summary.ts`); dopo la risposta si vede solo il giudizio (`fsrs.formatInterval` e `GRADES` eliminati, quindi non vanno più nel catalogo). `ReviewCards.tsx` resta il file con più punti legati all'inglese (17). Il resto come già scritto sotto.
+- **Profilo (#38)**: grafico a due barre per giorno (`--written` / `--oral`), `profileStats.lastDaysMinutes` restituisce `written`/`oral`; etichette in `profileStats.ts` (catalogo, PR 2). Il grafico resta globale.
+- **Porte (#39)**: PWA in sviluppo su 5273, anteprima della build su 4273 (`vite.config.ts`, `strictPort`). Le prove nel browser integrato usano queste.
 - **`RepeatSentence`**: "Ho sentito: <span lang="en">" (PR 2 per il testo, PR 9 per `lang`).
 - File con testi italiani nell'interfaccia: circa 30 componenti (stima con `git grep`), quindi la PR 2 va divisa come previsto.
 
@@ -129,7 +130,7 @@ Decisioni prese:
      - dialogue + review + pronuncia;
      - test.
    - Vanno nel catalogo anche:
-     - `fsrs.formatInterval`, i `GRADES` di `review/api.ts` e `purposes.ts`;
+     - `purposes.ts` e il giudizio dopo la risposta nel ripasso (`fsrs.formatInterval` e `GRADES` non esistono più);
      - le etichette di `profileStats.ts` e del grafico;
      - le etichette della barra in basso (`TabBar`), la pagina Impostazioni (effetti sonori compresi), `BackButton`, `PART_LABEL` e i messaggi sul microfono della lezione.
    - Messaggi di errore delle functions: restituire un `code` stabile oltre al testo, così il client li traduce.
