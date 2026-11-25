@@ -386,7 +386,11 @@ button .emoji { margin-right: 0.15em; }
 .stats-grid-4 strong { font-size: 1.6rem; }
 .day-chart { margin: 0.75rem 0 0; padding: 0.75rem 0.75rem 0.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
 .day-chart figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.75rem; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.6rem; }
-.day-chart-legend { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--muted); font-weight: 500; }
+.day-chart-legend { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; color: var(--muted); font-weight: 500; }
+.day-chart-legend > span { display: inline-flex; align-items: center; gap: 0.3rem; }
+.legend-swatch { width: 0.65rem; height: 0.65rem; border-radius: 0.15rem; }
+.legend-swatch.written, .day-bar.written { background: var(--written); }
+.legend-swatch.oral, .day-bar.oral { background: var(--oral); }
 .goal-dash { width: 1rem; border-top: 2px dashed var(--muted); }
 /* Two columns: the scale on the left, the bars on the right; weekdays in a row under the bars. */
 .day-chart-body { display: grid; grid-template-columns: auto 1fr; column-gap: 0.4rem; row-gap: 0.3rem; }
@@ -394,9 +398,9 @@ button .emoji { margin-right: 0.15em; }
 .day-chart-plot { position: relative; height: 7rem; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); background: linear-gradient(var(--line), var(--line)) 0 50% / 100% 1px no-repeat; }
 .day-chart-plot ol, .day-chart-days { list-style: none; margin: 0; padding: 0 0.2rem; display: grid; grid-template-columns: repeat(14, 1fr); gap: 0.2rem; }
 .day-chart-plot ol { position: absolute; inset: 0; align-items: end; }
-.day-chart-plot li { display: flex; justify-content: center; align-items: flex-end; height: 100%; }
+.day-chart-plot li { display: flex; justify-content: center; align-items: flex-end; gap: 1px; height: 100%; }
 .day-chart-goal { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--muted); opacity: 0.7; z-index: 1; pointer-events: none; }
-.day-bar { display: block; width: 100%; max-width: 1rem; border-radius: 0.25rem 0.25rem 0.1rem 0.1rem; background: var(--accent); }
+.day-bar { display: block; flex: 1; max-width: 0.55rem; border-radius: 0.2rem 0.2rem 0.05rem 0.05rem; }
 .day-chart-days li { text-align: center; color: var(--muted); font-size: 0.65rem; line-height: 1; }
 .level-progress { list-style: none; margin: 0.5rem 0 1rem; padding: 0; display: grid; gap: 0.6rem; }
 .level-progress li { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: center; gap: 0.6rem; }

@@ -54,17 +54,24 @@ export function studiedDays(days: StudyDayRow[]): number {
   return days.filter((d) => d.written_seconds + d.oral_seconds > 0).length
 }
 
+/** One day of the chart: minutes of written and of oral study, shown side by side. */
 export interface DayBar {
   day: string
-  minutes: number
+  written: number
+  oral: number
 }
 
-/** Minutes studied on each of the last `count` days, oldest first (days without a row are 0). */
+/** Written and oral minutes on each of the last `count` days, oldest first (days without a row are 0). */
 export function lastDaysMinutes(days: StudyDayRow[], today: string, count = 14): DayBar[] {
-  const byDay = new Map(days.map((d) => [d.day, d.written_seconds + d.oral_seconds]))
+  const byDay = new Map(days.map((d) => [d.day, d]))
   return Array.from({ length: count }, (_, i) => {
     const day = shiftDay(today, i - (count - 1))
-    return { day, minutes: Math.round((byDay.get(day) ?? 0) / 60) }
+    const row = byDay.get(day)
+    return {
+      day,
+      written: Math.round((row?.written_seconds ?? 0) / 60),
+      oral: Math.round((row?.oral_seconds ?? 0) / 60),
+    }
   })
 }
 
