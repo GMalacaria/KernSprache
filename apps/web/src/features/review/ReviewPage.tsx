@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import type { Grade } from 'ts-fsrs'
 import { usePracticeActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, startReviewSession, type ReviewItem } from './api'
 import { BackHeader } from '../../components/BackHeader'
 import { Waiting } from '../../components/Waiting'
-import { GRADE_LABELS } from './grading'
+import { GRADE_KEYS } from './grading'
 import { dueSummary } from './summary'
 import { PronunciationCard, SentenceCard, VocabCard } from './ReviewCards'
 
@@ -13,6 +14,7 @@ import { PronunciationCard, SentenceCard, VocabCard } from './ReviewCards'
 const REQUEUE_WITHIN_MS = 30 * 60_000
 
 export function ReviewPage({ onExit }: { onExit: () => void }) {
+  const { t } = useTranslation('review')
   const queryClient = useQueryClient()
   const due = useQuery({ queryKey: ['review', 'due-items'], queryFn: () => fetchDueItems(new Date()), staleTime: 0, gcTime: 0 })
 
@@ -30,8 +32,8 @@ export function ReviewPage({ onExit }: { onExit: () => void }) {
     return (
       <main className="page review">
         <ReviewHeader onBack={() => void exit(null)} />
-        {due.isPending && <Waiting title="Preparo il ripasso" compact />}
-        {due.isError && <p className="error">Impossibile caricare le carte da ripassare.</p>}
+        {due.isPending && <Waiting title={t('loading')} compact />}
+        {due.isError && <p className="error">{t('loadError')}</p>}
         {due.isSuccess && <ReviewIntro items={due.data} onStart={() => setStarted(true)} />}
       </main>
     )
@@ -52,6 +54,7 @@ interface ReviewSessionProps {
 function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
   // Review is extra practice: its time is saved for statistics, not counted towards the daily goal.
   usePracticeActivity('review')
+  const { t } = useTranslation(['review', 'common'])
   const [queue, setQueue] = useState(initialItems)
   const [done, setDone] = useState(0)
   // The grade the app gave the current card and when: the next due date is computed from that moment.
@@ -100,9 +103,9 @@ function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
       {!current && (
         <section className="notice">
           {done === 0 ? (
-            <p>Hai lasciato tutte le carte per un'altra volta: restano da ripassare.</p>
+            <p>{t('allSkipped')}</p>
           ) : (
-            <p>Ripasso finito: {done} carte. Le prossime torneranno quando è il momento giusto.</p>
+            <p>{t('finished', { count: done })}</p>
           )}
         </section>
       )}
@@ -110,25 +113,25 @@ function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
       {current && (
         <>
           <p className="muted">
-            Ancora da ripassare: {queue.length}
+            {t('left', { count: queue.length })}
           </p>
           <ReviewCard key={`${current.kind}-${current.id}-${current.reps}`} item={current} onGraded={onGraded} onSkip={skip} />
 
           {graded && (
             <div className="review-result" role="status">
               <p>
-                <strong>{GRADE_LABELS[graded.grade]}</strong>
+                <strong>{t(`grades.${GRADE_KEYS[graded.grade]}`)}</strong>
               </p>
               {save.isError && (
                 <>
-                  <p className="error">Salvataggio non riuscito.</p>
+                  <p className="error">{t('saveFailed')}</p>
                   <button type="button" className="secondary" onClick={() => save.variables && save.mutate(save.variables)}>
-                    Riprova
+                    {t('common:actions.retry')}
                   </button>
                 </>
               )}
               <button type="button" onClick={next} disabled={!save.isSuccess}>
-                {save.isPending ? 'Salvo…' : 'Avanti'}
+                {save.isPending ? t('common:actions.saving') : t('common:actions.next')}
               </button>
             </div>
           )}
@@ -139,35 +142,30 @@ function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
 }
 
 function ReviewHeader({ onBack }: { onBack: () => void }) {
-  return <BackHeader title="Ripasso" onBack={onBack} />
-}
-
-function plural(n: number, one: string, many: string): string {
-  return `${n} ${n === 1 ? one : many}`
+  const { t } = useTranslation('review')
+  return <BackHeader title={t('title')} onBack={onBack} />
 }
 
 /** The review's landing: how many cards are due and of which kind, and the button that starts it. */
 function ReviewIntro({ items, onStart }: { items: ReviewItem[]; onStart: () => void }) {
+  const { t } = useTranslation('review')
   if (items.length === 0) {
     return (
       <section className="notice">
-        <p>
-          Non hai carte da ripassare adesso. Le parole delle lezioni e gli errori dei dialoghi arrivano qui quando è il
-          momento di ripassarli.
-        </p>
+        <p>{t('nothingDue')}</p>
       </section>
     )
   }
   const { words, grammar, pronunciation } = dueSummary(items)
   const parts = [
-    words > 0 && plural(words, 'parola da tradurre', 'parole da tradurre'),
-    grammar > 0 && plural(grammar, 'errore da correggere', 'errori da correggere'),
-    pronunciation > 0 && plural(pronunciation, 'parola da pronunciare', 'parole da pronunciare'),
+    words > 0 && t('kinds.words', { count: words }),
+    grammar > 0 && t('kinds.grammar', { count: grammar }),
+    pronunciation > 0 && t('kinds.pronunciation', { count: pronunciation }),
   ].filter((p): p is string => Boolean(p))
   return (
     <section className="review-intro stack">
       <p className="review-count">
-        <strong>{items.length}</strong> {items.length === 1 ? 'carta da ripassare' : 'carte da ripassare'}
+        <strong>{items.length}</strong> {t('cards', { count: items.length })}
       </p>
       <ul className="review-kinds">
         {parts.map((p) => (
@@ -175,7 +173,7 @@ function ReviewIntro({ items, onStart }: { items: ReviewItem[]; onStart: () => v
         ))}
       </ul>
       <button type="button" onClick={onStart}>
-        Inizia ripasso
+        {t('start')}
       </button>
     </section>
   )

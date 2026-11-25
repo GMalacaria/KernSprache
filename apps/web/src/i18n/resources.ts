@@ -1,10 +1,12 @@
 import itAuth from './locales/it/auth.json'
 import itCommon from './locales/it/common.json'
+import itDialogue from './locales/it/dialogue.json'
 import itHome from './locales/it/home.json'
 import itLesson from './locales/it/lesson.json'
 import itOnboarding from './locales/it/onboarding.json'
 import itPath from './locales/it/path.json'
 import itProfile from './locales/it/profile.json'
+import itReview from './locales/it/review.json'
 import itSettings from './locales/it/settings.json'
 import itStudy from './locales/it/study.json'
 
@@ -20,6 +22,8 @@ export const resources = {
     settings: itSettings,
     study: itStudy,
     lesson: itLesson,
+    dialogue: itDialogue,
+    review: itReview,
   },
 } as const
 

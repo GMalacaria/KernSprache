@@ -1,7 +1,7 @@
+import { i18n } from '../i18n'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { startRecording, type Recording } from './audio'
 
-export const MIC_ERROR = 'Non riesco a usare il microfono. Controlla di aver dato il permesso al browser.'
 
 interface Options {
   /** Called with the audio when the recording ends, by the learner or at the time limit. */
@@ -50,7 +50,7 @@ export function useVoiceRecorder({ onRecorded, onTick }: Options) {
       setSeconds(0)
       setIsRecording(true)
     } catch {
-      setMicError(MIC_ERROR)
+      setMicError(i18n.t('voice.micError'))
     }
   }, [stop])
 
