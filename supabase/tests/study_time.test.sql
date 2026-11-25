@@ -1,6 +1,6 @@
 -- Study time: RLS on study_days and the add_study_time RPC. Run with: pnpm test:db
 begin;
-select plan(9);
+select plan(13);
 
 insert into auth.users (id, email) values
   ('33333333-3333-3333-3333-333333333333', 'carla@example.com'),
@@ -46,6 +46,28 @@ select throws_ok(
 select throws_ok(
   $$ insert into public.study_days (day, goal_minutes) values (current_date + 1, 20) $$,
   '42501', null, 'direct inserts are not allowed'
+);
+
+-- Practice (review, free dialogue) is saved per day but never completes the goal.
+select add_practice_time(current_date - 1, 'dialogue', 120);
+select add_practice_time(current_date - 1, 'dialogue', 120);
+select add_practice_time(current_date - 1, 'review', 60);
+select is(
+  (select array[dialogue_seconds, review_seconds, written_seconds, oral_seconds] from public.study_days where day = current_date - 1),
+  array[240, 60, 0, 0],
+  'practice time is added to its own columns, not to the halves of the goal'
+);
+select ok(
+  (select completed_at is null from public.add_practice_time(current_date - 1, 'dialogue', 120)),
+  'practice beyond the goal (360s of a 300s goal) does not complete the day'
+);
+select throws_ok(
+  $$ select public.add_practice_time(current_date, 'review', 600) $$,
+  '22023', null, 'practice rejects oversized increments'
+);
+select throws_ok(
+  $$ select public.add_practice_time(current_date + 5, 'review', 10) $$,
+  '22023', null, 'practice rejects days far from today'
 );
 
 select set_config('request.jwt.claims', '{"sub":"44444444-4444-4444-4444-444444444444","role":"authenticated"}', true);

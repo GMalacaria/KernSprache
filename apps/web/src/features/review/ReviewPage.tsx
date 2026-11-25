@@ -1,19 +1,18 @@
 import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Grade } from 'ts-fsrs'
-import { formatInterval } from '../../lib/fsrs'
-import { StudyPrompts } from '../study/StudyPrompts'
-import { StudyTimerBar } from '../study/StudyTimerBar'
-import { useStudyActivity } from '../study/useStudyTimer'
+import { usePracticeActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, startReviewSession, type ReviewItem } from './api'
+import { BackButton } from '../../components/BackButton'
 import { Waiting } from '../../components/Waiting'
 import { GRADE_LABELS } from './grading'
+import { dueSummary } from './summary'
 import { PronunciationCard, SentenceCard, VocabCard } from './ReviewCards'
 
 // Cards graded "Again" come back in the same sitting once they are due again (minutes away).
 const REQUEUE_WITHIN_MS = 30 * 60_000
 
-export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onSwitchToOral?: () => void }) {
+export function ReviewPage({ onExit }: { onExit: () => void }) {
   const queryClient = useQueryClient()
   const due = useQuery({ queryKey: ['review', 'due-items'], queryFn: () => fetchDueItems(new Date()), staleTime: 0, gcTime: 0 })
 
@@ -23,16 +22,17 @@ export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onS
     next()
   }
 
-  if (due.isPending || due.isError) {
+  const [started, setStarted] = useState(false)
+
+  // Landing first: what is due and a button to start. The practice time is counted only once the review
+  // starts, so opening the screen (or finding nothing to review) is not saved as review time.
+  if (due.isPending || due.isError || !started) {
     return (
       <main className="page review">
-        <header className="row">
-          <h1>Ripasso</h1>
-          <button type="button" className="link" onClick={() => void exit(null)}>
-            Chiudi
-          </button>
-        </header>
-        {due.isPending ? <Waiting title="Preparo il ripasso" compact /> : <p className="error">Impossibile caricare le carte da ripassare.</p>}
+        <ReviewHeader onBack={() => void exit(null)} />
+        {due.isPending && <Waiting title="Preparo il ripasso" compact />}
+        {due.isError && <p className="error">Impossibile caricare le carte da ripassare.</p>}
+        {due.isSuccess && <ReviewIntro items={due.data} onStart={() => setStarted(true)} onBack={() => void exit(null)} />}
       </main>
     )
   }
@@ -40,7 +40,6 @@ export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onS
     <ReviewSession
       initialItems={due.data}
       onExit={(id) => void exit(id)}
-      onSwitchToOral={onSwitchToOral ? (id) => void exit(id, onSwitchToOral) : undefined}
     />
   )
 }
@@ -48,11 +47,11 @@ export function ReviewPage({ onExit, onSwitchToOral }: { onExit: () => void; onS
 interface ReviewSessionProps {
   initialItems: ReviewItem[]
   onExit: (sessionId: Promise<string> | null) => void
-  onSwitchToOral?: (sessionId: Promise<string> | null) => void
 }
 
-function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionProps) {
-  useStudyActivity('written')
+function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
+  // Review is extra practice: its time is saved for statistics, not counted towards the daily goal.
+  usePracticeActivity('review')
   const [queue, setQueue] = useState(initialItems)
   const [done, setDone] = useState(0)
   // The grade the app gave the current card and when: the next due date is computed from that moment.
@@ -95,23 +94,13 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
 
   return (
     <main className="page review">
-      <header className="row">
-        <h1>Ripasso</h1>
-        <button type="button" className="link" onClick={() => onExit(sessionId.current)}>
-          {current ? 'Esci' : 'Chiudi'}
-        </button>
-      </header>
+      <ReviewHeader onBack={() => onExit(sessionId.current)} />
 
-      <StudyTimerBar />
-      <StudyPrompts
-        onSwitchToOral={onSwitchToOral ? () => onSwitchToOral(sessionId.current) : undefined}
-        onExit={() => onExit(sessionId.current)}
-      />
 
       {!current && (
         <section className="notice">
           {done === 0 ? (
-            <p>Non hai carte da ripassare adesso. Le parole e gli errori dei dialoghi arriveranno qui.</p>
+            <p>Hai lasciato tutte le carte per un'altra volta: restano da ripassare.</p>
           ) : (
             <p>Ripasso finito: {done} carte. Le prossime torneranno quando è il momento giusto.</p>
           )}
@@ -121,7 +110,7 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
       {current && (
         <>
           <p className="muted">
-            Ancora da ripassare: {queue.length}. L&apos;app valuta la risposta e decide quando riproporti la carta.
+            Ancora da ripassare: {queue.length}
           </p>
           <ReviewCard key={`${current.kind}-${current.id}-${current.reps}`} item={current} onGraded={onGraded} onSkip={skip} />
 
@@ -129,7 +118,6 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
             <div className="review-result" role="status">
               <p>
                 <strong>{GRADE_LABELS[graded.grade]}</strong>
-                {save.isSuccess && <> · torna tra {formatInterval(new Date(save.data.due), graded.at)}</>}
               </p>
               {save.isError && (
                 <>
@@ -147,6 +135,57 @@ function ReviewSession({ initialItems, onExit, onSwitchToOral }: ReviewSessionPr
         </>
       )}
     </main>
+  )
+}
+
+function ReviewHeader({ onBack }: { onBack: () => void }) {
+  return (
+    <header className="lesson-header">
+      <BackButton onBack={onBack} />
+      <h1>Ripasso</h1>
+    </header>
+  )
+}
+
+function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`
+}
+
+/** The review's landing: how many cards are due and of which kind, and the button that starts it. */
+function ReviewIntro({ items, onStart, onBack }: { items: ReviewItem[]; onStart: () => void; onBack: () => void }) {
+  if (items.length === 0) {
+    return (
+      <section className="notice stack">
+        <p>
+          Non hai carte da ripassare adesso. Le parole delle lezioni e gli errori dei dialoghi arrivano qui quando è il
+          momento di ripassarli.
+        </p>
+        <button type="button" className="secondary" onClick={onBack}>
+          Torna alla home
+        </button>
+      </section>
+    )
+  }
+  const { words, grammar, pronunciation } = dueSummary(items)
+  const parts = [
+    words > 0 && plural(words, 'parola da tradurre', 'parole da tradurre'),
+    grammar > 0 && plural(grammar, 'errore da correggere', 'errori da correggere'),
+    pronunciation > 0 && plural(pronunciation, 'parola da pronunciare', 'parole da pronunciare'),
+  ].filter((p): p is string => Boolean(p))
+  return (
+    <section className="review-intro stack">
+      <p className="review-count">
+        <strong>{items.length}</strong> {items.length === 1 ? 'carta da ripassare' : 'carte da ripassare'}
+      </p>
+      <ul className="review-kinds">
+        {parts.map((p) => (
+          <li key={p}>{p}</li>
+        ))}
+      </ul>
+      <button type="button" onClick={onStart}>
+        Inizia ripasso
+      </button>
+    </section>
   )
 }
 

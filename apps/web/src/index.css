@@ -327,21 +327,31 @@ form.stack button[type='submit'] { margin-top: 0.75rem; }
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes fade-out { to { opacity: 0; } }
 
-/* Side drawer */
-.side-menu { margin: 0; padding: 0; border: none; background: var(--bg); color: var(--fg); width: min(20rem, 88vw); max-width: none; height: 100dvh; max-height: none; inset: 0 auto 0 0; box-shadow: 0 0 40px rgb(8 12 28 / 0.35); }
-.side-menu::backdrop { background: rgb(8 12 28 / 0.55); }
-.side-menu-body { display: flex; flex-direction: column; gap: 1rem; min-height: 100%; padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(1rem + env(safe-area-inset-bottom)); }
-.side-menu-title { font-family: var(--display); font-size: 1.3rem; }
-.side-menu-nav { display: flex; flex-direction: column; }
+/* Tab bar: quick links at the bottom of the main screens (home, path, profile, settings). */
+.tab-bar {
+  position: fixed; inset: auto 0 0 0; z-index: 10;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  max-width: 32rem; margin: 0 auto;
+  padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
+  background: var(--surface); border-top: 1px solid var(--line);
+}
+.tab-bar button {
+  display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+  min-height: 3.25rem; padding: 0.3rem 0; border-radius: var(--radius-control);
+  background: transparent; color: var(--muted); box-shadow: none; font-size: 0.75rem; font-weight: 600;
+}
+.tab-bar button:active:not(:disabled) { transform: none; box-shadow: none; background: var(--track); }
+.tab-bar button[aria-current='page'] { color: var(--accent); }
+.tab-bar button[aria-current='page'] svg { stroke-width: 2.4; }
+/* Main screens leave room for the bar, so the last button is never hidden behind it. */
+.page:has(~ .tab-bar) { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+@media (min-width: 33rem) {
+  .tab-bar { border: 1px solid var(--line); border-bottom: none; border-radius: var(--radius-panel) var(--radius-panel) 0 0; }
+}
+
+/* Toggle rows (settings) */
 .menu-item { background: none; color: var(--fg); box-shadow: none; text-align: left; border-radius: 0.75rem; padding: 0.75rem 0.5rem; font-weight: 500; }
 .menu-item:active:not(:disabled) { transform: none; background: var(--track); box-shadow: none; }
-.menu-signout { margin-top: auto; }
-.menu-button { padding: 0.6rem; }
-@media (prefers-reduced-motion: no-preference) {
-  .side-menu[open] { animation: drawer-in 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
-  .side-menu[open]::backdrop { animation: fade-in 0.26s ease-out both; }
-}
-@keyframes drawer-in { from { transform: translateX(-100%); } }
 
 .emoji { display: inline-block; vertical-align: -0.2em; }
 button .emoji { margin-right: 0.15em; }
@@ -355,8 +365,14 @@ button .emoji { margin-right: 0.15em; }
 .placement-progress .bar { height: 0.55rem; }
 .placement-progress small { display: block; margin-bottom: 0.35rem; }
 .option:disabled.right, .option:disabled.wrong { opacity: 1; }
-.menu-item[aria-current='page'] { color: var(--accent); font-weight: 700; background: var(--track); }
-.menu-toggle { display: flex; align-items: center; justify-content: space-between; }
+.menu-toggle { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; width: 100%; }
+.settings-page > section, .profile-actions { margin-top: 1rem; }
+.review-intro { margin-top: 1.25rem; text-align: center; }
+.review-count { margin: 0; font-size: 1.1rem; }
+.review-count strong { display: block; font-family: var(--display); font-size: 3rem; line-height: 1.1; color: var(--accent); }
+.review-kinds { list-style: none; margin: 0; padding: 0; color: var(--fg); }
+.review-kinds li + li { margin-top: 0.15rem; }
+.profile-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem 1rem; }
 
 /* Pronunciation note under a spoken turn */
 .pronunciation { max-width: 85%; font-size: 0.9rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.5rem 0.75rem; }
@@ -373,10 +389,24 @@ button .emoji { margin-right: 0.15em; }
 .profile-hero p { margin: 0.25rem 0; }
 .stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
 .stats-grid-4 strong { font-size: 1.6rem; }
-.day-bars { list-style: none; margin: 0.75rem 0 0; padding: 0.75rem 0.5rem 0.4rem; display: grid; grid-template-columns: repeat(14, 1fr); gap: 0.2rem; align-items: end; height: 7.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
-.day-bars li { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 0.2rem; }
-.day-bar { display: block; width: 100%; max-width: 1rem; min-height: 3px; border-radius: 0.25rem 0.25rem 0.1rem 0.1rem; background: var(--accent); flex: none; }
-.day-bars small { color: var(--muted); font-size: 0.65rem; line-height: 1; }
+.day-chart { margin: 0.75rem 0 0; padding: 0.75rem 0.75rem 0.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); }
+.day-chart figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.75rem; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.6rem; }
+.day-chart-legend { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; color: var(--muted); font-weight: 500; }
+.day-chart-legend > span { display: inline-flex; align-items: center; gap: 0.3rem; }
+.legend-swatch { width: 0.65rem; height: 0.65rem; border-radius: 0.15rem; }
+.legend-swatch.written, .day-bar.written { background: var(--written); }
+.legend-swatch.oral, .day-bar.oral { background: var(--oral); }
+.goal-dash { width: 1rem; border-top: 2px dashed var(--muted); }
+/* Two columns: the scale on the left, the bars on the right; weekdays in a row under the bars. */
+.day-chart-body { display: grid; grid-template-columns: auto 1fr; column-gap: 0.4rem; row-gap: 0.3rem; }
+.day-chart-axis { display: flex; flex-direction: column; justify-content: space-between; height: 7rem; font-size: 0.65rem; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; line-height: 1; margin-top: -0.3em; margin-bottom: -0.3em; }
+.day-chart-plot { position: relative; height: 7rem; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); background: linear-gradient(var(--line), var(--line)) 0 50% / 100% 1px no-repeat; }
+.day-chart-plot ol, .day-chart-days { list-style: none; margin: 0; padding: 0 0.2rem; display: grid; grid-template-columns: repeat(14, 1fr); gap: 0.2rem; }
+.day-chart-plot ol { position: absolute; inset: 0; align-items: end; }
+.day-chart-plot li { display: flex; justify-content: center; align-items: flex-end; gap: 1px; height: 100%; }
+.day-chart-goal { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--muted); opacity: 0.7; z-index: 1; pointer-events: none; }
+.day-bar { display: block; flex: 1; max-width: 0.55rem; border-radius: 0.2rem 0.2rem 0.05rem 0.05rem; }
+.day-chart-days li { text-align: center; color: var(--muted); font-size: 0.65rem; line-height: 1; }
 .level-progress { list-style: none; margin: 0.5rem 0 1rem; padding: 0; display: grid; gap: 0.6rem; }
 .level-progress li { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: center; gap: 0.6rem; }
 .level-name { font-family: var(--display); font-weight: 600; }

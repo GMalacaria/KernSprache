@@ -70,13 +70,19 @@ describe('study totals', () => {
 })
 
 describe('lastDaysMinutes', () => {
-  it('returns the last days oldest first, filling the gaps with zero', () => {
-    const bars = lastDaysMinutes([day('2026-11-22', 12), day('2026-11-20', 5)], '2026-11-23', 4)
+  it('returns written and oral minutes of the last days, oldest first, filling the gaps with zero', () => {
+    const split = (d: string, written: number, oral: number): StudyDayRow => ({
+      day: d,
+      written_seconds: written * 60,
+      oral_seconds: oral * 60,
+      completed_at: null,
+    })
+    const bars = lastDaysMinutes([split('2026-11-22', 12, 3), split('2026-11-20', 4, 10)], '2026-11-23', 4)
     expect(bars).toEqual([
-      { day: '2026-11-20', minutes: 5 },
-      { day: '2026-11-21', minutes: 0 },
-      { day: '2026-11-22', minutes: 12 },
-      { day: '2026-11-23', minutes: 0 },
+      { day: '2026-11-20', written: 4, oral: 10 },
+      { day: '2026-11-21', written: 0, oral: 0 },
+      { day: '2026-11-22', written: 12, oral: 3 },
+      { day: '2026-11-23', written: 0, oral: 0 },
     ])
   })
 })

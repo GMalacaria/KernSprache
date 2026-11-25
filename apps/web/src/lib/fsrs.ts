@@ -45,17 +45,3 @@ export function toColumns(card: Card): FsrsColumns {
     last_review: card.last_review ? card.last_review.toISOString() : null,
   }
 }
-
-/** Short Italian label for how far away a date is, e.g. "10 min", "3 g", "2 mesi". */
-export function formatInterval(due: Date, now: Date): string {
-  const minutes = Math.max(1, Math.round((due.getTime() - now.getTime()) / 60_000))
-  if (minutes < 60) return `${minutes} min`
-  const hours = Math.round(minutes / 60)
-  if (hours < 24) return `${hours} h`
-  const days = Math.round(hours / 24)
-  if (days < 30) return `${days} g`
-  const months = Math.round(days / 30)
-  if (months < 12) return months === 1 ? '1 mese' : `${months} mesi`
-  const years = Math.round(days / 365)
-  return years === 1 ? '1 anno' : `${years} anni`
-}

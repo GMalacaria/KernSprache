@@ -2,7 +2,12 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Own ports instead of Vite's defaults (5173/4173), which other projects on the same machine use too.
+// strictPort: fail if the port is taken instead of silently moving to another one, so the
+// address always matches site_url and the redirect URLs in supabase/config.toml.
 export default defineConfig({
+  server: { port: 5273, strictPort: true },
+  preview: { port: 4273, strictPort: true },
   plugins: [
     react(),
     VitePWA({

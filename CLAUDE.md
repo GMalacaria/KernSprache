@@ -23,20 +23,21 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - Statistiche degli esercizi: per ogni lezione completata si salvano risposte, giuste e serie massima di risposte giuste di fila (`lesson_stats`); a fine lezione si vedono quelle della lezione, all'ultima lezione del capitolo e nel risultato della verifica i totali del capitolo (errori, serie massima, percentuale di successo). Serviranno per una futura pagina di profilo.
 - Dialoghi in inglese semplice, scritti e vocali.
 - Ripasso con spaced repetition degli errori e delle parole nuove. Il voto lo dà l'app, non l'utente: le parole si traducono in italiano (confronto locale che ignora articoli, accenti e piccoli errori di battitura; se non coincide decide l'IA economica con la function `review-check`, che accetta i sinonimi); gli errori di grammatica si correggono scrivendo o dicendo la frase (confronto parola per parola, poi `review-check`); le parole pronunciate male (`mistakes` con categoria `pronunciation`, salvate da `transcribe` con `save_mistakes` nel dialogo a voce e in "Ripeti la frase" se il punteggio è al massimo 85) si ripetono a voce e il punteggio di pronuncia fa da voto. Tre tentativi: giusta subito è Bene (Facile se esatta e veloce), al secondo tentativo Difficile, altrimenti Di nuovo. Parole e frasi si possono sempre ascoltare.
-- Notifiche: al massimo una al giorno all'ora scelta dall'utente (ora locale del suo fuso): serie a rischio (almeno 2 giorni di fila), altrimenti ripassi in scadenza, altrimenti l'obiettivo del giorno; nessuna se l'obiettivo è già raggiunto. Si attivano dalla home, solo dopo un clic.
+- Notifiche: al massimo una al giorno all'ora scelta dall'utente (ora locale del suo fuso): serie a rischio (almeno 2 giorni di fila), altrimenti ripassi in scadenza, altrimenti l'obiettivo del giorno; nessuna se l'obiettivo è già raggiunto. Si attivano da Impostazioni, solo dopo un clic.
 - Tono del tutor: incoraggiante ma onesto, niente piaggeria né complimenti generici.
 - Accesso con email e password. Chi non ha un account si registra e resta **in attesa** finché il proprietario non lo approva da dashboard Supabase (Table Editor > `profiles` > `approved` = true): finché non è approvato vede solo la schermata "Account in attesa" e le Edge Functions che usano l'IA rifiutano le sue richieste. Il primo account di un database vuoto è approvato da solo (il proprietario; in locale il primo che si registra). Password dimenticata e cambio password dall'app. Su Supabase: registrazioni aperte, **"Confirm email" disattivato** (niente email alla registrazione), Site URL e Redirect URLs con l'indirizzo della PWA (servono per il link di reset).
 - Al primo accesso si sceglie lo scopo dello studio (svago, viaggi, lavoro, amore: uno solo, modificabile), che orienta situazioni dei dialoghi, lessico ed esempi; poi c'è il test di livello (saltabile, si parte da A1), ripetibile dalla home.
 - Verifica di fine capitolo: disponibile quando le 4 lezioni sono complete, oppure come **verifica di salto** su un capitolo bloccato (pulsante "Salta qui con una verifica" nel Percorso): superarla segna come superati i capitoli precedenti e alza `profiles.level` almeno al livello di quel capitolo. È sempre metà scritta (8 domande a scelta multipla, corrette sul server) e metà orale (2 consegne valutate dall'IA). **L'orale è obbligatorio** (regola decisa, da implementare: oggi senza microfono le consegne si scrivono): senza microfono la verifica, compresa quella di salto, non si può fare. Punteggio = media dei due, si passa con 70/100; dopo un tentativo la verifica successiva è nuova. Superare l'ultimo capitolo di un livello alza `profiles.level`.
 - Test di livello: metà scritto (16 domande fisse a scelta multipla, 4 per livello A1–B2, corrette sul server: un livello è superato con 3/4 e solo se lo sono anche quelli sotto) e metà orale (4 risposte a voce valutate dall'IA). Livello finale = media dei due arrotondata per difetto.
-- Profilo (dal menu laterale): livello e scopo, giorni di fila con obiettivo raggiunto (stessa regola dei promemoria) e record, giorni di studio e tempo totale, grafico dei minuti negli ultimi 14 giorni, risposte (lezioni, percentuale giuste, errori, record di fila da `lesson_stats`), carte nel ripasso e avanzamento per livello.
-- Obiettivo giornaliero in minuti scelto dall'utente (`profiles.daily_goal_minutes`). Il timer conta solo il tempo attivo nel dialogo e nel ripasso: app in primo piano, finestra attiva e un'interazione negli ultimi 2 minuti.
-- La giornata è divisa a metà: prima lo scritto (dialogo scritto e ripasso), poi l'orale (dialogo a voce). A metà si invita a passare all'orale; raggiunto l'obiettivo compare un banner di successo e l'esercizio si ferma finché l'utente non chiede di continuare.
+- Profilo (tasto nella barra in basso): livello e scopo, con "Modifica obiettivo e scopo" e "Rifai il test di livello"; giorni di fila con obiettivo raggiunto (stessa regola dei promemoria) e record, giorni di studio e tempo totale, grafico degli ultimi 14 giorni con due barre per giorno, scritto e orale (colori `--written`/`--oral`), scala in minuti e linea tratteggiata a metà obiettivo, il traguardo di ciascuna barra, risposte (lezioni, percentuale giuste, errori, record di fila da `lesson_stats`), carte nel ripasso e avanzamento per livello.
+- Obiettivo giornaliero in minuti scelto dall'utente (`profiles.daily_goal_minutes`). Per l'obiettivo conta solo il percorso: il tempo attivo nelle **lezioni** (parte scritta e parte orale) e nelle verifiche di capitolo, con app in primo piano, finestra attiva e un'interazione negli ultimi 2 minuti. **Ripasso e dialogo libero sono esercizi extra:** non contano per l'obiettivo e non mostrano timer né inviti. Il loro tempo attivo, nel ripasso solo dopo "Inizia ripasso", si salva comunque per giorno come statistica (`study_days.review_seconds` / `dialogue_seconds`, RPC `add_practice_time`; `usePracticeActivity` nella PWA).
+- La giornata è divisa a metà: prima lo scritto (parte scritta delle lezioni), poi l'orale (parte orale). A metà si invita a passare all'orale; raggiunto l'obiettivo compare un banner di successo e l'esercizio si ferma finché l'utente non chiede di continuare.
 - **Obiettivo raggiunto = almeno metà scritto e metà orale.** Il tempo si mostra tutto, ma l'obiettivo del giorno (`study_days.completed_at`, impostato da `add_study_time`; `studyStatus` in `studyMath.ts` nella PWA) si considera raggiunto solo con almeno metà dei minuti nello scritto **e** metà nell'orale: con 20 minuti servono almeno 10 di scritto e 10 di orale, e 18 + 2 non bastano. Da questo dipendono anche banner, serie, promemoria e profilo. L'anello della home ha due archi, scritto (cobalto, `--written`) a destra e orale (terracotta, `--oral`) a sinistra, ognuno pieno solo con la sua metà; le scritte e le barre del timer usano gli stessi colori, e se il totale c'è ma manca una metà compare quanto manca.
-- **Navigazione** (decisa, da implementare): niente menu a hamburger. Nelle schermate principali c'è una barra in basso con 4 tasti: **Home | Percorso | Profilo | Impostazioni**.
+- **Navigazione:** niente menu a hamburger. Nelle schermate principali c'è una barra in basso con 4 tasti (`features/nav/TabBar.tsx`): **Home | Percorso | Profilo | Impostazioni**.
   - Profilo: statistiche, obiettivo (minuti e scopo), rifai il test di livello; con il multilingua anche le lingue.
-  - Impostazioni: promemoria, effetti sonori, installa l'app, cambio password, esci.
+  - Impostazioni (`features/settings/SettingsPage.tsx`): promemoria, effetti sonori, installa l'app, cambio password, esci.
   - Dentro le attività (lezione, dialogo, ripasso, verifiche, test) la barra non c'è e si torna indietro con la freccia.
+  - Scroll (`features/nav/scrollMemory.ts`): ogni schermata principale torna dove era stata lasciata, solo in memoria (un ricaricamento riparte dall'alto); la prima volta parte dall'alto, tranne il Percorso, che scorre fino al capitolo in corso. Le attività partono sempre dall'alto.
 
 ## Stack
 - **Frontend:** React + TypeScript + Vite, `vite-plugin-pwa` (manifest e service worker).
@@ -49,13 +50,13 @@ Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice sempli
 - **Hosting frontend:** Cloudflare Workers (piano gratuito): Workers Builds pubblica da `main` a ogni merge, config in `wrangler.jsonc`, indirizzo `aitool-kernsprache.geom-malacaria.workers.dev`.
 
 ## Vincoli di piattaforma
-- iOS: le notifiche push funzionano solo se la PWA è installata da **Safari → Condividi → Aggiungi a Home**. L'app propone l'installazione **dopo l'accesso** (mai nella pagina di login), solo su schermi touch e mai se gira già in modalità standalone (`display-mode: standalone`): una volta per dispositivo, circa 4 secondi dopo che la home è pronta (`localStorage` `kernsprache.installOffered`), più la voce manuale "Installa l'app" nella home. Su Android/Chromium il pulsante "Installa" usa l'evento `beforeinstallprompt` conservato (`src/lib/install.ts`); su iOS non esiste un'API, quindi il dialogo (`InstallDialog`) mostra i passi Condividi → Aggiungi alla schermata Home e avvisa che al primo avvio dall'icona va rifatto l'accesso (lo storage della PWA su iOS è separato). Il permesso per le notifiche si chiede solo dopo un'azione dell'utente.
+- iOS: le notifiche push funzionano solo se la PWA è installata da **Safari → Condividi → Aggiungi a Home**. L'app propone l'installazione **dopo l'accesso** (mai nella pagina di login), solo su schermi touch e mai se gira già in modalità standalone (`display-mode: standalone`): una volta per dispositivo, circa 4 secondi dopo che la home è pronta (`localStorage` `kernsprache.installOffered`), più la voce manuale "Installa l'app" in Impostazioni. Su Android/Chromium il pulsante "Installa" usa l'evento `beforeinstallprompt` conservato (`src/lib/install.ts`); su iOS non esiste un'API, quindi il dialogo (`InstallDialog`) mostra i passi Condividi → Aggiungi alla schermata Home e avvisa che al primo avvio dall'icona va rifatto l'accesso (lo storage della PWA su iOS è separato). Il permesso per le notifiche si chiede solo dopo un'azione dell'utente.
 - Supabase Free mette in pausa i progetti dopo 7 giorni di inattività: va bene con l'uso quotidiano.
 
 ## Architettura
 ```
 /apps/web              PWA React
-  /src/features        onboarding, home, lesson, dialogue, review, progress
+  /src/features        onboarding, home, nav (barra in basso), settings, profile, path, lesson, dialogue, review, study
   /src/lib             client Supabase, push, audio
   /src/sw              service worker personalizzato (gestione push)
 /supabase
@@ -102,7 +103,7 @@ Formato delle correzioni:
 - `sessions`: id, user_id, chapter_id, lesson_id, kind (lesson|dialogue|review), started_at, ended_at
 - `mistakes`: id, user_id, session_id, original, corrected, explanation_it, category, created_at, campi FSRS (gli errori sono anche carte di ripasso). Categoria `pronunciation`: original = corrected = la parola, explanation_it = il consiglio di pronuncia; escluse dal contesto del tutor
 - `vocab_items`: id, user_id, en, it, campi FSRS (due, stability, difficulty, reps, lapses, state, last_review)
-- `study_days`: user_id, day (giorno locale), goal_minutes, written_seconds, oral_seconds, completed_at. Si scrive solo con la RPC `add_study_time` (incremento atomico, max 120 s per chiamata).
+- `study_days`: user_id, day (giorno locale), goal_minutes, written_seconds, oral_seconds, completed_at, review_seconds, dialogue_seconds. Si scrive solo con le RPC `add_study_time` (metà dell'obiettivo; imposta `completed_at`) e `add_practice_time` (ripasso e dialogo, solo statistica): incremento atomico, max 120 s per chiamata.
 - `placement_results`: risposte e livelli (scritto, orale, finale) di ogni test di livello; scritta solo dalla function `placement-test`.
 - `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at; si registra con la RPC `register_push_subscription` (un endpoint passa a chi ha fatto l'accesso sul dispositivo)
 - `reminder_log`: user_id, day (giorno locale), kind; una riga al giorno per utente, scritta solo da `send-reminders`
@@ -159,15 +160,15 @@ pnpm db:start                                  # avvia Supabase locale, stampa U
 cp apps/web/.env.example apps/web/.env.local   # incolla la PUBLISHABLE_KEY stampata da db:start
 cp supabase/functions/.env.example supabase/functions/.env   # inserisci GEMINI_API_KEY
 pnpm fn:serve                                  # Edge Functions su http://127.0.0.1:54321/functions/v1/
-pnpm dev                                       # PWA su http://localhost:5173
+pnpm dev                                       # PWA su http://localhost:5273
 ```
 
 ### Sviluppo quotidiano
 | Comando | Cosa fa |
 |---|---|
-| `pnpm dev` | PWA in sviluppo su http://localhost:5173 (service worker attivo anche in dev) |
+| `pnpm dev` | PWA in sviluppo su http://localhost:5273 (service worker attivo anche in dev) |
 | `pnpm build` | typecheck + build di produzione in `apps/web/dist` |
-| `pnpm --filter web preview` | serve la build su http://localhost:4173 |
+| `pnpm --filter web preview` | serve la build su http://localhost:4273 |
 | `pnpm lint` | ESLint sulla PWA |
 | `pnpm typecheck` | solo controllo dei tipi |
 | `pnpm test` | test unitari della PWA (Vitest, `*.test.ts`) |

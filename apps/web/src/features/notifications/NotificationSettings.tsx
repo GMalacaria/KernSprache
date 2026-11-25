@@ -33,7 +33,14 @@ export function NotificationSettings({ userId }: { userId: string }) {
   const disable = useMutation({ mutationFn: disableReminders, onSuccess: refresh })
   const changeHour = useMutation({ mutationFn: (h: number) => setReminderHour(userId, h), onSuccess: refresh })
 
-  if (support === 'unsupported') return null
+  if (support === 'unsupported') {
+    return (
+      <section className="notice">
+        <h2 className="small-heading">Promemoria</h2>
+        <p className="muted">Questo browser non supporta le notifiche: attivale dall'app installata sul telefono.</p>
+      </section>
+    )
+  }
   if (support === 'needs-install') {
     return (
       <section className="notice">

@@ -37,6 +37,7 @@ import {
   WordsView,
 } from './sections'
 import type { LessonContent, QuizQuestion } from './types'
+import { BackButton } from '../../components/BackButton'
 import { Waiting } from '../../components/Waiting'
 
 interface LessonPageProps {
@@ -547,27 +548,7 @@ function Shell({ title, onExit, progress, resetKey, children }: ShellProps) {
   return (
     <main className="page lesson">
       <header className="lesson-header">
-        <button
-          type="button"
-          className="back-button"
-          aria-label="Indietro"
-          title="Indietro: il punto raggiunto resta salvato"
-          onClick={() => {
-            stopSpeaking()
-            onExit()
-          }}
-        >
-          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-            <path
-              d="M15 5l-7 7 7 7"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+        <BackButton onBack={onExit} title="Indietro: il punto raggiunto resta salvato" />
         <h1>{title}</h1>
       </header>
       {progress}

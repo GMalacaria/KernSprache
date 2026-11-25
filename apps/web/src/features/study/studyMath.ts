@@ -1,4 +1,13 @@
+/** The two halves of the daily goal: only the path (lessons and chapter tests) counts towards it. */
 export type StudyMode = 'written' | 'oral'
+/** Extra practice: its time is saved per day for statistics but does not count towards the goal. */
+export type PracticeKind = 'review' | 'dialogue'
+/** What the screen on display is timing. */
+export type ActivityKind = StudyMode | PracticeKind
+
+export function isStudyMode(kind: ActivityKind): kind is StudyMode {
+  return kind === 'written' || kind === 'oral'
+}
 
 /** Pause the timer after this long without any interaction. */
 export const IDLE_AFTER_MS = 2 * 60_000

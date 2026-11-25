@@ -287,14 +287,14 @@ isOneToOne: false
                   ]
                 },"study_days": {
                   Row: {
-                    "completed_at": string | null,"day": string,"goal_minutes": number,"oral_seconds": number,"updated_at": string,"user_id": string,"written_seconds": number
+                    "completed_at": string | null,"day": string,"dialogue_seconds": number,"goal_minutes": number,"oral_seconds": number,"review_seconds": number,"updated_at": string,"user_id": string,"written_seconds": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "completed_at"?: string | null,"day": string,"goal_minutes": number,"oral_seconds"?: number,"updated_at"?: string,"user_id"?: string,"written_seconds"?: number
+                    "completed_at"?: string | null,"day": string,"dialogue_seconds"?: number,"goal_minutes": number,"oral_seconds"?: number,"review_seconds"?: number,"updated_at"?: string,"user_id"?: string,"written_seconds"?: number
                   }
                   Update: {
-                    "completed_at"?: string | null,"day"?: string,"goal_minutes"?: number,"oral_seconds"?: number,"updated_at"?: string,"user_id"?: string,"written_seconds"?: number
+                    "completed_at"?: string | null,"day"?: string,"dialogue_seconds"?: number,"goal_minutes"?: number,"oral_seconds"?: number,"review_seconds"?: number,"updated_at"?: string,"user_id"?: string,"written_seconds"?: number
                   }
                   Relationships: [
                     
@@ -333,12 +333,32 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "add_study_time":
+            "add_practice_time":
+{ Args: { "p_day": string,"p_kind": Database["public"]['Enums']["practice_kind"],"p_seconds": number }; Returns: {
+              "completed_at": string | null,
+"day": string,
+"dialogue_seconds": number,
+"goal_minutes": number,
+"oral_seconds": number,
+"review_seconds": number,
+"updated_at": string,
+"user_id": string,
+"written_seconds": number
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "study_days"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"add_study_time":
 { Args: { "p_day": string,"p_mode": Database["public"]['Enums']["study_mode"],"p_seconds": number }; Returns: {
               "completed_at": string | null,
 "day": string,
+"dialogue_seconds": number,
 "goal_minutes": number,
 "oral_seconds": number,
+"review_seconds": number,
 "updated_at": string,
 "user_id": string,
 "written_seconds": number
@@ -373,7 +393,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "cefr_level": "A1"|"A2"|"B1"|"B2","learning_purpose": "leisure"|"travel"|"work"|"love","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other"|"pronunciation","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
+            "cefr_level": "A1"|"A2"|"B1"|"B2","learning_purpose": "leisure"|"travel"|"work"|"love","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other"|"pronunciation","practice_kind": "review"|"dialogue","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -493,7 +513,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "cefr_level": ["A1", "A2", "B1", "B2"],"learning_purpose": ["leisure", "travel", "work", "love"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other", "pronunciation"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
+            "cefr_level": ["A1", "A2", "B1", "B2"],"learning_purpose": ["leisure", "travel", "work", "love"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other", "pronunciation"],"practice_kind": ["review", "dialogue"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
           }
         }
 } as const

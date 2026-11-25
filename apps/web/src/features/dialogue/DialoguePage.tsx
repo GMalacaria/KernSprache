@@ -2,9 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ListenButton } from '../../components/ListenButton'
 import { canRecord, speak, stopSpeaking } from '../../lib/audio'
-import { StudyPrompts } from '../study/StudyPrompts'
-import { StudyTimerBar } from '../study/StudyTimerBar'
-import { useStudyActivity } from '../study/useStudyTimer'
+import { usePracticeActivity } from '../study/useStudyTimer'
 import { endSession, sendTutorTurn } from './api'
 import { CorrectionList } from './CorrectionList'
 import type { DialogueTurn, Pronunciation } from './types'
@@ -24,7 +22,8 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
   const queryClient = useQueryClient()
   const voiceAvailable = canRecord()
   const [mode, setMode] = useState<DialogueMode>(voiceAvailable ? initialMode : 'written')
-  const { markActivity } = useStudyActivity(mode)
+  // Free dialogue is extra practice: its time is saved for statistics, not counted towards the daily goal.
+  const { markActivity } = usePracticeActivity('dialogue')
   const [turns, setTurns] = useState<DialogueTurn[]>([])
   const [draft, setDraft] = useState('')
   const sessionId = useRef<string | undefined>(undefined)
@@ -100,9 +99,6 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
           Termina
         </button>
       </header>
-
-      <StudyTimerBar />
-      <StudyPrompts onSwitchToOral={voiceAvailable ? () => setMode('oral') : undefined} onExit={() => finish.mutate()} />
 
       {voiceAvailable && (
         <div className="segmented" role="group" aria-label="Modalità">

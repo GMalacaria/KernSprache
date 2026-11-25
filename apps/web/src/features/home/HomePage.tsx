@@ -1,11 +1,8 @@
-import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import type { DialogueMode } from '../dialogue/DialoguePage'
 import { purposeLabel } from '../onboarding/purposes'
 import { useDueCount } from '../review/useDueCount'
 import { GoalRing } from '../study/GoalRing'
-import { AppMenu, type AppMenuActions } from './AppMenu'
-import { MenuButton } from './SideMenu'
 import { useStudyTimer } from '../study/useStudyTimer'
 import { chapterAwaitingTest, nextLesson } from '../path/progress'
 import { usePath } from '../path/usePath'
@@ -15,7 +12,6 @@ interface HomePageProps {
   user: User
   onStartDialogue: (mode: DialogueMode) => void
   onStartReview: () => void
-  menu: AppMenuActions
   onOpenLesson: (lessonId: number) => void
   onOpenTest: (chapterId: number) => void
 }
@@ -24,7 +20,6 @@ export function HomePage({
   user,
   onStartDialogue,
   onStartReview,
-  menu,
   onOpenLesson,
   onOpenTest,
 }: HomePageProps) {
@@ -40,12 +35,10 @@ export function HomePage({
   const hasMainAction = Boolean(next || testChapter)
   const secondary = 'secondary'
 
-  const [menuOpen, setMenuOpen] = useState(false)
   return (
     <main className="page home">
-      <header className="row">
+      <header>
         <h1>Kern Sprache</h1>
-        <MenuButton onClick={() => setMenuOpen(true)} />
       </header>
 
       {profile.data && (
@@ -89,7 +82,6 @@ export function HomePage({
         </button>
       </div>
 
-      <AppMenu open={menuOpen} onClose={() => setMenuOpen(false)} userId={user.id} current="home" actions={menu} />
     </main>
   )
 }

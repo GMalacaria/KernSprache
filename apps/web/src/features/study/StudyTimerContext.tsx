@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useProfile } from '../home/useProfile'
-import { addStudyTime, fetchStudyDay, type StudyDay } from './api'
+import { addPracticeTime, addStudyTime, fetchStudyDay, type StudyDay } from './api'
 import { readFlag, writeFlag } from './storage'
-import { isLearnerActive, localDay, studyStatus, type StudyMode } from './studyMath'
+import { isLearnerActive, isStudyMode, localDay, studyStatus, type ActivityKind } from './studyMath'
 import { StudyTimerContext, type StudyTimer } from './useStudyTimer'
 
 const FLUSH_EVERY_S = 10
@@ -15,9 +15,11 @@ export function StudyTimerProvider({ userId, children }: { userId: string; child
   const [day, setDay] = useState(() => localDay(timeZone))
   const studyDay = useQuery({ queryKey: ['study-day', day], queryFn: () => fetchStudyDay(day) })
 
-  const [activeMode, setActiveModeState] = useState<StudyMode | null>(null)
+  // The activity on screen: a half of the goal (lesson, chapter test) or extra practice (review, dialogue).
+  const [activity, setActivity] = useState<ActivityKind | null>(null)
+  const activeMode = activity !== null && isStudyMode(activity) ? activity : null
   const [isCounting, setIsCounting] = useState(false)
-  const [pending, setPending] = useState({ written: 0, oral: 0 })
+  const [pending, setPending] = useState<Record<ActivityKind, number>>({ written: 0, oral: 0, review: 0, dialogue: 0 })
   const [halfwayDismissed, setHalfwayDismissed] = useState(() => readFlag(day, 'halfway-dismissed'))
   const [continued, setContinued] = useState(() => readFlag(day, 'continued'))
 
@@ -45,15 +47,15 @@ export function StudyTimerProvider({ userId, children }: { userId: string; child
   const flush = useCallback(async () => {
     if (flushing.current) return
     const toSend = pendingRef.current
-    if (toSend.written === 0 && toSend.oral === 0) return
+    const kinds = (['written', 'oral', 'review', 'dialogue'] as const).filter((k) => toSend[k] > 0)
+    if (kinds.length === 0) return
     flushing.current = true
     try {
       let latest: StudyDay | null = null
-      for (const mode of ['written', 'oral'] as const) {
-        const seconds = toSend[mode]
-        if (seconds === 0) continue
-        latest = await addStudyTime(day, mode, seconds)
-        setPending((p) => ({ ...p, [mode]: p[mode] - seconds }))
+      for (const kind of kinds) {
+        const seconds = toSend[kind]
+        latest = isStudyMode(kind) ? await addStudyTime(day, kind, seconds) : await addPracticeTime(day, kind, seconds)
+        setPending((p) => ({ ...p, [kind]: p[kind] - seconds }))
       }
       if (latest) queryClient.setQueryData(['study-day', day], latest)
     } catch (err) {
@@ -78,8 +80,9 @@ export function StudyTimerProvider({ userId, children }: { userId: string; child
     if (goalReached) void flush()
   }, [goalReached, flush])
 
-  // One tick per second: count a second for the active mode when the learner is really here.
-  const canCount = activeMode !== null && !showGoalReached && studyDay.isSuccess
+  // One tick per second: count a second for the activity on screen when the learner is really here.
+  // Practice is never paused by the goal-reached banner: that banner belongs to the lessons.
+  const canCount = activity !== null && !(activeMode !== null && showGoalReached) && studyDay.isSuccess
   useEffect(() => {
     const id = window.setInterval(() => {
       const now = Date.now()
@@ -101,16 +104,16 @@ export function StudyTimerProvider({ userId, children }: { userId: string; child
           nowMs: now,
         })
       setIsCounting(active)
-      if (active && activeMode) {
+      if (active && activity) {
         setPending((p) => {
-          const next = { ...p, [activeMode]: p[activeMode] + 1 }
-          if (next.written + next.oral >= FLUSH_EVERY_S) queueMicrotask(() => void flush())
+          const next = { ...p, [activity]: p[activity] + 1 }
+          if (next.written + next.oral + next.review + next.dialogue >= FLUSH_EVERY_S) queueMicrotask(() => void flush())
           return next
         })
       }
     }, 1000)
     return () => window.clearInterval(id)
-  }, [activeMode, canCount, day, flush, timeZone])
+  }, [activity, canCount, day, flush, timeZone])
 
   // Save what is pending when the page is hidden or the screen changes.
   useEffect(() => {
@@ -127,10 +130,10 @@ export function StudyTimerProvider({ userId, children }: { userId: string; child
   }, [flush])
 
   const setActiveMode = useCallback(
-    (mode: StudyMode | null) => {
+    (kind: ActivityKind | null) => {
       void flush()
       lastActivity.current = Date.now()
-      setActiveModeState(mode)
+      setActivity(kind)
     },
     [flush],
   )
