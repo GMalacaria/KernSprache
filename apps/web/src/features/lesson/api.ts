@@ -1,5 +1,5 @@
 import { i18n } from '../../i18n'
-import { FunctionsHttpError } from '@supabase/supabase-js'
+import { functionErrorMessage } from '../../lib/functionError'
 import { supabase } from '../../lib/supabase'
 import {
   combineStats,
@@ -14,23 +14,12 @@ import {
 import type { LessonStatsRow } from './stats'
 import type { LessonResponse } from './types'
 
-async function functionError(error: unknown, fallback: string): Promise<Error> {
-  if (error instanceof FunctionsHttpError) {
-    const payload: unknown = await (error.context as Response).json().catch(() => null)
-    if (payload && typeof payload === 'object' && 'error' in payload) {
-      const e = payload.error
-      if (e && typeof e === 'object' && 'message' in e && typeof e.message === 'string') return new Error(e.message)
-    }
-  }
-  return new Error(fallback)
-}
-
 export async function getLesson(lessonId: number): Promise<LessonResponse> {
   const { data, error } = await supabase.functions.invoke<LessonResponse>('lesson', {
     body: { action: 'get', lesson_id: lessonId },
   })
-  if (error) throw await functionError(error, i18n.t('errors.open', { ns: 'lesson' }))
-  if (!data) throw new Error(i18n.t('errors.empty', { ns: 'lesson' }))
+  if (error) throw new Error(await functionErrorMessage(error, i18n.t('errors.open', { ns: 'lesson' })))
+  if (!data) throw new Error(i18n.t('errors.emptyResponse'))
   return data
 }
 

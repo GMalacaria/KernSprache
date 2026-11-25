@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { MAX_RECORDING_MS } from '../../lib/audio'
 import { useVoiceRecorder } from '../../lib/useVoiceRecorder'
 import { transcribeAudio } from '../dialogue/api'
+import { useTranslation } from 'react-i18next'
 
 interface SpokenAnswerProps {
   onDone: (transcript: string) => void
@@ -11,6 +12,7 @@ interface SpokenAnswerProps {
 
 /** Records one spoken answer, shows the transcript, lets the learner redo it. */
 export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
+  const { t } = useTranslation(['tests', 'common'])
   const transcribe = useMutation({ mutationFn: transcribeAudio })
   const { isRecording, seconds, micError, start, stop } = useVoiceRecorder({
     onRecorded: (audio) => transcribe.mutate(audio),
@@ -24,15 +26,15 @@ export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
   if (transcribe.isSuccess) {
     return (
       <div className="stack">
-        <p className="muted">Ho capito:</p>
+        <p className="muted">{t('spoken.heard')}</p>
         <p className="bubble transcript" lang="en">
           {transcribe.data}
         </p>
         <button type="button" onClick={() => onDone(transcribe.data)}>
-          Avanti
+          {t('common:actions.next')}
         </button>
         <button type="button" className="link" onClick={() => void begin()}>
-          Rifai la registrazione
+          {t('spoken.redo')}
         </button>
       </div>
     )
@@ -47,18 +49,18 @@ export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
         disabled={transcribe.isPending}
       >
         {isRecording
-          ? `■ Fine (${seconds}s / ${MAX_RECORDING_MS / 1000}s)`
+          ? t('common:voice.stop', { seconds, limit: MAX_RECORDING_MS / 1000 })
           : transcribe.isPending
-            ? <>Trascrivo <span className="dots" aria-hidden="true" /></>
+            ? <>{t('common:voice.transcribing')} <span className="dots" aria-hidden="true" /></>
             : (
                 <>
-                  <Emoji name="microphone" /> Rispondi a voce
+                  <Emoji name="microphone" /> {t('spoken.answer')}
                 </>
               )}
       </button>
       {!isRecording && !transcribe.isPending && (
         <button type="button" className="link" onClick={onSkip}>
-          Non so rispondere, salta
+          {t('spoken.skip')}
         </button>
       )}
       {micError && <p className="error">{micError}</p>}

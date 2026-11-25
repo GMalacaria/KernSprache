@@ -9,6 +9,7 @@ import itProfile from './locales/it/profile.json'
 import itReview from './locales/it/review.json'
 import itSettings from './locales/it/settings.json'
 import itStudy from './locales/it/study.json'
+import itTests from './locales/it/tests.json'
 
 /** Interface strings by language: one JSON per feature (namespace). The interface language is the native one. */
 export const resources = {
@@ -24,6 +25,7 @@ export const resources = {
     lesson: itLesson,
     dialogue: itDialogue,
     review: itReview,
+    tests: itTests,
   },
 } as const
 

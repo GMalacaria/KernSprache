@@ -5,6 +5,7 @@ import { skipPlacement, startPlacement, submitPlacement, type PlacementResult } 
 import { SpokenAnswer } from './SpokenAnswer'
 import { BackHeader } from '../../components/BackHeader'
 import { Waiting } from '../../components/Waiting'
+import { useTranslation } from 'react-i18next'
 
 interface PlacementTestPageProps {
   userId: string
@@ -16,6 +17,7 @@ interface PlacementTestPageProps {
 type Step = { kind: 'intro' } | { kind: 'written'; index: number } | { kind: 'oral'; index: number } | { kind: 'result' }
 
 export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPageProps) {
+  const { t } = useTranslation(['tests', 'common'])
   const queryClient = useQueryClient()
   const test = useQuery({ queryKey: ['placement', 'questions'], queryFn: startPlacement, staleTime: Infinity })
   const [step, setStep] = useState<Step>({ kind: 'intro' })
@@ -35,9 +37,9 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
 
   const skip = useMutation({ mutationFn: () => skipPlacement(userId), onSuccess: finish })
   // Retaken from the profile: a back arrow leaves at any step. The first run has no way back, only "Salta".
-  const title = firstRun ? <h1>Test di livello</h1> : <BackHeader title="Test di livello" onBack={onDone} />
+  const title = firstRun ? <h1>{t('placement.title')}</h1> : <BackHeader title={t('placement.title')} onBack={onDone} />
 
-  if (test.isPending) return <Shell>Carico il test…</Shell>
+  if (test.isPending) return <Shell>{t('placement.loading')}</Shell>
   if (test.isError) return <Shell error>{test.error.message}</Shell>
   const { questions, oral_prompts: prompts } = test.data
 
@@ -57,20 +59,22 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
       <main className="page">
         {title}
         <p>
-          Circa 10 minuti per capire da dove partire: {questions.length} domande scritte a scelta multipla e{' '}
-          {voice ? `${prompts.length} risposte a voce` : 'nessuna risposta a voce (microfono non disponibile)'}.
+          {t('placement.intro', {
+            questions: questions.length,
+            oral: voice ? t('placement.oralCount', { count: prompts.length }) : t('placement.noOral'),
+          })}
         </p>
-        <p className="muted">Se non conosci una risposta, scegli "Non lo so": il test serve solo a darti lezioni adatte.</p>
+        <p className="muted">{t('placement.dontKnowHint')}</p>
         <div className="stack">
           <button type="button" onClick={() => setStep({ kind: 'written', index: 0 })}>
-            Inizia il test
+            {t('placement.start')}
           </button>
           {firstRun && (
             <button type="button" className="link" onClick={() => skip.mutate()} disabled={skip.isPending}>
-              Salta, parto dal livello A1
+              {t('placement.skip')}
             </button>
           )}
-          {skip.isError && <p className="error">Non sono riuscito a salvare. Riprova.</p>}
+          {skip.isError && <p className="error">{t('common:errors.saveFailed')}</p>}
         </div>
       </main>
     )
@@ -79,14 +83,10 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
   if (submit.isPending) {
     return (
       <main className="page">
-        <h1>Test di livello</h1>
+        <h1>{t('placement.title')}</h1>
         <Waiting
-          title="Calcolo il tuo livello"
-          hints={[
-            'Correggo le risposte scritte.',
-            'Ascolto come hai parlato.',
-            'Metto insieme scritto e orale.',
-          ]}
+          title={t('placement.grading.title')}
+          hints={[t('placement.grading.hint1'), t('placement.grading.hint2'), t('placement.grading.hint3')]}
         />
       </main>
     )
@@ -96,7 +96,7 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
       <Shell error>
         {submit.error.message}{' '}
         <button type="button" className="link" onClick={() => submit.mutate(oral)}>
-          Riprova
+          {t('common:actions.retry')}
         </button>
       </Shell>
     )
@@ -112,8 +112,8 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
     return (
       <main className="page">
         {!firstRun && title}
-        <Progress label="Parte scritta" current={step.index + 1} total={questions.length} />
-        <p className="muted">Scegli la parola giusta:</p>
+        <Progress label={t('writtenPart')} current={step.index + 1} total={questions.length} />
+        <p className="muted">{t('placement.writtenPrompt')}</p>
         <p className="card-main question" lang="en">
           {q.prompt}
         </p>
@@ -124,7 +124,7 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
             </button>
           ))}
           <button type="button" className="link" onClick={() => choose(null)}>
-            Non lo so
+            {t('dontKnow')}
           </button>
         </div>
       </main>
@@ -137,8 +137,8 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
     return (
       <main className="page">
         {!firstRun && title}
-        <Progress label="Parte orale" current={step.index + 1} total={prompts.length} />
-        <p className="muted">Rispondi in inglese, con qualche frase:</p>
+        <Progress label={t('oralPart')} current={step.index + 1} total={prompts.length} />
+        <p className="muted">{t('placement.oralPrompt')}</p>
         <p className="card-main question">{p.prompt_it}</p>
         <SpokenAnswer
           key={p.id}
@@ -157,21 +157,26 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
 }
 
 function ResultView({ result, onContinue }: { result: PlacementResult | undefined; onContinue: () => void }) {
+  const { t } = useTranslation('tests')
   if (!result) return null
   return (
     <main className="page">
-      <h1>Il tuo livello</h1>
+      <h1>{t('placement.resultTitle')}</h1>
       <p className="level-badge">{result.final_level}</p>
       <p>
-        Scritto: {result.written.correct} risposte giuste su {result.written.total} (livello {result.written.level})
-        {result.oral && ` · Orale: livello ${result.oral.level}`}
+        {t('placement.writtenResult', {
+          correct: result.written.correct,
+          total: result.written.total,
+          level: result.written.level,
+        })}
+        {result.oral && t('placement.oralResult', { level: result.oral.level })}
       </p>
       {result.oral && (
         <section className="notice">
           <p>{result.oral.feedback_it}</p>
           {result.oral.strengths_it.length > 0 && (
             <>
-              <h2 className="small-heading">Punti di forza</h2>
+              <h2 className="small-heading">{t('strengths')}</h2>
               <ul>
                 {result.oral.strengths_it.map((s) => (
                   <li key={s}>{s}</li>
@@ -181,7 +186,7 @@ function ResultView({ result, onContinue }: { result: PlacementResult | undefine
           )}
           {result.oral.to_improve_it.length > 0 && (
             <>
-              <h2 className="small-heading">Da migliorare</h2>
+              <h2 className="small-heading">{t('toImprove')}</h2>
               <ul>
                 {result.oral.to_improve_it.map((s) => (
                   <li key={s}>{s}</li>
@@ -191,20 +196,19 @@ function ResultView({ result, onContinue }: { result: PlacementResult | undefine
           )}
         </section>
       )}
-      <p className="muted">Le lezioni partiranno da questo livello. Puoi rifare il test quando vuoi dalla home.</p>
+      <p className="muted">{t('placement.resultHint')}</p>
       <button type="button" onClick={onContinue}>
-        Continua
+        {t('placement.continue')}
       </button>
     </main>
   )
 }
 
 function Progress({ label, current, total }: { label: string; current: number; total: number }) {
+  const { t } = useTranslation('tests')
   return (
     <div className="placement-progress">
-      <small>
-        {label}: {current} di {total}
-      </small>
+      <small>{t('progress', { label, current, total })}</small>
       <div className="bar">
         <span style={{ width: `${(current / total) * 100}%` }} />
       </div>
@@ -213,9 +217,10 @@ function Progress({ label, current, total }: { label: string; current: number; t
 }
 
 function Shell({ children, error = false }: { children: ReactNode; error?: boolean }) {
+  const { t } = useTranslation('tests')
   return (
     <main className="page">
-      <h1>Test di livello</h1>
+      <h1>{t('placement.title')}</h1>
       <p className={error ? 'error' : undefined}>{children}</p>
     </main>
   )

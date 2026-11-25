@@ -3,7 +3,7 @@ import type { Grade } from 'ts-fsrs'
 import { scheduler, toCard, toColumns, type FsrsColumns } from '../../lib/fsrs'
 import { supabase } from '../../lib/supabase'
 import type { Database } from '../../lib/database.types'
-import { errorMessage } from '../dialogue/api'
+import { functionErrorMessage } from '../../lib/functionError'
 
 const FSRS_SELECT = 'due, stability, difficulty, scheduled_days, learning_steps, reps, lapses, state, last_review'
 
@@ -91,7 +91,7 @@ export async function checkAnswer(request: {
 }): Promise<AnswerCheck> {
   const { data, error } = await supabase.functions.invoke<AnswerCheck>('review-check', { body: request })
   const fallback = i18n.t('checkError', { ns: 'review' })
-  if (error) throw new Error(await errorMessage(error, fallback))
+  if (error) throw new Error(await functionErrorMessage(error, fallback))
   if (!data) throw new Error(fallback)
   return data
 }

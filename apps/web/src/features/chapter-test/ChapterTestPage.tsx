@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Trans, useTranslation } from 'react-i18next'
 import { NoMicrophone } from '../../components/NoMicrophone'
 import { SentenceFeedback } from '../../components/SentenceFeedback'
 import { canRecord } from '../../lib/audio'
@@ -37,6 +38,7 @@ export function ChapterTestPage({
   skipAhead = false,
   onExit,
 }: ChapterTestPageProps) {
+  const { t } = useTranslation(['tests', 'common'])
   const queryClient = useQueryClient()
   // The oral half is required: without a microphone the test does not start (and is not generated).
   const voice = canRecord()
@@ -83,8 +85,8 @@ export function ChapterTestPage({
     return (
       <Shell onExit={onExit}>
         <NoMicrophone
-          title="Per la verifica serve il microfono"
-          why="La verifica è metà scritta e metà orale, e la parte orale si fa a voce: senza microfono non si può fare."
+          title={t('chapter.noMic.title')}
+          why={t('chapter.noMic.why')}
         />
       </Shell>
     )
@@ -93,8 +95,8 @@ export function ChapterTestPage({
     return (
       <Shell onExit={onExit}>
         <Waiting
-          title="Preparo la verifica"
-          hints={['Può richiedere qualche secondo.', 'Scelgo domande sul capitolo appena studiato.']}
+          title={t('chapter.preparing.title')}
+          hints={[t('chapter.preparing.hint1'), t('chapter.preparing.hint2')]}
         />
       </Shell>
     )
@@ -122,8 +124,8 @@ export function ChapterTestPage({
     return (
       <Shell onExit={onExit}>
         <Waiting
-          title="Correggo la verifica"
-          hints={['Controllo le risposte scritte.', 'Valuto le risposte a voce.', 'Calcolo il punteggio.']}
+          title={t('chapter.grading.title')}
+          hints={[t('chapter.grading.hint1'), t('chapter.grading.hint2'), t('chapter.grading.hint3')]}
         />
       </Shell>
     )
@@ -133,7 +135,7 @@ export function ChapterTestPage({
       <Shell onExit={onExit} error>
         {submit.error.message}{' '}
         <button type="button" className="link" onClick={() => submit.mutate(oral)}>
-          Riprova
+          {t('common:actions.retry')}
         </button>
       </Shell>
     )
@@ -142,19 +144,20 @@ export function ChapterTestPage({
   if (step.kind === 'intro') {
     return (
       <main className="page">
-        <BackHeader title="Verifica del capitolo" onBack={onExit} />
+        <BackHeader title={t('chapter.title')} onBack={onExit} />
         <p>
-          <strong>{chapterTitle}</strong>: {questions.length} domande scritte a scelta multipla e {tasks.length} risposte a
-          voce.
+          <Trans
+            t={t}
+            i18nKey="chapter.intro"
+            values={{ title: chapterTitle, questions: questions.length, tasks: tasks.length }}
+            components={{ strong: <strong /> }}
+          />
         </p>
         <p className="muted">
-          {skipAhead
-            ? 'Non hai ancora studiato questo capitolo: se superi la verifica con almeno 70 su 100 (media di scritto e orale) salti i capitoli che lo precedono e passi a quello dopo. '
-            : 'Serve a capire se hai capito il capitolo: con almeno 70 su 100 (media di scritto e orale) passi al capitolo successivo. '}
-          Le risposte giuste le vedi alla fine.
+          {skipAhead ? t('chapter.skipAhead') : t('chapter.normal')} {t('chapter.answersAtEnd')}
         </p>
         <button type="button" onClick={() => setStep({ kind: 'written', index: 0 })}>
-          Inizia
+          {t('chapter.start')}
         </button>
       </main>
     )
@@ -170,7 +173,7 @@ export function ChapterTestPage({
     return (
       <main className="page">
         <StudyTimerBar />
-        <Progress label="Parte scritta" current={step.index + 1} total={questions.length} />
+        <Progress label={t('writtenPart')} current={step.index + 1} total={questions.length} />
         <p className="card-main question" lang="en">
           {q.prompt}
         </p>
@@ -181,7 +184,7 @@ export function ChapterTestPage({
             </button>
           ))}
           <button type="button" className="link" onClick={() => choose(null)}>
-            Non lo so
+            {t('dontKnow')}
           </button>
         </div>
       </main>
@@ -199,8 +202,8 @@ export function ChapterTestPage({
     return (
       <main className="page">
         <StudyTimerBar />
-        <Progress label="Parte orale" current={step.index + 1} total={tasks.length} />
-        <p className="muted">Rispondi a voce in inglese, con qualche frase:</p>
+        <Progress label={t('oralPart')} current={step.index + 1} total={tasks.length} />
+        <p className="muted">{t('chapter.oralPrompt')}</p>
         <p className="card-main question">{task.prompt_it}</p>
         <SpokenAnswer key={task.id} onDone={done} onSkip={() => nextAfterOral(step.index, oral)} />
       </main>
@@ -231,42 +234,46 @@ interface ResultViewProps {
 }
 
 function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: ResultViewProps) {
+  const { t } = useTranslation('tests')
   const { written, oral } = result
   // The written half in the same numbers as the lessons, in question order.
-  const tally = test.questions.reduce((t, q) => addAnswer(t, !written.wrong.some((w) => w.id === q.id)), EMPTY_TALLY)
+  const tally = test.questions.reduce((tally, q) => addAnswer(tally, !written.wrong.some((w) => w.id === q.id)), EMPTY_TALLY)
   const testSummary = summarizeStats([
     { lesson_id: 0, answers: tally.answered, correct: tally.correct, best_streak: tally.bestStreak },
   ])
   return (
     <main className="page">
-      <h1>{result.passed ? 'Capitolo superato' : 'Non ancora'}</h1>
+      <h1>{result.passed ? t('chapter.passed') : t('chapter.notYet')}</h1>
       <p className="level-badge">{result.score}/100</p>
       <p>
-        Scritto: {written.correct} giuste su {written.total} ({written.score}/100) · Orale: {oral.score}/100
+        {t('chapter.scores', { correct: written.correct, total: written.total, written: written.score, oral: oral.score })}
       </p>
       {result.passed ? (
         <p className="notice">
-          Hai superato la verifica.
-          {result.level && levelBefore && result.level !== levelBefore && ` Hai finito il livello ${levelBefore}: adesso sei al ${result.level}!`}
+          {t('chapter.passedNotice')}
+          {result.level &&
+            levelBefore &&
+            result.level !== levelBefore &&
+            t('chapter.levelUp', { from: levelBefore, to: result.level })}
         </p>
       ) : (
-        <p className="notice">Servono almeno 70 su 100. Ripassa le lezioni del capitolo e riprova con una verifica nuova.</p>
+        <p className="notice">{t('chapter.failedNotice')}</p>
       )}
 
       <section className="notice">
         <p>{oral.feedback_it}</p>
-        <FeedbackList title="Punti di forza" items={oral.strengths_it} />
-        <FeedbackList title="Da migliorare" items={oral.to_improve_it} />
+        <FeedbackList title={t('strengths')} items={oral.strengths_it} />
+        <FeedbackList title={t('toImprove')} items={oral.to_improve_it} />
       </section>
 
       <section>
-        <h2 className="small-heading">La parte scritta</h2>
+        <h2 className="small-heading">{t('chapter.writtenHalf')}</h2>
         <StatsGrid summary={testSummary} />
       </section>
       <ChapterStats chapterId={chapterId} />
 
       <section>
-        <h2 className="small-heading">Rivedi le domande</h2>
+        <h2 className="small-heading">{t('chapter.reviewQuestions')}</h2>
         <ul className="review-list">
           {test.questions.map((q) => {
             const wrong = written.wrong.find((w) => w.id === q.id)
@@ -279,11 +286,13 @@ function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: R
                 <p className="review-answer">
                   {wrong ? (
                     <span className="error">
-                      {wrong.chosen === null ? 'Non risposta' : <>Hai scelto "{q.options[wrong.chosen]}"</>} · giusta: "
-                      {q.options[wrong.answer]}"
+                      {wrong.chosen === null
+                        ? t('chapter.unanswered')
+                        : t('chapter.chose', { option: q.options[wrong.chosen] })}
+                      {t('chapter.rightWas', { option: q.options[wrong.answer] })}
                     </span>
                   ) : (
-                    <span className="ok">Giusta</span>
+                    <span className="ok">{t('chapter.right')}</span>
                   )}
                 </p>
                 {review?.sentence_en && <SentenceFeedback en={review.sentence_en} it={review.translation_it} />}
@@ -295,11 +304,11 @@ function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: R
 
       <div className="stack">
         <button type="button" onClick={onExit}>
-          {result.passed ? 'Torna al percorso' : 'Ripassa le lezioni'}
+          {result.passed ? t('chapter.backToPath') : t('chapter.reviewLessons')}
         </button>
         {!result.passed && (
           <button type="button" className="link" onClick={onRetry}>
-            Riprova subito con una verifica nuova
+            {t('chapter.retryNew')}
           </button>
         )}
       </div>
@@ -322,11 +331,10 @@ function FeedbackList({ title, items }: { title: string; items: string[] }) {
 }
 
 function Progress({ label, current, total }: { label: string; current: number; total: number }) {
+  const { t } = useTranslation('tests')
   return (
     <div className="placement-progress">
-      <small>
-        {label}: {current} di {total}
-      </small>
+      <small>{t('progress', { label, current, total })}</small>
       <div className="bar">
         <span style={{ width: `${(current / total) * 100}%` }} />
       </div>
@@ -335,9 +343,10 @@ function Progress({ label, current, total }: { label: string; current: number; t
 }
 
 function Shell({ children, error = false, onExit }: { children: ReactNode; error?: boolean; onExit: () => void }) {
+  const { t } = useTranslation('tests')
   return (
     <main className="page">
-      <BackHeader title="Verifica del capitolo" onBack={onExit} />
+      <BackHeader title={t('chapter.title')} onBack={onExit} />
       <div className={error ? 'error' : undefined}>{children}</div>
     </main>
   )
