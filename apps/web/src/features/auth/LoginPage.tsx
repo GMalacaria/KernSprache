@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
 import { authErrorMessage } from './messages'
 import { MIN_PASSWORD_LENGTH } from './SetPasswordForm'
@@ -7,6 +8,7 @@ import { MIN_PASSWORD_LENGTH } from './SetPasswordForm'
 type Mode = 'login' | 'register' | 'forgot'
 
 export function LoginPage() {
+  const { t } = useTranslation(['auth', 'common'])
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -41,28 +43,26 @@ export function LoginPage() {
     submit.mutate()
   }
 
-  const title = mode === 'register' ? 'Crea un account' : mode === 'forgot' ? 'Password dimenticata' : 'Accedi'
-  const button = mode === 'register' ? 'Registrati' : mode === 'forgot' ? 'Inviami il link' : 'Accedi'
-  const pending = submit.isPending ? 'Un attimo…' : button
+  const pending = submit.isPending ? t('login.pending') : t(`login.submit.${mode}`)
 
   return (
     <main className="page">
-      <h1>Kern Sprache</h1>
-      <h2 className="small-heading">{title}</h2>
+      <h1>{t('common:appName')}</h1>
+      <h2 className="small-heading">{t(`login.title.${mode}`)}</h2>
       {mode === 'register' && (
-        <p className="muted">Dopo la registrazione l'account deve essere approvato prima di poter usare l'app.</p>
+        <p className="muted">{t('login.registerHint')}</p>
       )}
       {mode === 'forgot' && (
-        <p className="muted">Ti mandiamo un link per scegliere una nuova password.</p>
+        <p className="muted">{t('login.forgotHint')}</p>
       )}
 
       {submit.data === 'reset-sent' ? (
-        <p className="notice">Controlla la posta: il link per cambiare la password è stato inviato a {email}.</p>
+        <p className="notice">{t('login.resetSent', { email })}</p>
       ) : submit.data === 'check-email' ? (
-        <p className="notice">Controlla la posta e conferma l'email: poi l'account potrà essere approvato.</p>
+        <p className="notice">{t('login.checkEmail')}</p>
       ) : (
         <form onSubmit={onSubmit} className="stack">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t('login.email')}</label>
           <input
             id="email"
             type="email"
@@ -73,7 +73,7 @@ export function LoginPage() {
           />
           {mode !== 'forgot' && (
             <>
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{t('login.password')}</label>
               <input
                 id="password"
                 type="password"
@@ -95,16 +95,16 @@ export function LoginPage() {
       <div className="stack">
         {mode !== 'login' && (
           <button type="button" className="link" onClick={() => switchTo('login')}>
-            Ho già un account: accedi
+            {t('login.haveAccount')}
           </button>
         )}
         {mode === 'login' && (
           <>
             <button type="button" className="link" onClick={() => switchTo('register')}>
-              Non hai un account? Registrati
+              {t('login.noAccount')}
             </button>
             <button type="button" className="link" onClick={() => switchTo('forgot')}>
-              Password dimenticata?
+              {t('login.forgot')}
             </button>
           </>
         )}

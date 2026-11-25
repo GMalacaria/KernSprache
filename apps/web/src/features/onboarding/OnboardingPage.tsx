@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
 import { GOAL_OPTIONS } from '../study/studyMath'
 import { Emoji } from '../../components/Emoji'
-import { PURPOSES, type LearningPurpose } from './purposes'
+import { PURPOSES, purposeHint, purposeLabel, type LearningPurpose } from './purposes'
 
 interface OnboardingPageProps {
   userId: string
@@ -20,6 +21,7 @@ const MAX_GOAL_CHARS = 200
  * Onboarding ends after the placement test (or skipping it), which sets onboarded_at.
  */
 export function OnboardingPage({ userId, initial, editing = false, onDone }: OnboardingPageProps) {
+  const { t } = useTranslation(['onboarding', 'common'])
   const queryClient = useQueryClient()
   const [purpose, setPurpose] = useState<LearningPurpose | null>(initial?.purpose ?? null)
   const [details, setDetails] = useState(initial?.goal ?? '')
@@ -52,9 +54,9 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
 
   return (
     <main className="page">
-      <h1>{editing ? 'I tuoi obiettivi' : 'Benvenuto!'}</h1>
+      <h1>{editing ? t('editTitle') : t('welcome')}</h1>
       <form onSubmit={onSubmit} className="stack">
-        <label htmlFor="purpose">Perché vuoi imparare l'inglese?</label>
+        <label htmlFor="purpose">{t('purposeQuestion')}</label>
         <select
           id="purpose"
           value={purpose ?? ''}
@@ -62,51 +64,51 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
         >
           {purpose === null && (
             <option value="" disabled>
-              Scegli un motivo
+              {t('choosePurpose')}
             </option>
           )}
           {PURPOSES.map((p) => (
             <option key={p.value} value={p.value}>
-              {p.label}
+              {purposeLabel(p.value)}
             </option>
           ))}
         </select>
         {chosen && (
           <p className="purpose-hint muted">
             <Emoji name={chosen.icon} size="1.5rem" />
-            <span>{chosen.hint}</span>
+            <span>{purposeHint(chosen.value)}</span>
           </p>
         )}
 
-        <label htmlFor="details">Vuoi aggiungere qualcosa? (facoltativo)</label>
+        <label htmlFor="details">{t('detailsLabel')}</label>
         <textarea
           id="details"
           rows={2}
           maxLength={MAX_GOAL_CHARS}
           value={details}
           onChange={(e) => setDetails(e.target.value)}
-          placeholder="Es. tra sei mesi mi trasferisco a Londra per lavoro"
+          placeholder={t('detailsPlaceholder')}
         />
 
-        <label htmlFor="minutes">Quanti minuti vuoi studiare al giorno?</label>
+        <label htmlFor="minutes">{t('minutesQuestion')}</label>
         <select id="minutes" value={minutes} onChange={(e) => setMinutes(Number(e.target.value))}>
           {[...new Set([...GOAL_OPTIONS, minutes])].sort((a, b) => a - b).map((m) => (
             <option key={m} value={m}>
-              {m} minuti
+              {t('common:minutes', { count: m })}
             </option>
           ))}
         </select>
-        <p className="muted">Metà del tempo è scritto, metà orale.</p>
+        <p className="muted">{t('halfSplit')}</p>
 
         <button type="submit" disabled={!purpose || save.isPending}>
-          {editing ? 'Salva' : 'Avanti'}
+          {editing ? t('common:actions.save') : t('common:actions.next')}
         </button>
         {editing && (
           <button type="button" className="link" onClick={onDone}>
-            Annulla
+            {t('common:actions.cancel')}
           </button>
         )}
-        {save.isError && <p className="error">Non sono riuscito a salvare. Riprova.</p>}
+        {save.isError && <p className="error">{t('common:errors.saveFailed')}</p>}
       </form>
     </main>
   )

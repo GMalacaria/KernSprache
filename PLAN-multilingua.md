@@ -119,7 +119,9 @@ Decisioni prese:
    - Si controlla l'icona a vista: favicon nel browser, icona maskable con ritaglio circolare, home iOS.
    - `theme_color` resta `#2446d8`.
 
-2. **`feat(web): add i18n with Italian strings`**:
+2. **`feat(web): add i18n with Italian strings`** (in corso, una PR per gruppo):
+   - ✅ 2a `feat(web): add i18n with auth and onboarding strings`: `i18next` + `react-i18next`, `src/i18n/index.ts` (init sincrono, `<html lang>` dalla lingua), `resources.ts`, `i18next.d.ts` con `CustomTypeOptions` (chiavi tipizzate; per usare chiavi di un altro namespace `useTranslation(['auth', 'common'])`), namespace `common`, `auth`, `onboarding`. Fuori dai componenti si usa `i18n.getFixedT(null, '<ns>')` (es. `authErrorMessage`, `purposeLabel`); `PURPOSES` ha solo `value` e `icon`, etichette e suggerimenti nel catalogo. Test in `src/i18n/i18n.test.ts`.
+   - Piano originale:
    - `i18next` + `react-i18next`, `src/i18n/index.ts`, `src/i18n/locales/it/*.json` (un namespace per feature);
    - tipi delle chiavi con TypeScript strict (dichiarazione `CustomTypeOptions`);
    - `lang` di `<html>` dinamico.

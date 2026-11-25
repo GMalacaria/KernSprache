@@ -5,6 +5,7 @@ import { registerSW } from 'virtual:pwa-register'
 import { App } from './App'
 import { listenForInstall } from './lib/install'
 import { queryClient } from './lib/queryClient'
+import './i18n'
 import './index.css'
 
 registerSW({ immediate: true })
