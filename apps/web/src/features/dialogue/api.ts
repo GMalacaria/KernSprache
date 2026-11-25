@@ -1,33 +1,16 @@
 import { i18n } from '../../i18n'
-import { FunctionsHttpError } from '@supabase/supabase-js'
 import { blobToBase64 } from '../../lib/audio'
+import { functionErrorMessage } from '../../lib/functionError'
 import { supabase } from '../../lib/supabase'
 import type { Pronunciation, TutorChatRequest, TutorChatResponse } from './types'
 
-const fallbackError = () => i18n.t('errors.tutorNoReply')
-
-/** Reads the Italian message the function puts in `{ error: { message } }`. */
-export async function errorMessage(error: unknown, fallback = fallbackError()): Promise<string> {
-  if (error instanceof FunctionsHttpError) {
-    try {
-      const body: unknown = await (error.context as Response).json()
-      if (
-        body && typeof body === 'object' && 'error' in body && body.error && typeof body.error === 'object' &&
-        'message' in body.error && typeof body.error.message === 'string'
-      ) {
-        return body.error.message
-      }
-    } catch {
-      // Not JSON: fall through.
-    }
-  }
-  return fallback
-}
+const tutorError = () => i18n.t('errors.tutorNoReply')
+const transcribeError = () => i18n.t('errors.transcribe')
 
 export async function sendTutorTurn(request: TutorChatRequest): Promise<TutorChatResponse> {
   const { data, error } = await supabase.functions.invoke<TutorChatResponse>('tutor-chat', { body: request })
-  if (error) throw new Error(await errorMessage(error))
-  if (!data) throw new Error(fallbackError())
+  if (error) throw new Error(await functionErrorMessage(error, tutorError()))
+  if (!data) throw new Error(tutorError())
   return data
 }
 
@@ -36,8 +19,8 @@ export async function transcribeAudio(audio: Blob): Promise<string> {
   const { data, error } = await supabase.functions.invoke<{ text: string }>('transcribe', {
     body: { audio_base64: await blobToBase64(audio), mime_type: audio.type },
   })
-  if (error) throw new Error(await errorMessage(error))
-  if (!data?.text) throw new Error(fallbackError())
+  if (error) throw new Error(await functionErrorMessage(error, transcribeError()))
+  if (!data?.text) throw new Error(transcribeError())
   return data.text
 }
 
@@ -61,8 +44,8 @@ export async function transcribeWithPronunciation(
       },
     },
   )
-  if (error) throw new Error(await errorMessage(error))
-  if (!data?.text) throw new Error(fallbackError())
+  if (error) throw new Error(await functionErrorMessage(error, transcribeError()))
+  if (!data?.text) throw new Error(transcribeError())
   return { text: data.text, pronunciation: data.pronunciation ?? null }
 }
 

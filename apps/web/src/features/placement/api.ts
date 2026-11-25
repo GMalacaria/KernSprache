@@ -1,4 +1,5 @@
-import { FunctionsHttpError } from '@supabase/supabase-js'
+import { i18n } from '../../i18n'
+import { functionErrorMessage } from '../../lib/functionError'
 import type { Database } from '../../lib/database.types'
 import { supabase } from '../../lib/supabase'
 
@@ -25,18 +26,8 @@ export interface PlacementResult {
 
 async function invoke<T>(body: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>('placement-test', { body })
-  if (error) {
-    let message = 'Il test non risponde. Riprova tra poco.'
-    if (error instanceof FunctionsHttpError) {
-      const payload: unknown = await (error.context as Response).json().catch(() => null)
-      if (payload && typeof payload === 'object' && 'error' in payload) {
-        const e = payload.error
-        if (e && typeof e === 'object' && 'message' in e && typeof e.message === 'string') message = e.message
-      }
-    }
-    throw new Error(message)
-  }
-  if (!data) throw new Error('Risposta vuota dal server.')
+  if (error) throw new Error(await functionErrorMessage(error, i18n.t('placement.error', { ns: 'tests' })))
+  if (!data) throw new Error(i18n.t('errors.emptyResponse'))
   return data
 }
 

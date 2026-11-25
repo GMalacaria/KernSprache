@@ -9,7 +9,6 @@
   },
   "errors": {
     "open": "Non riesco ad aprire la lezione. Riprova tra poco.",
-    "empty": "Risposta vuota dal server.",
     "progress": "Non riesco a leggere i tuoi progressi. Riprova tra poco.",
     "save": "Non sono riuscito a salvare i progressi."
   },

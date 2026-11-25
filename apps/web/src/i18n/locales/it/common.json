@@ -15,7 +15,9 @@
   "errors": {
     "saveFailed": "Non sono riuscito a salvare. Riprova.",
     "profileLoad": "Impossibile caricare il profilo. Ricarica la pagina.",
-    "tutorNoReply": "Il tutor non ha risposto. Riprova tra poco."
+    "tutorNoReply": "Il tutor non ha risposto. Riprova tra poco.",
+    "emptyResponse": "Risposta vuota dal server.",
+    "transcribe": "Non riesco a trascrivere adesso. Riprova tra poco o scrivi il messaggio."
   },
   "minutes_one": "{{count}} minuto",
   "minutes_other": "{{count}} minuti",
@@ -56,5 +58,19 @@
     "repeatAgain": "Riprova a ripetere",
     "unclear": "Non riesco a valutarla: riprova avvicinando il telefono.",
     "cancel": "Annulla"
+  },
+  "serverErrors": {
+    "bad_request": "Richiesta non valida.",
+    "unauthorized": "Sessione scaduta, accedi di nuovo.",
+    "not_approved": "Il tuo account non è ancora stato approvato.",
+    "chapter_not_found": "Capitolo non trovato.",
+    "lesson_not_found": "Lezione non trovata.",
+    "session_not_found": "Sessione non trovata.",
+    "test_not_found": "Verifica non trovata.",
+    "already_passed": "Hai già superato la verifica di questo capitolo.",
+    "already_submitted": "Hai già consegnato questa verifica: iniziane una nuova.",
+    "session_ended": "Questa conversazione è già terminata.",
+    "no_speech": "Non ho sentito niente. Avvicina il telefono e riprova.",
+    "internal": "Errore imprevisto, riprova tra poco."
   }
 }

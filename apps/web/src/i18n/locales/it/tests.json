@@ -1,0 +1,81 @@
+{
+  "progress": "{{label}}: {{current}} di {{total}}",
+  "writtenPart": "Parte scritta",
+  "oralPart": "Parte orale",
+  "dontKnow": "Non lo so",
+  "strengths": "Punti di forza",
+  "toImprove": "Da migliorare",
+  "spoken": {
+    "heard": "Ho capito:",
+    "redo": "Rifai la registrazione",
+    "answer": "Rispondi a voce",
+    "skip": "Non so rispondere, salta"
+  },
+  "chapter": {
+    "title": "Verifica del capitolo",
+    "noMic": {
+      "title": "Per la verifica serve il microfono",
+      "why": "La verifica è metà scritta e metà orale, e la parte orale si fa a voce: senza microfono non si può fare."
+    },
+    "preparing": {
+      "title": "Preparo la verifica",
+      "hint1": "Può richiedere qualche secondo.",
+      "hint2": "Scelgo domande sul capitolo appena studiato."
+    },
+    "grading": {
+      "title": "Correggo la verifica",
+      "hint1": "Controllo le risposte scritte.",
+      "hint2": "Valuto le risposte a voce.",
+      "hint3": "Calcolo il punteggio."
+    },
+    "intro": "<strong>{{title}}</strong>: {{questions}} domande scritte a scelta multipla e {{tasks}} risposte a voce.",
+    "skipAhead": "Non hai ancora studiato questo capitolo: se superi la verifica con almeno 70 su 100 (media di scritto e orale) salti i capitoli che lo precedono e passi a quello dopo.",
+    "normal": "Serve a capire se hai capito il capitolo: con almeno 70 su 100 (media di scritto e orale) passi al capitolo successivo.",
+    "answersAtEnd": "Le risposte giuste le vedi alla fine.",
+    "start": "Inizia",
+    "oralPrompt": "Rispondi a voce in inglese, con qualche frase:",
+    "passed": "Capitolo superato",
+    "notYet": "Non ancora",
+    "scores": "Scritto: {{correct}} giuste su {{total}} ({{written}}/100) · Orale: {{oral}}/100",
+    "passedNotice": "Hai superato la verifica.",
+    "levelUp": " Hai finito il livello {{from}}: adesso sei al {{to}}!",
+    "failedNotice": "Servono almeno 70 su 100. Ripassa le lezioni del capitolo e riprova con una verifica nuova.",
+    "writtenHalf": "La parte scritta",
+    "reviewQuestions": "Rivedi le domande",
+    "unanswered": "Non risposta",
+    "chose": "Hai scelto \"{{option}}\"",
+    "rightWas": " · giusta: \"{{option}}\"",
+    "right": "Giusta",
+    "backToPath": "Torna al percorso",
+    "reviewLessons": "Ripassa le lezioni",
+    "retryNew": "Riprova subito con una verifica nuova",
+    "errors": {
+      "start": "Non riesco a preparare la verifica. Riprova tra poco.",
+      "submit": "Non riesco a correggere la verifica. Riprova tra poco."
+    }
+  },
+  "placement": {
+    "title": "Test di livello",
+    "loading": "Carico il test…",
+    "intro": "Circa 10 minuti per capire da dove partire: {{questions}} domande scritte a scelta multipla e {{oral}}.",
+    "oralCount": "{{count}} risposte a voce",
+    "noOral": "nessuna risposta a voce (microfono non disponibile)",
+    "dontKnowHint": "Se non conosci una risposta, scegli \"Non lo so\": il test serve solo a darti lezioni adatte.",
+    "start": "Inizia il test",
+    "skip": "Salta, parto dal livello A1",
+    "grading": {
+      "title": "Calcolo il tuo livello",
+      "hint1": "Correggo le risposte scritte.",
+      "hint2": "Ascolto come hai parlato.",
+      "hint3": "Metto insieme scritto e orale."
+    },
+    "writtenPrompt": "Scegli la parola giusta:",
+    "oralPrompt": "Rispondi in inglese, con qualche frase:",
+    "resultTitle": "Il tuo livello",
+    "writtenResult": "Scritto: {{correct}} risposte giuste su {{total}} (livello {{level}})",
+    "oralResult": " · Orale: livello {{level}}",
+    "resultHint": "Le lezioni partiranno da questo livello. Puoi rifare il test quando vuoi dalla home.",
+    "continue": "Continua",
+    "error": "Il test non risponde. Riprova tra poco."
+  }
+}

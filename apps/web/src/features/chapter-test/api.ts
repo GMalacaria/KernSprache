@@ -1,4 +1,5 @@
-import { FunctionsHttpError } from '@supabase/supabase-js'
+import { i18n } from '../../i18n'
+import { functionErrorMessage } from '../../lib/functionError'
 import type { Database } from '../../lib/database.types'
 import { supabase } from '../../lib/supabase'
 
@@ -51,25 +52,15 @@ export interface ChapterTestResult {
 
 async function invoke<T>(body: object, fallback: string): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>('chapter-test', { body })
-  if (error) {
-    let message = fallback
-    if (error instanceof FunctionsHttpError) {
-      const payload: unknown = await (error.context as Response).json().catch(() => null)
-      if (payload && typeof payload === 'object' && 'error' in payload) {
-        const e = payload.error
-        if (e && typeof e === 'object' && 'message' in e && typeof e.message === 'string') message = e.message
-      }
-    }
-    throw new Error(message)
-  }
-  if (!data) throw new Error('Risposta vuota dal server.')
+  if (error) throw new Error(await functionErrorMessage(error, fallback))
+  if (!data) throw new Error(i18n.t('errors.emptyResponse'))
   return data
 }
 
 export function startChapterTest(chapterId: number) {
   return invoke<ChapterTest>(
     { action: 'start', chapter_id: chapterId },
-    'Non riesco a preparare la verifica. Riprova tra poco.',
+    i18n.t('chapter.errors.start', { ns: 'tests' }),
   )
 }
 
@@ -80,7 +71,7 @@ export function submitChapterTest(
 ) {
   return invoke<ChapterTestResult>(
     { action: 'submit', test_id: testId, answers, oral },
-    'Non riesco a correggere la verifica. Riprova tra poco.',
+    i18n.t('chapter.errors.submit', { ns: 'tests' }),
   )
 }
 
