@@ -2,6 +2,7 @@ import { GeminiApiError, GoogleGenAI } from '../deps.ts'
 import { requireEnv } from '../env.ts'
 import { toTokenUsage } from './gemini.ts'
 import { AiError, type TokenUsage } from './types.ts'
+import type { LanguageCode } from '../languages.ts'
 
 /** Gemini returns raw 16-bit mono PCM at 24 kHz. */
 export const TTS_SAMPLE_RATE = 24_000
@@ -19,10 +20,15 @@ export interface Speaker {
 }
 
 /** Wraps raw PCM in a minimal WAV container so every browser can play it. */
-export function pcmToWav(pcm: Uint8Array, sampleRate = TTS_SAMPLE_RATE): Uint8Array {
+export function pcmToWav(
+  pcm: Uint8Array,
+  sampleRate = TTS_SAMPLE_RATE,
+): Uint8Array {
   const header = new DataView(new ArrayBuffer(44))
   const write = (offset: number, text: string) => {
-    for (let i = 0; i < text.length; i++) header.setUint8(offset + i, text.charCodeAt(i))
+    for (let i = 0; i < text.length; i++) {
+      header.setUint8(offset + i, text.charCodeAt(i))
+    }
   }
   write(0, 'RIFF')
   header.setUint32(4, 36 + pcm.length, true)
@@ -50,11 +56,21 @@ export function base64ToBytes(base64: string): Uint8Array {
   return bytes
 }
 
-/** Cache key: the same voice and sentence always map to the same audio file. */
-export async function ttsKey(voice: string, text: string): Promise<string> {
-  const data = new TextEncoder().encode(`${voice}\n${text}`)
+/**
+ * Cache key: the same language, voice and sentence always map to the same audio file. The same spelling can be a
+ * word in two languages ("die"), so the language is part of the key; English keeps the key it had before languages
+ * existed, so the audio already generated stays valid.
+ */
+export async function ttsKey(
+  voice: string,
+  text: string,
+  language: LanguageCode = 'en',
+): Promise<string> {
+  const source = language === 'en' ? `${voice}\n${text}` : `${language}\n${voice}\n${text}`
+  const data = new TextEncoder().encode(source)
   const digest = await crypto.subtle.digest('SHA-256', data)
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('')
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
 }
 
 /** Text-to-speech with Gemini. Independent of AI_PROVIDER, like transcription. */
@@ -90,11 +106,22 @@ export class GeminiSpeaker implements Speaker {
 
     const usage = toTokenUsage(response.usageMetadata)
     if (response.promptFeedback?.blockReason) {
-      throw new AiError('refused', `Blocked (${response.promptFeedback.blockReason})`, usage, model)
+      throw new AiError(
+        'refused',
+        `Blocked (${response.promptFeedback.blockReason})`,
+        usage,
+        model,
+      )
     }
     const data = response.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data)?.inlineData?.data
-    if (!data) throw new AiError('invalid_output', 'No audio returned', usage, model)
-    return { wav: pcmToWav(base64ToBytes(data)), model: response.modelVersion ?? model, usage }
+    if (!data) {
+      throw new AiError('invalid_output', 'No audio returned', usage, model)
+    }
+    return {
+      wav: pcmToWav(base64ToBytes(data)),
+      model: response.modelVersion ?? model,
+      usage,
+    }
   }
 }
 

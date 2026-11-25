@@ -1,3 +1,4 @@
+import type { LanguageCode } from './languages.ts'
 import type { Pronunciation } from './schemas/pronunciation.ts'
 import type { Db } from './supabase.ts'
 
@@ -50,6 +51,7 @@ export async function savePronunciationCards(
   db: Db,
   userId: string,
   pronunciation: Pronunciation | null,
+  language: LanguageCode,
 ): Promise<void> {
   if (
     !pronunciation?.words.length || pronunciation.score > MAX_SCORE_FOR_CARDS
@@ -59,13 +61,16 @@ export async function savePronunciationCards(
     .select('original')
     .eq('user_id', userId)
     .eq('category', 'pronunciation')
+    .eq('language', language)
   if (error) {
     console.error('Failed to read pronunciation cards', error)
     return
   }
   const cards = pronunciationCards(pronunciation, data.map((m) => m.original))
   if (!cards.length) return
-  const { error: insertError } = await db.from('mistakes').insert(cards)
+  const { error: insertError } = await db.from('mistakes').insert(
+    cards.map((card) => ({ ...card, language })),
+  )
   if (insertError) {
     console.error('Failed to save pronunciation cards', insertError)
   }

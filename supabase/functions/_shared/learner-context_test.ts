@@ -3,6 +3,7 @@ import { renderLearnerContext } from './learner-context.ts'
 
 Deno.test('renderLearnerContext lists recurring mistake types and review words', () => {
   const text = renderLearnerContext({
+    pair: { native: 'it', target: 'en' },
     level: 'A2',
     goal: null,
     purpose: 'travel',
@@ -34,6 +35,7 @@ Deno.test('renderLearnerContext lists recurring mistake types and review words',
 
 Deno.test('renderLearnerContext handles a brand-new learner', () => {
   const text = renderLearnerContext({
+    pair: { native: 'it', target: 'en' },
     level: 'A1',
     goal: 'parlare con i colleghi',
     purpose: null,

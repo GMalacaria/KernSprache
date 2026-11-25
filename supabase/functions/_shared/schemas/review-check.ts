@@ -1,4 +1,5 @@
 import { z } from '../deps.ts'
+import { languageSchema } from '../languages.ts'
 
 const text = z.string().trim().min(1).max(300)
 
@@ -13,6 +14,8 @@ export const reviewCheckRequestSchema = z.object({
   answer: text,
   /** The answer was spoken: spelling and punctuation do not count. */
   spoken: z.boolean().default(false),
+  /** Language of the card; the learner's active language when missing (older clients). */
+  language: languageSchema.optional(),
 })
 export type ReviewCheckRequest = z.infer<typeof reviewCheckRequestSchema>
 

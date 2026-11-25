@@ -5,7 +5,8 @@ import { AiError, getAiProvider } from '../_shared/ai/index.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
 import { cleanReply } from '../_shared/tutor-reply.ts'
 import { loadLearnerSnapshot, renderLearnerContext } from '../_shared/learner-context.ts'
-import { TUTOR_CHAT_PROMPT_VERSION, TUTOR_CHAT_SYSTEM_PROMPT } from '../_shared/prompts/tutor-chat.v2.ts'
+import { TUTOR_CHAT_PROMPT_VERSION, tutorChatPrompt } from '../_shared/prompts/tutor-chat.v3.ts'
+import { type LanguageCode, pairNames } from '../_shared/languages.ts'
 import {
   MAX_HISTORY_MESSAGES,
   tutorChatRequestSchema,
@@ -21,18 +22,28 @@ Deno.serve(
     const db = userClient(req)
     const userId = await requireApprovedUser(db)
 
-    const body = tutorChatRequestSchema.safeParse(await req.json().catch(() => null))
-    if (!body.success) throw new HttpError(400, 'bad_request', 'Richiesta non valida')
+    const body = tutorChatRequestSchema.safeParse(
+      await req.json().catch(() => null),
+    )
+    if (!body.success) {
+      throw new HttpError(400, 'bad_request', 'Richiesta non valida')
+    }
     const { lesson_id: lessonId } = body.data
 
-    const sessionId = await ensureSession(db, body.data.session_id, lessonId)
     const snapshot = await loadLearnerSnapshot(db, userId, lessonId)
+    const language = snapshot.pair.target
+    const sessionId = await ensureSession(
+      db,
+      body.data.session_id,
+      lessonId,
+      language,
+    )
 
     let result
     try {
       result = await getAiProvider().generateStructured({
         task: 'dialogue',
-        system: TUTOR_CHAT_SYSTEM_PROMPT,
+        system: tutorChatPrompt(pairNames(snapshot.pair)),
         context: renderLearnerContext(snapshot),
         messages: body.data.messages.slice(-MAX_HISTORY_MESSAGES),
         schema: tutorReplySchema,
@@ -62,8 +73,11 @@ Deno.serve(
       usage: result.usage,
     })
 
-    const reply = cleanReply(result.data, new Set(snapshot.reviewWords))
-    await Promise.all([saveMistakes(db, sessionId, reply), saveVocab(db, userId, reply)])
+    const reply = cleanReply(result.data, new Set(snapshot.reviewWords), language === 'de')
+    await Promise.all([
+      saveMistakes(db, sessionId, reply, language),
+      saveVocab(db, userId, reply, language),
+    ])
 
     return json({ session_id: sessionId, ...reply })
   }),
@@ -81,24 +95,50 @@ function aiErrorMessage(err: AiError): string {
 }
 
 /** Reuses the caller's dialogue session or starts a new one (RLS guarantees ownership). */
-async function ensureSession(db: Db, sessionId: string | undefined, lessonId: number | undefined): Promise<string> {
+async function ensureSession(
+  db: Db,
+  sessionId: string | undefined,
+  lessonId: number | undefined,
+  language: LanguageCode,
+): Promise<string> {
   if (sessionId) {
-    const { data, error } = await db.from('sessions').select('id, ended_at').eq('id', sessionId).maybeSingle()
+    const { data, error } = await db.from('sessions').select('id, ended_at').eq(
+      'id',
+      sessionId,
+    ).maybeSingle()
     if (error) throw error
-    if (!data) throw new HttpError(404, 'session_not_found', 'Sessione non trovata')
-    if (data.ended_at) throw new HttpError(409, 'session_ended', 'Questa conversazione è già terminata')
+    if (!data) {
+      throw new HttpError(404, 'session_not_found', 'Sessione non trovata')
+    }
+    if (data.ended_at) {
+      throw new HttpError(
+        409,
+        'session_ended',
+        'Questa conversazione è già terminata',
+      )
+    }
     return data.id
   }
   const { data, error } = await db
     .from('sessions')
-    .insert({ kind: 'dialogue', lesson_id: lessonId ?? null, chapter_id: await chapterOf(db, lessonId) })
+    .insert({
+      kind: 'dialogue',
+      lesson_id: lessonId ?? null,
+      chapter_id: await chapterOf(db, lessonId),
+      language,
+    })
     .select('id')
     .single()
   if (error) throw error
   return data.id
 }
 
-async function saveMistakes(db: Db, sessionId: string, reply: TutorReply): Promise<void> {
+async function saveMistakes(
+  db: Db,
+  sessionId: string,
+  reply: TutorReply,
+  language: LanguageCode,
+): Promise<void> {
   if (!reply.corrections.length) return
   const { error } = await db.from('mistakes').insert(
     reply.corrections.map((c) => ({
@@ -107,28 +147,45 @@ async function saveMistakes(db: Db, sessionId: string, reply: TutorReply): Promi
       corrected: c.corrected,
       explanation_it: c.explanation_it,
       category: c.category,
+      language,
     })),
   )
   if (error) throw error
 }
 
-/** Inserts only words the learner does not have yet (vocab is unique per lower(en)). */
-async function saveVocab(db: Db, userId: string, reply: TutorReply): Promise<void> {
+/** Inserts only words the learner does not have yet (vocab is unique per language and lower(en)). */
+async function saveVocab(
+  db: Db,
+  userId: string,
+  reply: TutorReply,
+  language: LanguageCode,
+): Promise<void> {
   if (!reply.new_vocab.length) return
-  const words = reply.new_vocab.map((v) => v.en)
-  const { data: existing, error } = await db.from('vocab_items').select('en').eq('user_id', userId).in('en', words)
+  // Also the lower-case spelling: the unique index is on lower(en), and German nouns keep their capital.
+  const words = [...new Set(reply.new_vocab.flatMap((v) => [v.en, v.en.toLowerCase()]))]
+  const { data: existing, error } = await db.from('vocab_items').select('en')
+    .eq('user_id', userId)
+    .eq('language', language).in('en', words)
   if (error) throw error
   const known = new Set((existing ?? []).map((v) => v.en.toLowerCase()))
-  const fresh = reply.new_vocab.filter((v) => !known.has(v.en))
+  const fresh = reply.new_vocab.filter((v) => !known.has(v.en.toLowerCase()))
   if (!fresh.length) return
-  const { error: insertError } = await db.from('vocab_items').insert(fresh)
+  const { error: insertError } = await db.from('vocab_items').insert(
+    fresh.map((v) => ({ ...v, language })),
+  )
   // 23505: a concurrent request inserted the same word; nothing to do.
   if (insertError && insertError.code !== '23505') throw insertError
 }
 
-async function chapterOf(db: Db, lessonId: number | undefined): Promise<number | null> {
+async function chapterOf(
+  db: Db,
+  lessonId: number | undefined,
+): Promise<number | null> {
   if (lessonId === undefined) return null
-  const { data, error } = await db.from('lessons').select('chapter_id').eq('id', lessonId).maybeSingle()
+  const { data, error } = await db.from('lessons').select('chapter_id').eq(
+    'id',
+    lessonId,
+  ).maybeSingle()
   if (error) throw error
   return data?.chapter_id ?? null
 }

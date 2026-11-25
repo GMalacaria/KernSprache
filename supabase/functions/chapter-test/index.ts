@@ -7,9 +7,11 @@ import { combineScores, type Level, levelAfterPass, scoreOral, scoreWritten } fr
 import { handle, HttpError, json } from '../_shared/http.ts'
 import {
   CHAPTER_TEST_ORAL_PROMPT_VERSION,
-  CHAPTER_TEST_ORAL_SYSTEM_PROMPT,
-} from '../_shared/prompts/chapter-test.v1.ts'
-import { CHAPTER_TEST_PROMPT_VERSION, CHAPTER_TEST_SYSTEM_PROMPT } from '../_shared/prompts/chapter-test.v2.ts'
+  CHAPTER_TEST_PROMPT_VERSION,
+  chapterTestOralPrompt,
+  chapterTestPrompt,
+} from '../_shared/prompts/chapter-test.v3.ts'
+import { type LanguageCode, type Learner, loadLearner, pairNames } from '../_shared/languages.ts'
 import {
   chapterTestRequestSchema,
   generatedTestSchema,
@@ -34,6 +36,7 @@ interface ChapterInfo {
   sort_order: number
   title: string
   grammar_focus: string
+  language: LanguageCode
   lessons: { id: number }[]
 }
 
@@ -42,10 +45,16 @@ Deno.serve(
     const db = userClient(req)
     const userId = await requireApprovedUser(db)
 
-    const body = chapterTestRequestSchema.safeParse(await req.json().catch(() => null))
-    if (!body.success) throw new HttpError(400, 'bad_request', 'Richiesta non valida')
+    const body = chapterTestRequestSchema.safeParse(
+      await req.json().catch(() => null),
+    )
+    if (!body.success) {
+      throw new HttpError(400, 'bad_request', 'Richiesta non valida')
+    }
 
-    if (body.data.action === 'start') return json(await start(db, userId, body.data.chapter_id))
+    if (body.data.action === 'start') {
+      return json(await start(db, userId, body.data.chapter_id))
+    }
     return json(await submit(db, userId, body.data))
   }),
 )
@@ -53,11 +62,15 @@ Deno.serve(
 async function loadChapter(db: Db, chapterId: number): Promise<ChapterInfo> {
   const { data, error } = await db
     .from('chapters')
-    .select('id, level, sort_order, title, grammar_focus, lessons (id)')
+    .select(
+      'id, level, sort_order, title, grammar_focus, language, lessons (id)',
+    )
     .eq('id', chapterId)
     .maybeSingle()
   if (error) throw error
-  if (!data) throw new HttpError(404, 'chapter_not_found', 'Capitolo non trovato')
+  if (!data) {
+    throw new HttpError(404, 'chapter_not_found', 'Capitolo non trovato')
+  }
   return data as ChapterInfo
 }
 
@@ -72,7 +85,13 @@ async function start(db: Db, userId: string, chapterId: number) {
     .eq('passed', true)
     .limit(1)
   if (passedError) throw passedError
-  if (passed.length > 0) throw new HttpError(409, 'already_passed', 'Hai già superato la verifica di questo capitolo.')
+  if (passed.length > 0) {
+    throw new HttpError(
+      409,
+      'already_passed',
+      'Hai già superato la verifica di questo capitolo.',
+    )
+  }
 
   // No lesson check: the same test ends a chapter whose lessons are done and also
   // lets the learner skip ahead to a later chapter. The app decides when to offer it.
@@ -90,19 +109,21 @@ async function start(db: Db, userId: string, chapterId: number) {
   if (unused && unused.chapter_test_attempts.length === 0) {
     const questions = z.array(storedQuestionSchema).safeParse(unused.questions)
     const oralTasks = z.array(oralTaskSchema).safeParse(unused.oral_tasks)
-    if (questions.success && oralTasks.success) return publicTest(unused.id, questions.data, oralTasks.data)
+    if (questions.success && oralTasks.success) {
+      return publicTest(unused.id, questions.data, oralTasks.data)
+    }
   }
 
-  const { data: profile, error: profileError } = await db
-    .from('profiles')
-    .select('purpose')
-    .eq('id', userId)
-    .single()
-  if (profileError) throw profileError
-
-  const generated = await generateTest(db, userId, chapter, profile.purpose)
-  const questions: StoredQuestion[] = generated.questions.map((q, i) => ({ id: `q${i + 1}`, ...q }))
-  const oralTasks: OralTask[] = generated.oral_tasks.map((t, i) => ({ id: `o${i + 1}`, ...t }))
+  const learner = await loadLearner(db, userId, chapter.language)
+  const generated = await generateTest(db, userId, chapter, learner)
+  const questions: StoredQuestion[] = generated.questions.map((q, i) => ({
+    id: `q${i + 1}`,
+    ...q,
+  }))
+  const oralTasks: OralTask[] = generated.oral_tasks.map((t, i) => ({
+    id: `o${i + 1}`,
+    ...t,
+  }))
   const { data: saved, error: saveError } = await admin
     .from('chapter_tests')
     .insert({
@@ -119,15 +140,28 @@ async function start(db: Db, userId: string, chapterId: number) {
 }
 
 /** The test as the learner sees it: no answers. */
-function publicTest(testId: string, questions: StoredQuestion[], oralTasks: OralTask[]) {
+function publicTest(
+  testId: string,
+  questions: StoredQuestion[],
+  oralTasks: OralTask[],
+) {
   return {
     test_id: testId,
-    questions: questions.map(({ id, prompt, options }) => ({ id, prompt, options })),
+    questions: questions.map(({ id, prompt, options }) => ({
+      id,
+      prompt,
+      options,
+    })),
     oral_tasks: oralTasks,
   }
 }
 
-async function generateTest(db: Db, userId: string, chapter: ChapterInfo, purpose: string | null) {
+async function generateTest(
+  db: Db,
+  userId: string,
+  chapter: ChapterInfo,
+  learner: Learner,
+) {
   const { data: contents, error } = await db
     .from('lesson_contents')
     .select('content, lessons!inner (chapter_id, sort_order)')
@@ -143,13 +177,17 @@ async function generateTest(db: Db, userId: string, chapter: ChapterInfo, purpos
       `- Grammar: ${c.grammar.examples.map((e) => e.en).join(' / ')}`,
       `- Words: ${c.words.map((w) => `${w.en} (${w.it})`).join(', ')}`,
       `- Phrases: ${c.phrases.map((p) => p.en).join(' / ')}`,
-      `- Verbs: ${c.verbs.map((v) => `${v.base}-${v.past}-${v.past_participle}`).join(', ')}`,
+      `- Verbs: ${
+        c.verbs.map((v) => `${v.base}-${v.past}-${v.past_participle}`).join(
+          ', ',
+        )
+      }`,
     ]
   })
   const context = [
     '# Chapter',
     `- "${chapter.title}" (CEFR ${chapter.level}): ${chapter.grammar_focus}`,
-    `- Learner's purpose: ${purpose ?? 'not specified'}`,
+    `- Learner's purpose: ${learner.purpose ?? 'not specified'}`,
     '',
     '# What the lessons taught',
     ...(lessonLines.length ? lessonLines : ['(lesson contents not available: use the chapter grammar focus)']),
@@ -161,10 +199,13 @@ async function generateTest(db: Db, userId: string, chapter: ChapterInfo, purpos
     'Non riesco a preparare la verifica adesso. Riprova tra poco.',
     {
       task: 'explanation',
-      system: CHAPTER_TEST_SYSTEM_PROMPT,
+      system: chapterTestPrompt(pairNames(learner.pair)),
       context,
       messages: [{ role: 'user', content: 'Write the chapter test.' }],
-      schema: generatedTestSchema.refine(testIsValid, 'The test needs 8 questions with 4 options and 2 oral tasks'),
+      schema: generatedTestSchema.refine(
+        testIsValid,
+        'The test needs 8 questions with 4 options and 2 oral tasks',
+      ),
       maxTokens: 3000,
     },
   )
@@ -173,7 +214,11 @@ async function generateTest(db: Db, userId: string, chapter: ChapterInfo, purpos
 async function submit(
   db: Db,
   userId: string,
-  body: { test_id: string; answers: Record<string, number>; oral: { id: string; transcript: string }[] },
+  body: {
+    test_id: string
+    answers: Record<string, number>
+    oral: { id: string; transcript: string }[]
+  },
 ) {
   const admin = adminClient()
   const { data: test, error } = await admin
@@ -185,18 +230,23 @@ async function submit(
   if (error) throw error
   if (!test) throw new HttpError(404, 'test_not_found', 'Verifica non trovata')
   if (test.chapter_test_attempts.length > 0) {
-    throw new HttpError(409, 'already_submitted', 'Hai già consegnato questa verifica: iniziane una nuova.')
+    throw new HttpError(
+      409,
+      'already_submitted',
+      'Hai già consegnato questa verifica: iniziane una nuova.',
+    )
   }
   const questions = z.array(storedQuestionSchema).parse(test.questions)
   const oralTasks = z.array(oralTaskSchema).parse(test.oral_tasks)
   const chapter = await loadChapter(db, test.chapter_id)
+  const learner = await loadLearner(db, userId, chapter.language)
 
   const written = scoreWritten(questions, body.answers)
   const transcripts = body.oral
     .filter((o) => oralTasks.some((t) => t.id === o.id))
     .map((o) => ({ id: o.id, transcript: o.transcript.trim() }))
   const spoken = transcripts.some((t) => t.transcript.length > 0)
-  const assessment = spoken ? await assessOral(userId, chapter, oralTasks, transcripts) : null
+  const assessment = spoken ? await assessOral(userId, learner, chapter, oralTasks, transcripts) : null
   const oralScore = assessment ? scoreOral(oralTasks, assessment.scores) : 0
   const { score, passed } = combineScores(written.score, oralScore)
 
@@ -205,27 +255,37 @@ async function submit(
       'Non hai risposto alle consegne orali: senza la parte orale la verifica non può essere superata.',
     strengths_it: assessment?.strengths_it ?? [],
     to_improve_it: assessment?.to_improve_it ?? [],
-    oral_scores: oralTasks.map((t) => ({ id: t.id, score: assessment?.scores.find((s) => s.id === t.id)?.score ?? 0 })),
+    oral_scores: oralTasks.map((t) => ({
+      id: t.id,
+      score: assessment?.scores.find((s) => s.id === t.id)?.score ?? 0,
+    })),
     wrong: written.wrong,
   }
-  const { error: insertError } = await admin.from('chapter_test_attempts').insert({
-    user_id: userId,
-    chapter_id: chapter.id,
-    test_id: test.id,
-    written_score: written.score,
-    oral_score: oralScore,
-    score,
-    passed,
-    feedback,
-  })
+  const { error: insertError } = await admin.from('chapter_test_attempts')
+    .insert({
+      user_id: userId,
+      chapter_id: chapter.id,
+      test_id: test.id,
+      written_score: written.score,
+      oral_score: oralScore,
+      score,
+      passed,
+      feedback,
+      language: chapter.language,
+    })
   if (insertError) throw insertError
 
   let level: Level | null = null
-  if (passed) level = await raiseLevel(db, userId, chapter)
+  if (passed) level = await raiseLevel(db, userId, learner, chapter)
 
   return {
     chapter_id: chapter.id,
-    written: { correct: written.correct, total: written.total, score: written.score, wrong: written.wrong },
+    written: {
+      correct: written.correct,
+      total: written.total,
+      score: written.score,
+      wrong: written.wrong,
+    },
     // Answers are revealed now: the full sentence and its translation, for every question.
     review: questions.map(questionReview),
     oral: {
@@ -241,34 +301,49 @@ async function submit(
   }
 }
 
-/** After the last chapter of a level, moves the learner up. Returns the (possibly new) level. */
-async function raiseLevel(db: Db, userId: string, chapter: ChapterInfo): Promise<Level> {
-  const { data: profile, error } = await db.from('profiles').select('level').eq('id', userId).single()
-  if (error) throw error
+/**
+ * After the last chapter of a level, moves the learner up in the chapter's language. Returns the (possibly new)
+ * level. The profile keeps the level of the active language too, while the app still reads it from there.
+ */
+async function raiseLevel(
+  db: Db,
+  userId: string,
+  learner: Learner,
+  chapter: ChapterInfo,
+): Promise<Level> {
   const { data: later, error: laterError } = await db
     .from('chapters')
     .select('id')
+    .eq('language', chapter.language)
     .eq('level', chapter.level)
     .gt('sort_order', chapter.sort_order)
     .limit(1)
   if (laterError) throw laterError
-  const next = levelAfterPass(profile.level, chapter.level, later.length === 0)
-  if (next !== profile.level) {
-    const { error: updateError } = await db.from('profiles').update({ level: next }).eq('id', userId)
-    if (updateError) throw updateError
-  }
+  const next = levelAfterPass(learner.level, chapter.level, later.length === 0)
+  if (next === learner.level) return next
+  const { error: rowError } = await db
+    .from('learner_languages')
+    .upsert({ user_id: userId, language: chapter.language, level: next })
+  if (rowError) throw rowError
+  const { error: profileError } = await db
+    .from('profiles')
+    .update({ level: next })
+    .eq('id', userId)
+    .eq('active_language', chapter.language)
+  if (profileError) throw profileError
   return next
 }
 
 function assessOral(
   userId: string,
+  learner: Learner,
   chapter: ChapterInfo,
   tasks: OralTask[],
   transcripts: { id: string; transcript: string }[],
 ): Promise<OralAssessment> {
   const context = [
     `# Chapter: "${chapter.title}" (CEFR ${chapter.level}): ${chapter.grammar_focus}`,
-    '# Tasks (instructions given to the learner in Italian)',
+    '# Tasks (instructions given to the learner in their native language)',
     ...tasks.map((t) => `- ${t.id}: ${t.prompt_it}`),
   ].join('\n')
   const answers = tasks.map((t) => {
@@ -282,9 +357,12 @@ function assessOral(
     'Non riesco a valutare la parte orale adesso. Riprova tra poco.',
     {
       task: 'explanation',
-      system: CHAPTER_TEST_ORAL_SYSTEM_PROMPT,
+      system: chapterTestOralPrompt(pairNames(learner.pair)),
       context,
-      messages: [{ role: 'user', content: `# Learner's spoken answers (transcribed)\n\n${answers}` }],
+      messages: [{
+        role: 'user',
+        content: `# Learner's spoken answers (transcribed)\n\n${answers}`,
+      }],
       schema: oralAssessmentSchema,
       maxTokens: 2048,
     },
@@ -296,16 +374,30 @@ async function callAi<T>(
   userId: string,
   promptVersion: string,
   failureMessage: string,
-  request: Parameters<ReturnType<typeof getAiProvider>['generateStructured']>[0] & { schema: z.ZodType<T> },
+  request:
+    & Parameters<ReturnType<typeof getAiProvider>['generateStructured']>[0]
+    & { schema: z.ZodType<T> },
 ): Promise<T> {
   try {
     const result = await getAiProvider().generateStructured<T>(request)
-    await logAiUsage({ userId, functionName: FUNCTION_NAME, promptVersion, model: result.model, usage: result.usage })
+    await logAiUsage({
+      userId,
+      functionName: FUNCTION_NAME,
+      promptVersion,
+      model: result.model,
+      usage: result.usage,
+    })
     return result.data
   } catch (err) {
     if (err instanceof AiError) {
       if (err.usage && err.model) {
-        await logAiUsage({ userId, functionName: FUNCTION_NAME, promptVersion, model: err.model, usage: err.usage })
+        await logAiUsage({
+          userId,
+          functionName: FUNCTION_NAME,
+          promptVersion,
+          model: err.model,
+          usage: err.usage,
+        })
       }
       throw new HttpError(502, `ai_${err.code}`, failureMessage)
     }

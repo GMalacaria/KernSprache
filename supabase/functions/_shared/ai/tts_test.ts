@@ -22,3 +22,9 @@ Deno.test('ttsKey: stable, and different for another voice or sentence', async (
   assertNotEquals(a, await ttsKey('Puck', 'Where were you?'))
   assertNotEquals(a, await ttsKey('Kore', 'Where was you?'))
 })
+
+Deno.test('ttsKey: the language is part of the key, English keeps the old key', async () => {
+  const english = await ttsKey('Kore', 'die')
+  assertEquals(english, await ttsKey('Kore', 'die', 'en'))
+  assertNotEquals(english, await ttsKey('Kore', 'die', 'de'))
+})
