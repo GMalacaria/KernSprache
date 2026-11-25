@@ -1,0 +1,12 @@
+{
+  "summary": "Livello <strong>{{level}}</strong> · {{purpose}} · {{minutes}} min al giorno",
+  "goalReachedHint": "Obiettivo di oggi raggiunto. Puoi continuare ad allenarti quanto vuoi.",
+  "newGoalTomorrow": "Il nuovo obiettivo di {{minutes}} minuti vale da domani: quello di oggi è già iniziato.",
+  "continuePath": "Continua il percorso: {{title}}",
+  "chapterTest": "Verifica del capitolo: {{title}}",
+  "chapterTestHint": "{{level}} · scritto e orale, per passare al capitolo successivo",
+  "startDialogue": "Inizia un dialogo",
+  "startOralDialogue": "Inizia un dialogo a voce",
+  "review": "Ripasso",
+  "reviewDue": "Ripasso ({{count}} da fare)"
+}

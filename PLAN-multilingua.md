@@ -121,6 +121,7 @@ Decisioni prese:
 
 2. **`feat(web): add i18n with Italian strings`** (in corso, una PR per gruppo):
    - ✅ 2a `feat(web): add i18n with auth and onboarding strings`: `i18next` + `react-i18next`, `src/i18n/index.ts` (init sincrono, `<html lang>` dalla lingua), `resources.ts`, `i18next.d.ts` con `CustomTypeOptions` (chiavi tipizzate; per usare chiavi di un altro namespace `useTranslation(['auth', 'common'])`), namespace `common`, `auth`, `onboarding`. Fuori dai componenti si usa `i18n.getFixedT(null, '<ns>')` (es. `authErrorMessage`, `purposeLabel`); `PURPOSES` ha solo `value` e `icon`, etichette e suggerimenti nel catalogo. Test in `src/i18n/i18n.test.ts`.
+   - ✅ 2b `feat(web): move home, path, profile and settings strings to i18n`: namespace `home`, `path`, `profile`, `settings` (promemoria compresi), `study` (anello, timer, inviti), e in `common` barra in basso, caricamenti, `BackButton`, `ListenButton`, `NoMicrophone`, `Scritto`/`Orale`, durate brevi (`formatDuration`, `formatMinutesLeft`). I giorni della settimana del grafico sono una stringa `chart.weekdays`.
    - Piano originale:
    - `i18next` + `react-i18next`, `src/i18n/index.ts`, `src/i18n/locales/it/*.json` (un namespace per feature);
    - tipi delle chiavi con TypeScript strict (dichiarazione `CustomTypeOptions`);

@@ -1,13 +1,15 @@
+import { useTranslation } from 'react-i18next'
 import { stopSpeaking } from '../lib/audio'
 
 /** Back arrow of the activity screens (lesson, review): leaving keeps the point reached, so it is not an "exit". */
-export function BackButton({ onBack, title = 'Indietro' }: { onBack: () => void; title?: string }) {
+export function BackButton({ onBack, title }: { onBack: () => void; title?: string }) {
+  const { t } = useTranslation()
   return (
     <button
       type="button"
       className="back-button"
-      aria-label="Indietro"
-      title={title}
+      aria-label={t('actions.back')}
+      title={title ?? t('actions.back')}
       onClick={() => {
         stopSpeaking()
         onBack()

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { useProfile } from '../home/useProfile'
 import { purposeLabel } from '../onboarding/purposes'
 import { summarizeStats } from '../lesson/stats'
@@ -15,8 +16,6 @@ import {
   studiedDays,
   totalStudySeconds,
 } from './profileStats'
-
-const WEEKDAYS = ['D', 'L', 'M', 'M', 'G', 'V', 'S']
 
 function Stat({ value, label }: { value: string | number; label: string }) {
   return (
@@ -35,6 +34,8 @@ interface ProfilePageProps {
 
 /** The learner's profile: level and purpose, streaks, study time, answers and progress through the path. */
 export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfilePageProps) {
+  const { t, i18n } = useTranslation(['profile', 'common'])
+  const weekdays = t('chart.weekdays').split(',')
   const profile = useProfile(userId)
   const { path } = usePath(userId)
   const data = useQuery({ queryKey: ['profile-data'], queryFn: fetchProfileData })
@@ -56,58 +57,59 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
   return (
     <main className="page profile">
       <header className="sticky-header">
-        <h1>Profilo</h1>
+        <h1>{t('title')}</h1>
       </header>
 
       {profile.data && (
         <section className="profile-hero">
-          <p className="level-badge" aria-label={`Livello ${profile.data.level}`}>
+          <p className="level-badge" aria-label={t('common:level', { level: profile.data.level })}>
             {profile.data.level}
           </p>
           <p>
-            {purposeLabel(profile.data.purpose)} · {profile.data.daily_goal_minutes} min al giorno
+            {t('goalLine', { purpose: purposeLabel(profile.data.purpose), minutes: profile.data.daily_goal_minutes })}
           </p>
           {profile.data.goal && <p className="muted">«{profile.data.goal}»</p>}
           <div className="profile-actions">
             <button type="button" className="link" onClick={onEditGoals}>
-              Modifica obiettivo e scopo
+              {t('editGoals')}
             </button>
             <button type="button" className="link" onClick={onRetakePlacement}>
-              Rifai il test di livello
+              {t('retakePlacement')}
             </button>
           </div>
         </section>
       )}
 
-      {data.isPending && <Waiting title="Conto i tuoi progressi" compact />}
-      {data.isError && <p className="error">Non riesco a caricare i tuoi numeri. Riprova tra poco.</p>}
+      {data.isPending && <Waiting title={t('loading')} compact />}
+      {data.isError && <p className="error">{t('loadError')}</p>}
 
       {data.isSuccess && !hasStudied && (
-        <p className="notice">Completa la prima lezione o raggiungi l'obiettivo di un giorno: i tuoi numeri compaiono qui.</p>
+        <p className="notice">{t('empty')}</p>
       )}
 
       {data.isSuccess && hasStudied && (
         <>
           <section>
-            <h2>Costanza</h2>
+            <h2>{t('consistency')}</h2>
             <ul className="stats-grid stats-grid-4">
-              <Stat value={goalStreak(days, today)} label="giorni di fila" />
-              <Stat value={bestGoalStreak(days)} label="record di giorni" />
-              <Stat value={studiedDays(days)} label="giorni di studio" />
-              <Stat value={formatDuration(totalStudySeconds(days))} label="tempo totale" />
+              <Stat value={goalStreak(days, today)} label={t('streak')} />
+              <Stat value={bestGoalStreak(days)} label={t('bestStreak')} />
+              <Stat value={studiedDays(days)} label={t('studyDays')} />
+              <Stat value={formatDuration(totalStudySeconds(days))} label={t('totalTime')} />
             </ul>
             <figure className="day-chart">
               <figcaption>
-                Minuti di studio al giorno, ultimi 14 giorni
+                {t('chart.caption')}
                 <span className="day-chart-legend">
                   <span>
-                    <span className="legend-swatch written" aria-hidden="true" /> scritto
+                    <span className="legend-swatch written" aria-hidden="true" /> {t('chart.written')}
                   </span>
                   <span>
-                    <span className="legend-swatch oral" aria-hidden="true" /> orale
+                    <span className="legend-swatch oral" aria-hidden="true" /> {t('chart.oral')}
                   </span>
                   <span>
-                    <span className="goal-dash" aria-hidden="true" /> metà obiettivo ({halfGoal.toLocaleString('it-IT')} min)
+                    <span className="goal-dash" aria-hidden="true" />{' '}
+                    {t('chart.halfGoal', { minutes: halfGoal.toLocaleString(i18n.language) })}
                   </span>
                 </span>
               </figcaption>
@@ -119,13 +121,13 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
                 </div>
                 <div className="day-chart-plot">
                   <span className="day-chart-goal" style={{ bottom: pct(halfGoal) }} aria-hidden="true" />
-                  <ol aria-label="Minuti di scritto e di orale negli ultimi 14 giorni">
+                  <ol aria-label={t('chart.aria')}>
                     {bars.map((bar) => (
-                      <li key={bar.day} title={`${bar.day}: ${bar.written} min di scritto, ${bar.oral} min di orale`}>
+                      <li key={bar.day} title={t('chart.barTitle', { day: bar.day, written: bar.written, oral: bar.oral })}>
                         <span className="day-bar written" style={{ height: barHeight(bar.written) }} />
                         <span className="day-bar oral" style={{ height: barHeight(bar.oral) }} />
                         <span className="visually-hidden">
-                          {bar.day}: {bar.written} minuti di scritto, {bar.oral} di orale
+                          {t('chart.barText', { day: bar.day, written: bar.written, oral: bar.oral })}
                         </span>
                       </li>
                     ))}
@@ -134,7 +136,7 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
                 <span aria-hidden="true" />
                 <ol className="day-chart-days" aria-hidden="true">
                   {bars.map((bar) => (
-                    <li key={bar.day}>{WEEKDAYS[new Date(`${bar.day}T12:00:00Z`).getUTCDay()]}</li>
+                    <li key={bar.day}>{weekdays[new Date(`${bar.day}T12:00:00Z`).getUTCDay()]}</li>
                   ))}
                 </ol>
               </div>
@@ -142,15 +144,15 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
           </section>
 
           <section>
-            <h2>Risposte</h2>
+            <h2>{t('answers')}</h2>
             <ul className="stats-grid stats-grid-4">
-              <Stat value={answers.lessons} label={answers.lessons === 1 ? 'lezione' : 'lezioni'} />
-              <Stat value={answers.successRate === null ? '–' : `${answers.successRate}%`} label="risposte giuste" />
-              <Stat value={answers.mistakes} label={answers.mistakes === 1 ? 'errore' : 'errori'} />
-              <Stat value={answers.bestStreak} label="giuste di fila (record)" />
+              <Stat value={answers.lessons} label={t('lessons', { count: answers.lessons })} />
+              <Stat value={answers.successRate === null ? '–' : `${answers.successRate}%`} label={t('correctAnswers')} />
+              <Stat value={answers.mistakes} label={t('mistakes', { count: answers.mistakes })} />
+              <Stat value={answers.bestStreak} label={t('bestRun')} />
             </ul>
             <p className="muted">
-              {data.data.reviewCards} tra parole ed errori nel ripasso. Dal ripasso li riprendi quando sono in scadenza.
+              {t('reviewCards', { count: data.data.reviewCards })}
             </p>
           </section>
         </>
@@ -158,7 +160,7 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
 
       {path && (
         <section>
-          <h2>Percorso</h2>
+          <h2>{t('path')}</h2>
           <ul className="level-progress">
             {levelProgress(path).map((level) => (
               <li key={level.level}>
@@ -166,7 +168,7 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
                 <div
                   className="bar"
                   role="progressbar"
-                  aria-label={`Livello ${level.level}`}
+                  aria-label={t('common:level', { level: level.level })}
                   aria-valuemin={0}
                   aria-valuemax={level.total}
                   aria-valuenow={level.done}
@@ -174,7 +176,7 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
                   <span style={{ width: `${level.total ? (level.done / level.total) * 100 : 0}%` }} />
                 </div>
                 <small>
-                  {level.done}/{level.total} capitoli
+                  {t('chapters', { done: level.done, total: level.total })}
                 </small>
               </li>
             ))}

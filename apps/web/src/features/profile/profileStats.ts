@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 import { LEVELS, type CefrLevel, type ChapterView } from '../path/progress'
 
 /** One row of study_days, as the profile needs it. */
@@ -78,10 +79,10 @@ export function lastDaysMinutes(days: StudyDayRow[], today: string, count = 14):
 /** "45 min", "2 h 15 min", "3 h". */
 export function formatDuration(totalSeconds: number): string {
   const minutes = Math.round(totalSeconds / 60)
-  if (minutes < 60) return `${minutes} min`
+  if (minutes < 60) return i18n.t('minutesShort', { count: minutes })
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
-  return rest === 0 ? `${hours} h` : `${hours} h ${rest} min`
+  return rest === 0 ? i18n.t('hoursShort', { hours }) : i18n.t('hoursMinutesShort', { hours, minutes: rest })
 }
 
 export interface LevelProgress {

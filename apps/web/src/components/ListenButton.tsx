@@ -1,4 +1,5 @@
 import { useSyncExternalStore, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { canSpeak, getSpeechLoading, speak, subscribeSpeechLoading } from '../lib/audio'
 import { Emoji } from './Emoji'
 
@@ -13,6 +14,7 @@ interface ListenButtonProps {
 
 /** Speaker button: shows a spinner in place of the icon while the voice is being prepared. */
 export function ListenButton({ text, label, className, iconSize }: ListenButtonProps) {
+  const { t } = useTranslation()
   const loading = useSyncExternalStore(subscribeSpeechLoading, getSpeechLoading) === text
   if (!canSpeak()) return null
   return (
@@ -20,7 +22,7 @@ export function ListenButton({ text, label, className, iconSize }: ListenButtonP
       type="button"
       className={className}
       onClick={() => speak(text)}
-      aria-label={label ? undefined : `Ascolta: ${text}`}
+      aria-label={label ? undefined : t('listen.aria', { text })}
       aria-busy={loading}
     >
       {loading ? (
@@ -29,7 +31,9 @@ export function ListenButton({ text, label, className, iconSize }: ListenButtonP
         <Emoji name="speaker" size={iconSize} />
       )}
       {label && <> {label}</>}
-      {loading && <span className="visually-hidden" role="status">Preparo l'audio</span>}
+      {loading && <span className="visually-hidden" role="status">
+          {t('listen.preparing')}
+        </span>}
     </button>
   )
 }

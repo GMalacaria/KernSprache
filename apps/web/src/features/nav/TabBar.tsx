@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export type Tab = 'home' | 'path' | 'profile' | 'settings'
 
@@ -26,8 +27,6 @@ const ICONS: Record<Tab, ReactNode> = {
   ),
 }
 
-const LABELS: Record<Tab, string> = { home: 'Home', path: 'Percorso', profile: 'Profilo', settings: 'Impostazioni' }
-
 const TABS: Tab[] = ['home', 'path', 'profile', 'settings']
 
 interface TabBarProps {
@@ -37,8 +36,9 @@ interface TabBarProps {
 
 /** Quick links at the bottom of the main screens; activities (lesson, dialogue, tests) have their own back arrow. */
 export function TabBar({ current, onSelect }: TabBarProps) {
+  const { t } = useTranslation()
   return (
-    <nav className="tab-bar" aria-label="Sezioni">
+    <nav className="tab-bar" aria-label={t('tabs.label')}>
       {TABS.map((tab) => (
         <button
           key={tab}
@@ -61,7 +61,7 @@ export function TabBar({ current, onSelect }: TabBarProps) {
           >
             {ICONS[tab]}
           </svg>
-          <span>{LABELS[tab]}</span>
+          <span>{t(`tabs.${tab}`)}</span>
         </button>
       ))}
     </nav>

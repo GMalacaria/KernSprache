@@ -1,0 +1,33 @@
+{
+  "title": "Impostazioni",
+  "sounds": {
+    "title": "Suoni",
+    "toggle": "Effetti sonori per risposte giuste e sbagliate",
+    "on": "Attivi",
+    "off": "Disattivati"
+  },
+  "install": {
+    "title": "App sul telefono",
+    "why": "Installala per aprirla dalla schermata Home e ricevere i promemoria.",
+    "button": "Installa l'app"
+  },
+  "account": {
+    "title": "Account",
+    "signedInAs": "Accesso come {{email}}"
+  },
+  "reminders": {
+    "title": "Promemoria",
+    "unsupported": "Questo browser non supporta le notifiche: attivale dall'app installata sul telefono.",
+    "needsInstall": "Su iPhone le notifiche funzionano solo con l'app installata: in Safari tocca <strong>Condividi</strong> e poi <strong>Aggiungi a Home</strong>, poi riapri l'app dalla Home.",
+    "hour": "Ora del promemoria",
+    "activeHint": "Ricevi al massimo una notifica al giorno, se non hai ancora raggiunto l'obiettivo.",
+    "disable": "Disattiva i promemoria",
+    "blocked": "Le notifiche sono bloccate nel browser: consentile dalle sue impostazioni per attivare i promemoria.",
+    "inactiveHint": "Una notifica al giorno con ripassi in scadenza o serie a rischio.",
+    "enable": "Attiva i promemoria",
+    "errors": {
+      "denied": "Le notifiche sono bloccate: consentile dalle impostazioni del browser.",
+      "noSubscription": "Il browser non ha creato l'iscrizione. Riprova."
+    }
+  }
+}

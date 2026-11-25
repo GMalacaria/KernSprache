@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { LEVELS, type ChapterView } from './progress'
+import { useTranslation } from 'react-i18next'
+import { LEVELS } from './progress'
 import { usePath } from './usePath'
 import { Waiting } from '../../components/Waiting'
 
@@ -9,13 +10,6 @@ interface PathPageProps {
   onOpenTest: (chapterId: number) => void
   /** First visit: scroll to the chapter in progress. Later visits come back where the learner left the list. */
   landOnCurrent: boolean
-}
-
-const STATUS_LABEL: Record<ChapterView['status'], string> = {
-  skipped: 'Superato con il test',
-  done: 'Completato',
-  current: 'In corso',
-  locked: 'Bloccato',
 }
 
 /** Open padlock: the chapter is locked but a test can open it. */
@@ -29,6 +23,7 @@ function OpenLock() {
 }
 
 export function PathPage({ userId, onOpenLesson, onOpenTest, landOnCurrent }: PathPageProps) {
+  const { t } = useTranslation('path')
   const { path, isError } = usePath(userId)
   const currentRef = useRef<HTMLLIElement>(null)
 
@@ -43,14 +38,14 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, landOnCurrent }: Pa
   return (
     <main className="page">
       <header className="sticky-header">
-        <h1>Percorso</h1>
+        <h1>{t('title')}</h1>
       </header>
-      {isError && <p className="error">Impossibile caricare il percorso.</p>}
-      {!path && !isError && <Waiting title="Carico il percorso" compact />}
+      {isError && <p className="error">{t('loadError')}</p>}
+      {!path && !isError && <Waiting title={t('loading')} compact />}
       {path &&
         LEVELS.map((level) => (
           <section key={level} className="level-section">
-            <h2>Livello {level}</h2>
+            <h2>{t('level', { level })}</h2>
             <ol className="chapters">
               {path
                 .filter((c) => c.level === level)
@@ -60,13 +55,13 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, landOnCurrent }: Pa
                     <>
                       <strong>{chapter.title}</strong>
                       <span className="chapter-badges">
-                        <span className="tag">{STATUS_LABEL[chapter.status]}</span>
+                        <span className="tag">{t(`status.${chapter.status}`)}</span>
                         {chapter.skipTestAvailable && (
                           <button
                             type="button"
                             className="link icon-button"
-                            aria-label={`Sblocca "${chapter.title}" con una verifica`}
-                            title="Sblocca con una verifica"
+                            aria-label={t('unlockAria', { title: chapter.title })}
+                            title={t('unlockTitle')}
                             onClick={() => onOpenTest(chapter.id)}
                           >
                             <OpenLock />
@@ -92,7 +87,7 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, landOnCurrent }: Pa
                                   {lesson.status === 'done' ? '✓' : lesson.status === 'locked' ? '–' : '›'}
                                 </span>
                                 {lesson.title}
-                                {lesson.status === 'locked' && <span className="visually-hidden"> (bloccata)</span>}
+                                {lesson.status === 'locked' && <span className="visually-hidden">{t('lessonLocked')}</span>}
                               </button>
                             </li>
                           ))}
@@ -101,13 +96,12 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, landOnCurrent }: Pa
                       {chapter.status === 'current' &&
                         (chapter.testAvailable ? (
                           <button type="button" className="primary-action" onClick={() => onOpenTest(chapter.id)}>
-                            Verifica del capitolo
-                            <small>Scritto e orale: con 70 su 100 passi al capitolo successivo</small>
+                            {t('chapterTest')}
+                            <small>{t('chapterTestHint')}</small>
                           </button>
                         ) : (
                           <p className="muted">
-                            Lezioni completate: {chapter.completedLessons} di {chapter.lessons.length}. Poi c'è la
-                            verifica del capitolo.
+                            {t('lessonsDone', { done: chapter.completedLessons, total: chapter.lessons.length })}
                           </p>
                         ))}
                     </>

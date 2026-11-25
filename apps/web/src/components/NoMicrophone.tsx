@@ -1,15 +1,14 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 /** Explains that the activity needs the microphone: there is no written fallback for the oral half. */
 export function NoMicrophone({ title, why }: { title: string; why: ReactNode }) {
+  const { t } = useTranslation()
   return (
     <section className="notice">
       <h2>{title}</h2>
       <p>{why}</p>
-      <p>
-        Su questo dispositivo il microfono non è disponibile. Apri Kern Sprache sul telefono, oppure usa un browser che
-        permetta di registrare e dai il permesso al microfono quando te lo chiede.
-      </p>
+      <p>{t('noMicrophone')}</p>
     </section>
   )
 }

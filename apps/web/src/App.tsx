@@ -23,6 +23,7 @@ import { PlacementTestPage } from './features/placement/PlacementTestPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { StudyTimerProvider } from './features/study/StudyTimerContext'
 import { Waiting } from './components/Waiting'
+import { i18n } from './i18n'
 
 /** The install offer appears a few seconds after the learner is in the app. */
 const INSTALL_OFFER_DELAY_MS = 4000
@@ -43,7 +44,7 @@ export function App() {
     <>
       {session === undefined ? (
         <main className="page">
-          <Waiting title="Carico Kern Sprache" compact />
+          <Waiting title={i18n.t('loading.app')} compact />
         </main>
       ) : session && recovering ? (
         <SetPasswordPage onDone={endRecovery} />
@@ -111,14 +112,14 @@ function SignedInApp({ user }: { user: User }) {
   if (profile.isPending) {
     return (
       <main className="page">
-        <Waiting title="Carico il tuo profilo" compact />
+        <Waiting title={i18n.t('loading.profile')} compact />
       </main>
     )
   }
   if (profile.isError) {
     return (
       <main className="page">
-        <p className="error">Impossibile caricare il profilo. Ricarica la pagina.</p>
+        <p className="error">{i18n.t('errors.profileLoad')}</p>
       </main>
     )
   }

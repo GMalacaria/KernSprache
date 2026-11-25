@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { setSoundsEnabled, soundsEnabled } from '../../lib/sounds'
 import { supabase } from '../../lib/supabase'
 import { ChangePassword } from '../auth/ChangePassword'
@@ -13,18 +14,19 @@ interface SettingsPageProps {
 
 /** Settings tab: reminders, sounds, installing the app, password and sign-out. */
 export function SettingsPage({ userId, email, onInstall }: SettingsPageProps) {
+  const { t } = useTranslation(['settings', 'common'])
   const [sounds, setSounds] = useState(soundsEnabled)
 
   return (
     <main className="page settings-page">
       <header className="sticky-header">
-        <h1>Impostazioni</h1>
+        <h1>{t('title')}</h1>
       </header>
 
       <NotificationSettings userId={userId} />
 
       <section className="notice">
-        <h2 className="small-heading">Suoni</h2>
+        <h2 className="small-heading">{t('sounds.title')}</h2>
         <button
           type="button"
           className="menu-item menu-toggle"
@@ -35,29 +37,29 @@ export function SettingsPage({ userId, email, onInstall }: SettingsPageProps) {
             setSoundsEnabled(!sounds)
           }}
         >
-          Effetti sonori per risposte giuste e sbagliate
-          <span className="tag">{sounds ? 'Attivi' : 'Disattivati'}</span>
+          {t('sounds.toggle')}
+          <span className="tag">{sounds ? t('sounds.on') : t('sounds.off')}</span>
         </button>
       </section>
 
       {onInstall && (
         <section className="notice stack">
-          <h2 className="small-heading">App sul telefono</h2>
-          <p className="muted">Installala per aprirla dalla schermata Home e ricevere i promemoria.</p>
+          <h2 className="small-heading">{t('install.title')}</h2>
+          <p className="muted">{t('install.why')}</p>
           <button type="button" className="secondary" onClick={onInstall}>
-            Installa l'app
+            {t('install.button')}
           </button>
         </section>
       )}
 
       <section className="notice stack">
-        <h2 className="small-heading">Account</h2>
-        {email && <p className="muted">Accesso come {email}</p>}
+        <h2 className="small-heading">{t('account.title')}</h2>
+        {email && <p className="muted">{t('account.signedInAs', { email })}</p>}
         <div className="footer-links">
           <ChangePassword />
         </div>
         <button type="button" className="secondary" onClick={() => void supabase.auth.signOut()}>
-          Esci
+          {t('common:actions.signOut')}
         </button>
       </section>
     </main>
