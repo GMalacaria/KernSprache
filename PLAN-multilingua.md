@@ -7,7 +7,7 @@
 2. ✅ Il blocco "scritto + orale e navigazione" di `PLAN.md` è mergiato, compreso il punto 4 (PR 0 `feat(web): require the oral part of chapter tests`, fatta prima della PR 2 perché tocca `ChapterTestPage.tsx`).
 3. ✅ Mappatura dei punti legati all'inglese rifatta su `aa4da98` (`git grep -n "Italian.*English\|lang=\"en\"\|_it\b\|\.en\b"`): circa 65 file, vedi "Cosa è cambiato (PR #36–#39)". Se arrivano altre PR, va ripetuta.
 4. Ultima migration su `main`: `20261125160000_practice_time.sql`. Le nuove devono avere timestamp successivi.
-5. Dump di produzione prima della PR 3, su richiesta esplicita.
+5. Dump di produzione prima della PR 10 (rename e drop), su richiesta esplicita. La PR 3 è solo additiva.
 6. Si riparte dalla PR 2, un branch alla volta, sempre da `main`.
 
 ## Cosa è cambiato (PR #36–#39)
@@ -142,7 +142,16 @@ Decisioni prese:
      - le etichette della barra in basso (`TabBar`), la pagina Impostazioni (effetti sonori compresi), `BackButton`, `PART_LABEL` e i messaggi sul microfono della lezione.
    - Messaggi di errore delle functions: restituire un `code` stabile oltre al testo, così il client li traduce.
 
-3. **`feat(db): track languages per learner`** (migration + pgTAP + `db:types`):
+3. ✅ **`feat(db): track languages per learner`** — fatta **solo con aggiunte** (scelta dell'utente il 2026-11-25), migration `20261125180000_learner_languages`:
+   - nessun rename né drop: app e functions in produzione continuano a funzionare prima e dopo la migration, quindi la PR si può mergiare senza rilascio coordinato e la migration si applica quando si vuole (prima della PR 4);
+   - enum `language_code`; `profiles.native_language` (default `it`) e `active_language` (default `en`, diversa dalla madre); tabella `learner_languages` con RLS propria;
+   - **sincronizzazione temporanea**: il trigger `profiles_sync_learner_language` copia livello, scopo, `goal` e `onboarded_at` del profilo nella riga della lingua attiva, perché il codice scrive ancora `profiles`. La PR 9 lo toglie quando l'app scrive `learner_languages`;
+   - `placement_results` → trigger che imposta `learner_languages.placement_done_at`;
+   - `language` (default `en`) su `sessions`, `mistakes`, `vocab_items`, `placement_results`, `chapter_test_attempts`, `chapters`, `tts_cache`; indice unico `vocab_items (user_id, language, lower(en))`; `chapters` unici per `(language, slug)` e `(language, level, sort_order)`; `lessons.slug` unico per capitolo;
+   - backfill: una riga `en` di `learner_languages` per ogni profilo (con `placement_done_at` dall'ultimo test);
+   - **spostato alla PR 10**: rename di `vocab_items.en/it` → `term/translation`, `mistakes.explanation_it` → `explanation`, `chapters.description_it` → `description`, drop di `profiles.level/purpose/goal/onboarded_at`, e togliere i default `en` di `language`. La chiave di `tts_cache` con la lingua va nella PR 4 (`speak`);
+   - test pgTAP in `supabase/tests/languages.test.sql`. In questa worktree `supabase test db` e `db:types --local` non trovano lo stack (`project_id` diverso dai container `english-tutor`): test eseguiti con `psql` nel container dentro una transazione annullata, tipi generati con `--db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres --schema graphql_public --schema public`.
+   - Piano originale:
    - enum `language_code`; `profiles.native_language`, `profiles.active_language`;
    - tabella `learner_languages` (user_id, language, level, purpose, goal, onboarded_at, placement_done_at, created_at; PK `(user_id, language)`; RLS propria);
    - colonna `language` su:
@@ -204,7 +213,7 @@ Decisioni prese:
    - gli attributi `lang="en"` scritti nel codice diventano la lingua attiva: ReviewCards, sections, DialoguePage, LessonDialogue, ChapterTestPage, PlacementTestPage, PronunciationNote, DictationExercise, SentenceFeedback, RepeatSentence, RepeatExercise, SpokenAnswer;
    - `send-reminders`: il promemoria usa la lingua attiva (testi ancora in italiano).
 
-10. **`chore(db): drop single-language columns`**:
+10. **`chore(db): drop single-language columns`** (con i rename spostati qui dalla PR 3; questa sì richiede un rilascio coordinato di migration e functions):
     - togliere `profiles.level/purpose/goal/onboarded_at` e `lesson_contents`;
     - aggiornare `CLAUDE.md` (modello dati, obiettivi, sezione Voce) e `PLAN.md`.
 
