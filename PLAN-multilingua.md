@@ -215,7 +215,12 @@ Decisioni prese:
    - punteggi del dettato accanto a `lesson_stats`, per esempio con colonne `dictation_*` o una tabella propria, così il profilo li mostra;
    - `chapter_test_attempts.oral_transcripts jsonb`.
 
-7. **`feat(functions): placement test per language`**:
+7. ✅ **`feat(functions): placement test per language`** — PR aperta, **da rivedere dall'utente prima del merge** (sono contenuti):
+   - `_shared/placement/questions/{en,fr,es,de}.ts`, 16 domande ciascuno, 4 per livello, scritte una volta e fisse (stile della banca inglese: frase con un buco sulla grammatica tipica del livello). Già tolte tre domande ambigue (tedesco "Sie ___ Lehrerin" accettava *sind*; spagnolo "Este año ___ a Madrid" accettava il *pretérito*; "Aunque ___ mañana" accettava il futuro);
+   - `writtenQuestions(language)`; `placement-test` usa la banca della lingua attiva, sia all'inizio sia nella correzione; le consegne orali restano in italiano (lingua madre) e valgono per tutte le lingue;
+   - test Deno: ogni banca ha 16 domande, 4 per livello, id unici, opzioni distinte, risposta giusta in posizioni diverse;
+   - provato: con il tedesco attivo il test restituisce le domande tedesche e salva il risultato con `de`, segnando la lingua come piazzata.
+   - Piano originale:
    - `_shared/placement/questions/{en,fr,es,de}.ts`, 16 domande ciascuno, 4 per livello. FR/ES/DE si generano una volta con l'IA e si rivedono;
    - `ORAL_PROMPTS` con testo nella lingua madre;
    - `placement-test` sceglie in base alla lingua attiva; `placement_results.language`.
@@ -236,6 +241,7 @@ Decisioni prese:
    - **dettato multilingua**: `normalizeWords` con `\p{L}\p{N}` e NFC, `DictationSentence { text, translation }`, test per FR/ES/DE (accenti, ß, ñ, apostrofo francese, `¿¡`);
    - gli attributi `lang="en"` scritti nel codice diventano la lingua attiva: ReviewCards, sections, DialoguePage, LessonDialogue, ChapterTestPage, PlacementTestPage, PronunciationNote, DictationExercise, SentenceFeedback, RepeatSentence, RepeatExercise, SpokenAnswer;
    - `send-reminders`: il promemoria usa la lingua attiva (testi ancora in italiano).
+   - **cambio di lingua attiva**: copiare nel profilo livello, scopo, goal e `onboarded_at` della riga di `learner_languages` della nuova lingua (o, meglio, far leggere alla PWA `learner_languages` e togliere il trigger di sincronizzazione), altrimenti il profilo resta con il livello della lingua di prima (visto provando il test di livello tedesco).
 
 10. **`chore(db): drop single-language columns`** (con i rename spostati qui dalla PR 3; questa sì richiede un rilascio coordinato di migration e functions):
     - togliere `profiles.level/purpose/goal/onboarded_at` e `lesson_contents`;
