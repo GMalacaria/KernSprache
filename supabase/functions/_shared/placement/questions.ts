@@ -40,20 +40,20 @@ export interface OralPrompt {
   id: string
   level: CefrLevel
   /** Instruction in the native language (Italian for now); the learner answers in the studied language. */
-  prompt_it: string
+  prompt: string
 }
 
 export const ORAL_PROMPTS: OralPrompt[] = [
-  { id: 'oral-a1', level: 'A1', prompt_it: 'Presentati: come ti chiami, da dove vieni e cosa ti piace fare?' },
-  { id: 'oral-a2', level: 'A2', prompt_it: 'Racconta cosa hai fatto lo scorso fine settimana.' },
+  { id: 'oral-a1', level: 'A1', prompt: 'Presentati: come ti chiami, da dove vieni e cosa ti piace fare?' },
+  { id: 'oral-a2', level: 'A2', prompt: 'Racconta cosa hai fatto lo scorso fine settimana.' },
   {
     id: 'oral-b1',
     level: 'B1',
-    prompt_it: 'Parla di un viaggio o di un progetto che vuoi fare in futuro, e spiega perché.',
+    prompt: 'Parla di un viaggio o di un progetto che vuoi fare in futuro, e spiega perché.',
   },
   {
     id: 'oral-b2',
     level: 'B2',
-    prompt_it: 'Secondo te è meglio vivere in città o in campagna? Spiega la tua opinione con qualche argomento.',
+    prompt: 'Secondo te è meglio vivere in città o in campagna? Spiega la tua opinione con qualche argomento.',
   },
 ]

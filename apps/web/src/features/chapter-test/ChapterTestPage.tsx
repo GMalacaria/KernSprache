@@ -204,7 +204,7 @@ export function ChapterTestPage({
         <StudyTimerBar />
         <Progress label={t('oralPart')} current={step.index + 1} total={tasks.length} />
         <p className="muted">{t('chapter.oralPrompt')}</p>
-        <p className="card-main question">{task.prompt_it}</p>
+        <p className="card-main question">{task.prompt}</p>
         <SpokenAnswer key={task.id} onDone={done} onSkip={() => nextAfterOral(step.index, oral)} />
       </main>
     )
@@ -261,9 +261,9 @@ function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: R
       )}
 
       <section className="notice">
-        <p>{oral.feedback_it}</p>
-        <FeedbackList title={t('strengths')} items={oral.strengths_it} />
-        <FeedbackList title={t('toImprove')} items={oral.to_improve_it} />
+        <p>{oral.feedback}</p>
+        <FeedbackList title={t('strengths')} items={oral.strengths} />
+        <FeedbackList title={t('toImprove')} items={oral.to_improve} />
       </section>
 
       <section>
@@ -277,7 +277,7 @@ function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: R
         <ul className="review-list">
           {test.questions.map((q) => {
             const wrong = written.wrong.find((w) => w.id === q.id)
-            const review = result.review?.find((r) => r.id === q.id)
+            const review = result.review.find((r) => r.id === q.id)
             return (
               <li key={q.id}>
                 <p lang="en" className="review-answer">
@@ -295,7 +295,7 @@ function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: R
                     <span className="ok">{t('chapter.right')}</span>
                   )}
                 </p>
-                {review?.sentence_en && <SentenceFeedback en={review.sentence_en} it={review.translation_it} />}
+                {review && <SentenceFeedback text={review.sentence} translation={review.translation} />}
               </li>
             )
           })}

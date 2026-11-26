@@ -1,30 +1,36 @@
 import { z } from '../deps.ts'
 
 const question = z.object({
-  question_it: z.string(),
+  question: z.string(),
   options: z.array(z.string()),
   /** Index of the correct option. */
   answer: z.number().int().min(0).max(3),
 })
 
+/** A sentence or expression in the studied language with its translation in the native one. */
+const translated = z.object({ text: z.string(), translation: z.string() })
+
 /**
  * Content of one lesson (about 6-8 minutes): grammar, new words, phrases, idioms,
  * verbs, listening and reading comprehension, and a short dialogue with the tutor.
+ * Text in the studied language: `text`, `term`, `example`, `forms`, `title`, `opening`; text in the native language:
+ * `translation`, `literal`, `meaning`, `intro`, `explanation`, `question`, `scenario`.
  * Sizes are set in the prompt; validation only rejects unusable output.
  */
 export const lessonContentSchema = z.object({
-  intro_it: z.string(),
+  intro: z.string(),
   grammar: z.object({
-    explanation_it: z.string(),
-    examples: z.array(z.object({ en: z.string(), it: z.string() })).min(1),
+    explanation: z.string(),
+    examples: z.array(translated).min(1),
   }),
-  words: z.array(z.object({ en: z.string(), it: z.string(), example_en: z.string() })).min(3),
-  phrases: z.array(z.object({ en: z.string(), it: z.string() })).min(1),
-  idioms: z.array(z.object({ en: z.string(), it: z.string(), meaning_it: z.string() })),
-  verbs: z.array(z.object({ base: z.string(), past: z.string(), past_participle: z.string(), it: z.string() })),
-  listening: z.object({ text_en: z.string(), questions: z.array(question).min(1) }),
-  reading: z.object({ title_en: z.string(), text_en: z.string(), questions: z.array(question).min(1) }),
-  dialogue: z.object({ scenario_it: z.string(), opening_en: z.string() }),
+  words: z.array(z.object({ term: z.string(), translation: z.string(), example: z.string() })).min(3),
+  phrases: z.array(translated).min(1),
+  idioms: z.array(z.object({ text: z.string(), literal: z.string(), meaning: z.string() })),
+  /** The forms learners memorise, dictionary form first (English: base, past simple, past participle). */
+  verbs: z.array(z.object({ forms: z.array(z.string()).min(1).max(4), translation: z.string() })),
+  listening: z.object({ text: z.string(), questions: z.array(question).min(1) }),
+  reading: z.object({ title: z.string(), text: z.string(), questions: z.array(question).min(1) }),
+  dialogue: z.object({ scenario: z.string(), opening: z.string() }),
 })
 export type LessonContent = z.infer<typeof lessonContentSchema>
 

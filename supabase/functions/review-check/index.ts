@@ -8,7 +8,7 @@ import {
   REVIEW_CHECK_PROMPT_VERSION,
   reviewCheckMessage,
   reviewCheckPrompt,
-} from '../_shared/prompts/review-check.v2.ts'
+} from '../_shared/prompts/review-check.v3.ts'
 import { reviewCheckRequestSchema, reviewCheckResultSchema } from '../_shared/schemas/review-check.ts'
 import { requireApprovedUser, userClient } from '../_shared/supabase.ts'
 

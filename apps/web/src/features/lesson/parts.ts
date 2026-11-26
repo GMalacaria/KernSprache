@@ -84,15 +84,15 @@ export const REPEAT_PASS_SCORE = 70
  * dictation (written part) does not already use, so the two parts practise different sentences.
  */
 export function repeatSentences(content: LessonContent): DictationSentence[] {
-  const key = (en: string) => normalizeWords(en).join(' ')
-  const used = new Set(dictationSentences(content).map((d) => key(d.en)))
+  const key = (text: string) => normalizeWords(text).join(' ')
+  const used = new Set(dictationSentences(content).map((d) => key(d.text)))
   const candidates: DictationSentence[] = [
-    ...content.grammar.examples.map((e) => ({ en: e.en, it: e.it })),
-    ...content.words.map((w) => ({ en: w.example_en, it: '' })),
+    ...content.grammar.examples,
+    ...content.words.map((w) => ({ text: w.example, translation: '' })),
   ]
   const picked: DictationSentence[] = []
   for (const sentence of candidates) {
-    const words = normalizeWords(sentence.en)
+    const words = normalizeWords(sentence.text)
     const k = words.join(' ')
     if (words.length < REPEAT_MIN_WORDS || words.length > REPEAT_MAX_WORDS || used.has(k)) continue
     used.add(k)

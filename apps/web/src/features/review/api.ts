@@ -78,7 +78,7 @@ export async function endReviewSession(id: string): Promise<void> {
 
 export interface AnswerCheck {
   correct: boolean
-  feedback_it: string
+  feedback: string
 }
 
 /** Asks the AI whether an answer that differs from the stored solution is still right (synonym, other valid fix). */

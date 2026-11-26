@@ -139,7 +139,7 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
         {!firstRun && title}
         <Progress label={t('oralPart')} current={step.index + 1} total={prompts.length} />
         <p className="muted">{t('placement.oralPrompt')}</p>
-        <p className="card-main question">{p.prompt_it}</p>
+        <p className="card-main question">{p.prompt}</p>
         <SpokenAnswer
           key={p.id}
           onDone={(transcript) => {
@@ -173,22 +173,22 @@ function ResultView({ result, onContinue }: { result: PlacementResult | undefine
       </p>
       {result.oral && (
         <section className="notice">
-          <p>{result.oral.feedback_it}</p>
-          {result.oral.strengths_it.length > 0 && (
+          <p>{result.oral.feedback}</p>
+          {result.oral.strengths.length > 0 && (
             <>
               <h2 className="small-heading">{t('strengths')}</h2>
               <ul>
-                {result.oral.strengths_it.map((s) => (
+                {result.oral.strengths.map((s) => (
                   <li key={s}>{s}</li>
                 ))}
               </ul>
             </>
           )}
-          {result.oral.to_improve_it.length > 0 && (
+          {result.oral.to_improve.length > 0 && (
             <>
               <h2 className="small-heading">{t('toImprove')}</h2>
               <ul>
-                {result.oral.to_improve_it.map((s) => (
+                {result.oral.to_improve.map((s) => (
                   <li key={s}>{s}</li>
                 ))}
               </ul>

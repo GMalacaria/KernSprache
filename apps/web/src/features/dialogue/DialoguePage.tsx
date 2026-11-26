@@ -135,8 +135,8 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
               <p className="vocab">
                 {t('newWords')}{' '}
                 {turn.newVocab.map((v) => (
-                  <span key={v.en} className="tag">
-                    {v.en} = {v.it}
+                  <span key={v.term} className="tag">
+                    {v.term} = {v.translation}
                   </span>
                 ))}
               </p>

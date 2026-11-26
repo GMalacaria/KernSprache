@@ -3,8 +3,8 @@ import { MAX_SCORE_FOR_CARDS, pronunciationCards } from './pronunciation-cards.t
 
 const assessment = (score: number, words: string[]) => ({
   score,
-  feedback_it: 'Cura la "th".',
-  words: words.map((word) => ({ word, tip_it: `Consiglio per ${word}` })),
+  feedback: 'Cura la "th".',
+  words: words.map((word) => ({ word, tip: `Consiglio per ${word}` })),
 })
 
 Deno.test('pronunciation cards: one card per word, the word is both original and corrected', () => {

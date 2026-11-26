@@ -3,29 +3,29 @@ import { comprehensionQuiz, lessonScore, makeQuestion, phraseQuiz, shuffle, verb
 import type { LessonContent } from './types'
 
 const content: LessonContent = {
-  intro_it: 'x',
-  grammar: { explanation_it: 'x', examples: [{ en: 'I am', it: 'io sono' }] },
+  intro: 'x',
+  grammar: { explanation: 'x', examples: [{ text: 'I am', translation: 'io sono' }] },
   words: [
-    { en: 'tourist', it: 'turista', example_en: '' },
-    { en: 'hotel', it: 'albergo', example_en: '' },
-    { en: 'passport', it: 'passaporto', example_en: '' },
-    { en: 'city', it: 'città', example_en: '' },
-    { en: 'summer', it: 'estate', example_en: '' },
+    { term: 'tourist', translation: 'turista', example: '' },
+    { term: 'hotel', translation: 'albergo', example: '' },
+    { term: 'passport', translation: 'passaporto', example: '' },
+    { term: 'city', translation: 'città', example: '' },
+    { term: 'summer', translation: 'estate', example: '' },
   ],
   phrases: [
-    { en: 'Nice to meet you.', it: 'Piacere di conoscerti.' },
-    { en: 'Welcome!', it: 'Benvenuto!' },
-    { en: 'Here you are.', it: 'Ecco a te.' },
+    { text: 'Nice to meet you.', translation: 'Piacere di conoscerti.' },
+    { text: 'Welcome!', translation: 'Benvenuto!' },
+    { text: 'Here you are.', translation: 'Ecco a te.' },
   ],
-  idioms: [{ en: 'safe and sound', it: 'sano e salvo', meaning_it: 'arrivato senza problemi' }],
+  idioms: [{ text: 'safe and sound', literal: 'sano e salvo', meaning: 'arrivato senza problemi' }],
   verbs: [
-    { base: 'meet', past: 'met', past_participle: 'met', it: 'incontrare' },
-    { base: 'arrive', past: 'arrived', past_participle: 'arrived', it: 'arrivare' },
-    { base: 'go', past: 'went', past_participle: 'gone', it: 'andare' },
+    { forms: ['meet', 'met', 'met'], translation: 'incontrare' },
+    { forms: ['arrive', 'arrived', 'arrived'], translation: 'arrivare' },
+    { forms: ['go', 'went', 'gone'], translation: 'andare' },
   ],
-  listening: { text_en: 'x', questions: [{ question_it: 'Chi?', options: ['a', 'b', 'c', 'd'], answer: 2 }] },
-  reading: { title_en: 'x', text_en: 'x', questions: [{ question_it: 'Dove?', options: ['a', 'b'], answer: 5 }] },
-  dialogue: { scenario_it: 'x', opening_en: 'Hi!' },
+  listening: { text: 'x', questions: [{ question: 'Chi?', options: ['a', 'b', 'c', 'd'], answer: 2 }] },
+  reading: { title: 'x', text: 'x', questions: [{ question: 'Dove?', options: ['a', 'b'], answer: 5 }] },
+  dialogue: { scenario: 'x', opening: 'Hi!' },
 }
 
 const correctOption = (q: { options: string[]; answer: number }) => q.options[q.answer]
@@ -43,19 +43,25 @@ describe('quiz builders', () => {
     expect(correctOption(q)).toBe('went')
   })
 
-  it('asks one translation per word with English options', () => {
+  it('asks one translation per word with options in the studied language', () => {
     const qs = wordQuiz(content)
     expect(qs).toHaveLength(5)
     expect(qs.map(correctOption)).toEqual(['tourist', 'hotel', 'passport', 'city', 'summer'])
     expect(qs.every((q) => q.options.length === 4 && q.optionsLang === 'en')).toBe(true)
   })
 
-  it('asks the past simple with the typical -ed mistake as a distractor', () => {
-    const [, arrive, go] = verbQuiz(content)
+  it('asks the second form of each verb, with the other forms around the gap', () => {
+    const [meet, , go] = verbQuiz(content)
     expect(go && correctOption(go)).toBe('went')
-    expect(go?.options).toContain('goed')
-    // A regular verb: "arrived" must not appear twice as the "-ed mistake".
-    expect(arrive?.options.filter((o) => o === 'arrived')).toHaveLength(1)
+    expect(go?.prompt).toContain('go · ___ · gone')
+    expect(go?.prompt).toContain('andare')
+    expect(go?.options).toContain('gone')
+    // "met" is both the second and the third form: it appears once, as the right answer.
+    expect(meet?.options.filter((o) => o === 'met')).toHaveLength(1)
+  })
+
+  it('skips verbs with a single form', () => {
+    expect(verbQuiz({ ...content, verbs: [{ forms: ['être'], translation: 'essere' }] })).toEqual([])
   })
 
   it('asks the meaning of a phrase and of each idiom', () => {

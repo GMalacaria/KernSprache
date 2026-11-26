@@ -49,7 +49,7 @@ export function MultipleChoice({ question, onAnswered }: MultipleChoiceProps) {
               {correct ? t('quiz.right') : t('quiz.wrong', { answer: question.options[question.answer] })}
             </strong>
           </p>
-          {question.feedback && <SentenceFeedback en={question.feedback.en} it={question.feedback.it} />}
+          {question.feedback && <SentenceFeedback text={question.feedback.text} translation={question.feedback.translation} />}
           <button type="button" onClick={() => onAnswered(correct)}>
             {t('common:actions.next')}
           </button>

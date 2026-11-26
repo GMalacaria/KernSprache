@@ -21,6 +21,6 @@ export type ReviewCheckRequest = z.infer<typeof reviewCheckRequestSchema>
 
 export const reviewCheckResultSchema = z.object({
   correct: z.boolean(),
-  feedback_it: z.string().min(1).max(400),
+  feedback: z.string().min(1).max(400),
 })
 export type ReviewCheckResult = z.infer<typeof reviewCheckResultSchema>

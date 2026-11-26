@@ -81,8 +81,8 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
     if (match === 'typo') return flow.finish(true, false, i18n.t('spelling', { ns: 'review', word: item.it }))
     try {
       const result = await flow.check.mutateAsync({ kind: 'translation', prompt: item.en, expected: item.it, answer })
-      if (result.correct) flow.finish(true, false, result.feedback_it)
-      else flow.miss(result.feedback_it)
+      if (result.correct) flow.finish(true, false, result.feedback)
+      else flow.miss(result.feedback)
     } catch {
       // The error is shown from the mutation state; the attempt does not count.
     }
@@ -158,10 +158,10 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
         spoken,
       })
       if (result.correct) {
-        flow.finish(true, false, result.feedback_it)
+        flow.finish(true, false, result.feedback)
       } else {
         setAttempt(comparison.words)
-        flow.miss(result.feedback_it)
+        flow.miss(result.feedback)
       }
     } catch {
       // Shown from the mutation state; the attempt does not count.

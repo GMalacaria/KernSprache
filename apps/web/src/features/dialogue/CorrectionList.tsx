@@ -14,7 +14,7 @@ export function CorrectionList({ corrections }: { corrections: Correction[] }) {
             <del>{c.original}</del> → <ins>{c.corrected}</ins>
             <span className="tag">{t(`categories.${c.category}`)}</span>
           </p>
-          <p className="muted">{c.explanation_it}</p>
+          <p className="muted">{c.explanation}</p>
         </li>
       ))}
     </ul>
