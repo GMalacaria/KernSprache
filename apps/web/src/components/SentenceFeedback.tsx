@@ -1,3 +1,4 @@
+import { useStudiedLanguage } from '../features/languages/useLanguage'
 import { canRecord } from '../lib/audio'
 import { ListenButton } from './ListenButton'
 import { RepeatSentence } from './RepeatSentence'
@@ -11,12 +12,13 @@ interface SentenceFeedbackProps {
 
 /** After an answer: the sentence with a button to hear it, its translation and a way to repeat it aloud. */
 export function SentenceFeedback({ text, translation }: SentenceFeedbackProps) {
+  const lang = useStudiedLanguage()
   return (
     <div className="sentence-block">
       <div className="sentence-feedback">
         <ListenButton text={text} className="listen-button" iconSize="1.4em" />
         <div>
-          <p lang="en" className="sentence-en">
+          <p lang={lang} className="sentence-en">
             {text}
           </p>
           {translation && <p className="sentence-it">{translation}</p>}

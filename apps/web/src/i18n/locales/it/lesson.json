@@ -121,8 +121,7 @@
     },
     "turnsLeft_one": "Rispondi ancora {{count}} volta.",
     "turnsLeft_other": "Rispondi ancora {{count}} volte.",
-    "answerAria": "La tua risposta in inglese",
-    "placeholder": "Write here…",
+    "answerAria": "La tua risposta in {{language}}",
     "send": "Invia"
   },
   "sentenceOf": "{{title}}: frase {{current}} di {{total}}",

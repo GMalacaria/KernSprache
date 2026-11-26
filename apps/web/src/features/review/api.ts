@@ -4,6 +4,7 @@ import { scheduler, toCard, toColumns, type FsrsColumns } from '../../lib/fsrs'
 import { supabase } from '../../lib/supabase'
 import type { Database } from '../../lib/database.types'
 import { functionErrorMessage } from '../../lib/functionError'
+import type { StudiedLanguage } from '../languages/languages'
 
 const FSRS_SELECT = 'due, stability, difficulty, scheduled_days, learning_steps, reps, lapses, state, last_review'
 
@@ -21,14 +22,21 @@ export type ReviewItem =
     category: Database['public']['Enums']['mistake_category']
   } & FsrsColumns)
 
-/** Cards due now from both sources, oldest first. */
-export async function fetchDueItems(now: Date): Promise<ReviewItem[]> {
+/** Cards of the studied language due now from both sources, oldest first. */
+export async function fetchDueItems(now: Date, language: StudiedLanguage): Promise<ReviewItem[]> {
   const iso = now.toISOString()
   const [vocab, mistakes] = await Promise.all([
-    supabase.from('vocab_items').select(`id, en, it, ${FSRS_SELECT}`).lte('due', iso).order('due').limit(DAILY_REVIEW_LIMIT),
+    supabase
+      .from('vocab_items')
+      .select(`id, en, it, ${FSRS_SELECT}`)
+      .eq('language', language)
+      .lte('due', iso)
+      .order('due')
+      .limit(DAILY_REVIEW_LIMIT),
     supabase
       .from('mistakes')
       .select(`id, original, corrected, explanation_it, category, ${FSRS_SELECT}`)
+      .eq('language', language)
       .lte('due', iso)
       .order('due')
       .limit(DAILY_REVIEW_LIMIT),
@@ -43,12 +51,12 @@ export async function fetchDueItems(now: Date): Promise<ReviewItem[]> {
   return items.sort((a, b) => a.due.localeCompare(b.due)).slice(0, DAILY_REVIEW_LIMIT)
 }
 
-/** Number of cards due now (vocabulary + mistakes). */
-export async function fetchDueCount(now: Date): Promise<number> {
+/** Number of cards of the studied language due now (vocabulary + mistakes). */
+export async function fetchDueCount(now: Date, language: StudiedLanguage): Promise<number> {
   const iso = now.toISOString()
   const [vocab, mistakes] = await Promise.all([
-    supabase.from('vocab_items').select('id', { count: 'exact', head: true }).lte('due', iso),
-    supabase.from('mistakes').select('id', { count: 'exact', head: true }).lte('due', iso),
+    supabase.from('vocab_items').select('id', { count: 'exact', head: true }).eq('language', language).lte('due', iso),
+    supabase.from('mistakes').select('id', { count: 'exact', head: true }).eq('language', language).lte('due', iso),
   ])
   if (vocab.error) throw vocab.error
   if (mistakes.error) throw mistakes.error

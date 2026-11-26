@@ -47,7 +47,7 @@ describe('quiz builders', () => {
     const qs = wordQuiz(content)
     expect(qs).toHaveLength(5)
     expect(qs.map(correctOption)).toEqual(['tourist', 'hotel', 'passport', 'city', 'summer'])
-    expect(qs.every((q) => q.options.length === 4 && q.optionsLang === 'en')).toBe(true)
+    expect(qs.every((q) => q.options.length === 4 && q.optionsStudied === true)).toBe(true)
   })
 
   it('asks the second form of each verb, with the other forms around the gap', () => {

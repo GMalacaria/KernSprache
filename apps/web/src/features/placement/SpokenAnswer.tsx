@@ -1,3 +1,4 @@
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { Emoji } from '../../components/Emoji'
 import { VolumeMeter } from '../../components/VolumeMeter'
 import { useMutation } from '@tanstack/react-query'
@@ -14,6 +15,7 @@ interface SpokenAnswerProps {
 
 /** Records one spoken answer, shows the transcript, lets the learner redo it. */
 export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation(['tests', 'common'])
   const transcribe = useMutation({ mutationFn: transcribeAudio })
   const { isRecording, seconds, micError, level, autoStops, start, stop } = useVoiceRecorder({
@@ -31,7 +33,7 @@ export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
     return (
       <div className="stack">
         <p className="muted">{t('spoken.heard')}</p>
-        <p className="bubble transcript" lang="en">
+        <p className="bubble transcript" lang={lang}>
           {transcribe.data}
         </p>
         <button type="button" onClick={() => onDone(transcribe.data)}>

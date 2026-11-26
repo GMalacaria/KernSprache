@@ -1,13 +1,12 @@
 {
   "title": "Dialogo",
   "modeAria": "Modalità",
-  "hintOral": "Tocca \"Parla\", rispondi in inglese ad alta voce e tocca di nuovo per inviare. Il tutor ti risponde a voce e corregge ogni errore.",
-  "hintWritten": "Scrivi in inglese, anche frasi semplici. Il tutor ti risponde e corregge ogni errore.",
+  "hintOral": "Tocca \"Parla\", rispondi in {{language}} ad alta voce e tocca di nuovo per inviare. Il tutor ti risponde a voce e corregge ogni errore.",
+  "hintWritten": "Scrivi in {{language}}, anche frasi semplici. Il tutor ti risponde e corregge ogni errore.",
   "listen": "Ascolta",
   "newWords": "Parole nuove:",
   "typing": "Il tutor sta scrivendo",
-  "messageAria": "Il tuo messaggio in inglese",
-  "placeholder": "Write here…",
+  "messageAria": "Il tuo messaggio in {{language}}",
   "send": "Invia",
   "noMistakes": "Nessun errore in questo messaggio.",
   "categories": {

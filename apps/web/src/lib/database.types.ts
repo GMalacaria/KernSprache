@@ -481,6 +481,9 @@ isOneToOne: false
       } },
 "register_push_subscription":
 { Args: { "p_auth": string,"p_endpoint": string,"p_p256dh": string }; Returns: undefined
+                           },
+"set_active_language":
+{ Args: { "p_language": Database["public"]['Enums']["language_code"] }; Returns: undefined
                            }
           }
           Enums: {

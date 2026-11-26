@@ -30,5 +30,14 @@
   "bestRun": "giuste di fila (record)",
   "reviewCards": "{{count}} tra parole ed errori nel ripasso. Dal ripasso li riprendi quando sono in scadenza.",
   "path": "Percorso",
-  "chapters": "{{done}}/{{total}} capitoli"
+  "chapters": "{{done}}/{{total}} capitoli",
+  "languageLine": "Stai studiando {{language}}",
+  "pronunciation": "Pronuncia",
+  "pronunciationAverage": "media della pronuncia",
+  "pronunciationCount_one": "{{count}} frase valutata",
+  "pronunciationCount_other": "{{count}} frasi valutate",
+  "dictationAverage": "media del dettato",
+  "dictationCount_one": "{{count}} frase dettata",
+  "dictationCount_other": "{{count}} frasi dettate",
+  "global": "Tutte le lingue"
 }

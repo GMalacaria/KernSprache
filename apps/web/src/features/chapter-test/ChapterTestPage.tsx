@@ -1,3 +1,5 @@
+import { useLanguageNames } from '../languages/useLanguage'
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Trans, useTranslation } from 'react-i18next'
@@ -38,7 +40,9 @@ export function ChapterTestPage({
   skipAhead = false,
   onExit,
 }: ChapterTestPageProps) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation(['tests', 'common'])
+  const names = useLanguageNames()
   const queryClient = useQueryClient()
   // The oral half is required: without a microphone the test does not start (and is not generated).
   const voice = canRecord()
@@ -174,12 +178,12 @@ export function ChapterTestPage({
       <main className="page">
         <StudyTimerBar />
         <Progress label={t('writtenPart')} current={step.index + 1} total={questions.length} />
-        <p className="card-main question" lang="en">
+        <p className="card-main question" lang={lang}>
           {q.prompt}
         </p>
         <div className="stack options">
           {q.options.map((option, i) => (
-            <button key={`${i}-${option}`} type="button" className="option" lang="en" onClick={() => choose(i)}>
+            <button key={`${i}-${option}`} type="button" className="option" lang={lang} onClick={() => choose(i)}>
               {option}
             </button>
           ))}
@@ -203,7 +207,7 @@ export function ChapterTestPage({
       <main className="page">
         <StudyTimerBar />
         <Progress label={t('oralPart')} current={step.index + 1} total={tasks.length} />
-        <p className="muted">{t('chapter.oralPrompt')}</p>
+        <p className="muted">{t('chapter.oralPrompt', { language: names.lower })}</p>
         <p className="card-main question">{task.prompt}</p>
         <SpokenAnswer key={task.id} onDone={done} onSkip={() => nextAfterOral(step.index, oral)} />
       </main>
@@ -234,6 +238,7 @@ interface ResultViewProps {
 }
 
 function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: ResultViewProps) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation('tests')
   const { written, oral } = result
   // The written half in the same numbers as the lessons, in question order.
@@ -280,7 +285,7 @@ function ResultView({ result, test, chapterId, levelBefore, onRetry, onExit }: R
             const review = result.review.find((r) => r.id === q.id)
             return (
               <li key={q.id}>
-                <p lang="en" className="review-answer">
+                <p lang={lang} className="review-answer">
                   {q.prompt}
                 </p>
                 <p className="review-answer">

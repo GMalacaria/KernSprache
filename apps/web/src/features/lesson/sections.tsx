@@ -1,3 +1,4 @@
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { useTranslation } from 'react-i18next'
 import { ListenButton } from '../../components/ListenButton'
 import { canSpeak } from '../../lib/audio'
@@ -8,6 +9,7 @@ function Listen({ text }: { text: string }) {
 }
 
 export function GrammarView({ content }: { content: LessonContent }) {
+  const lang = useStudiedLanguage()
   return (
     <>
       <p className="lesson-intro">{content.intro}</p>
@@ -15,7 +17,7 @@ export function GrammarView({ content }: { content: LessonContent }) {
       <ul className="examples">
         {content.grammar.examples.map((e) => (
           <li key={e.text}>
-            <span lang="en">{e.text}</span> <Listen text={e.text} />
+            <span lang={lang}>{e.text}</span> <Listen text={e.text} />
             <br />
             <small className="muted">{e.translation}</small>
           </li>
@@ -26,13 +28,14 @@ export function GrammarView({ content }: { content: LessonContent }) {
 }
 
 export function WordsView({ content }: { content: LessonContent }) {
+  const lang = useStudiedLanguage()
   return (
     <ul className="cards">
       {content.words.map((w) => (
         <li key={w.term} className="card">
-          <strong lang="en">{w.term}</strong> <Listen text={w.term} /> = {w.translation}
+          <strong lang={lang}>{w.term}</strong> <Listen text={w.term} /> = {w.translation}
           <br />
-          <small className="muted" lang="en">
+          <small className="muted" lang={lang}>
             {w.example}
           </small>
         </li>
@@ -42,6 +45,7 @@ export function WordsView({ content }: { content: LessonContent }) {
 }
 
 export function PhrasesView({ content }: { content: LessonContent }) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation('lesson')
   return (
     <>
@@ -49,7 +53,7 @@ export function PhrasesView({ content }: { content: LessonContent }) {
       <ul className="cards">
         {content.phrases.map((p) => (
           <li key={p.text} className="card">
-            <strong lang="en">{p.text}</strong> <Listen text={p.text} />
+            <strong lang={lang}>{p.text}</strong> <Listen text={p.text} />
             <br />
             {p.translation}
           </li>
@@ -61,7 +65,7 @@ export function PhrasesView({ content }: { content: LessonContent }) {
           <ul className="cards">
             {content.idioms.map((i) => (
               <li key={i.text} className="card">
-                <strong lang="en">{i.text}</strong> <Listen text={i.text} />
+                <strong lang={lang}>{i.text}</strong> <Listen text={i.text} />
                 <br />
                 <small className="muted">{t('views.literally', { text: i.literal })}</small>
                 <br />
@@ -76,6 +80,7 @@ export function PhrasesView({ content }: { content: LessonContent }) {
 }
 
 export function VerbsView({ content }: { content: LessonContent }) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation('lesson')
   return (
     <table className="verbs">
@@ -88,7 +93,7 @@ export function VerbsView({ content }: { content: LessonContent }) {
       <tbody>
         {content.verbs.map((v) => (
           <tr key={v.forms.join('-')}>
-            <td lang="en">{v.forms.join(' · ')}</td>
+            <td lang={lang}>{v.forms.join(' · ')}</td>
             <td>{v.translation}</td>
           </tr>
         ))}
@@ -118,6 +123,7 @@ export function RepeatIntro({ count }: { count: number }) {
 }
 
 export function ListeningView({ content, showText }: { content: LessonContent; showText: boolean }) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation('lesson')
   return (
     <div className="stack">
@@ -127,7 +133,7 @@ export function ListeningView({ content, showText }: { content: LessonContent; s
         <p className="muted">{t('views.noSpeech')}</p>
       )}
       {(showText || !canSpeak()) && (
-        <p className="passage" lang="en">
+        <p className="passage" lang={lang}>
           {content.listening.text}
         </p>
       )}
@@ -136,10 +142,11 @@ export function ListeningView({ content, showText }: { content: LessonContent; s
 }
 
 export function ReadingView({ content }: { content: LessonContent }) {
+  const lang = useStudiedLanguage()
   return (
     <article className="passage">
-      <h3 lang="en">{content.reading.title}</h3>
-      <p lang="en">{content.reading.text}</p>
+      <h3 lang={lang}>{content.reading.title}</h3>
+      <p lang={lang}>{content.reading.text}</p>
     </article>
   )
 }

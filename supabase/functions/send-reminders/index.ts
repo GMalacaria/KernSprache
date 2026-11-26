@@ -13,6 +13,7 @@ import {
   streakEndingYesterday,
 } from '../_shared/reminders.ts'
 import { adminClient, type Db } from '../_shared/supabase.ts'
+import type { LanguageCode } from '../_shared/languages.ts'
 
 const STREAK_LOOKBACK_DAYS = 60
 const PUSH_TTL_SECONDS = 6 * 60 * 60
@@ -43,7 +44,7 @@ Deno.serve(
 
     const { data: profiles, error: profilesError } = await db
       .from('profiles')
-      .select('id, reminder_time, timezone, daily_goal_minutes')
+      .select('id, reminder_time, timezone, daily_goal_minutes, active_language')
       .in('id', [...byUser.keys()])
     if (profilesError) throw profilesError
 
@@ -91,7 +92,7 @@ function safeLocal(now: Date, timeZone: string): { day: string; hour: number } |
 
 async function reminderFor(
   db: Db,
-  profile: { id: string; daily_goal_minutes: number },
+  profile: { id: string; daily_goal_minutes: number; active_language: LanguageCode },
   today: string,
   now: Date,
 ): Promise<Reminder | null> {
@@ -109,9 +110,12 @@ async function reminderFor(
   const completed = new Set(days.filter((d) => d.completed_at !== null).map((d) => d.day))
 
   const nowIso = now.toISOString()
+  // Cards due in the language being studied: the review only shows those.
   const [vocab, mistakes] = await Promise.all([
-    db.from('vocab_items').select('id', { count: 'exact', head: true }).eq('user_id', profile.id).lte('due', nowIso),
-    db.from('mistakes').select('id', { count: 'exact', head: true }).eq('user_id', profile.id).lte('due', nowIso),
+    db.from('vocab_items').select('id', { count: 'exact', head: true }).eq('user_id', profile.id)
+      .eq('language', profile.active_language).lte('due', nowIso),
+    db.from('mistakes').select('id', { count: 'exact', head: true }).eq('user_id', profile.id)
+      .eq('language', profile.active_language).lte('due', nowIso),
   ])
   if (vocab.error) throw vocab.error
   if (mistakes.error) throw mistakes.error

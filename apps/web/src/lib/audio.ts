@@ -124,13 +124,30 @@ export async function blobToBase64(blob: Blob): Promise<string> {
   return btoa(binary)
 }
 
-function englishVoice(): SpeechSynthesisVoice | undefined {
+/** Language the voice speaks: the studied language, set by the app (`setSpeechLanguage`). */
+export type SpeechLanguage = 'en' | 'fr' | 'es' | 'de'
+let speechLanguage: SpeechLanguage = 'en'
+
+/** Called when the active language changes: every sentence read from now on is in that language. */
+export function setSpeechLanguage(language: SpeechLanguage): void {
+  speechLanguage = language
+}
+
+/** Preferred browser voices per language, then any voice of that language. */
+const BROWSER_LOCALES: Record<SpeechLanguage, string[]> = {
+  en: ['en-GB', 'en-US'],
+  fr: ['fr-FR'],
+  es: ['es-ES'],
+  de: ['de-DE'],
+}
+
+function browserVoice(language: SpeechLanguage): SpeechSynthesisVoice | undefined {
   const voices = window.speechSynthesis.getVoices()
-  return (
-    voices.find((v) => v.lang === 'en-GB') ??
-    voices.find((v) => v.lang === 'en-US') ??
-    voices.find((v) => v.lang.startsWith('en'))
-  )
+  for (const locale of BROWSER_LOCALES[language]) {
+    const voice = voices.find((v) => v.lang === locale)
+    if (voice) return voice
+  }
+  return voices.find((v) => v.lang.toLowerCase().startsWith(language))
 }
 
 export function canSpeak(): boolean {
@@ -189,23 +206,29 @@ function primePlayer(): void {
   })
 }
 
+/** Cache key: the same spelling can be a word in two languages. */
+function clipKey(text: string): string {
+  return `${speechLanguage}\n${text}`
+}
+
 function fetchClip(text: string): Promise<string> {
-  const cached = clips.get(text)
+  const key = clipKey(text)
+  const cached = clips.get(key)
   if (cached) return Promise.resolve(cached)
-  const inFlight = pending.get(text)
+  const inFlight = pending.get(key)
   if (inFlight) return inFlight
-  const request = downloadClip(text).finally(() => pending.delete(text))
-  pending.set(text, request)
+  const request = downloadClip(text, speechLanguage, key).finally(() => pending.delete(key))
+  pending.set(key, request)
   return request
 }
 
-async function downloadClip(text: string): Promise<string> {
-  const { data, error } = await supabase.functions.invoke<{ path: string }>('speak', { body: { text } })
+async function downloadClip(text: string, language: SpeechLanguage, key: string): Promise<string> {
+  const { data, error } = await supabase.functions.invoke<{ path: string }>('speak', { body: { text, language } })
   if (error || !data?.path) throw new Error('speak failed')
   const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}${data.path}`)
   if (!response.ok) throw new Error('audio download failed')
   const url = URL.createObjectURL(await response.blob())
-  clips.set(text, url)
+  clips.set(key, url)
   if (clips.size > MAX_CACHED_CLIPS) {
     const oldest = clips.keys().next().value
     if (oldest !== undefined) {
@@ -217,7 +240,7 @@ async function downloadClip(text: string): Promise<string> {
 }
 
 async function speakWithGemini(text: string, token: number): Promise<void> {
-  if (!clips.has(text)) setLoading(text)
+  if (!clips.has(clipKey(text))) setLoading(text)
   const url = await Promise.race([
     fetchClip(text),
     new Promise<never>((_, reject) => window.setTimeout(() => reject(new Error('timeout')), REMOTE_TIMEOUT_MS)),
@@ -234,14 +257,14 @@ function speakWithBrowser(text: string): void {
   if (!('speechSynthesis' in window)) return
   window.speechSynthesis.cancel()
   const utterance = new SpeechSynthesisUtterance(text)
-  const voice = englishVoice()
+  const voice = browserVoice(speechLanguage)
   if (voice) utterance.voice = voice
-  utterance.lang = voice?.lang ?? 'en-GB'
+  utterance.lang = voice?.lang ?? BROWSER_LOCALES[speechLanguage][0] ?? speechLanguage
   utterance.rate = 0.9
   window.speechSynthesis.speak(utterance)
 }
 
-/** Reads English text aloud with the Gemini voice; falls back to the browser voice if that fails. */
+/** Reads text in the studied language aloud with the Gemini voice; falls back to the browser voice if that fails. */
 export function speak(text: string): void {
   if (!canSpeak()) return
   stopSpeaking()

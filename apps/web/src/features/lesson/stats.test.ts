@@ -18,7 +18,7 @@ describe('lesson stats', () => {
   })
 
   it('makeQuestion keeps the sentence and translation shown after answering', () => {
-    const q = makeQuestion('?', 'hotel', ['city'], 1, 'en', { text: 'hotel', translation: 'albergo' })
+    const q = makeQuestion('?', 'hotel', ['city'], 1, true, { text: 'hotel', translation: 'albergo' })
     expect(q.feedback).toEqual({ text: 'hotel', translation: 'albergo' })
     expect(makeQuestion('?', 'hotel', ['city'], 1).feedback).toBeUndefined()
   })

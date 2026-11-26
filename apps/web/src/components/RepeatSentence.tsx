@@ -1,3 +1,4 @@
+import { useStudiedLanguage } from '../features/languages/useLanguage'
 import { useMutation } from '@tanstack/react-query'
 import { Trans, useTranslation } from 'react-i18next'
 import { MAX_RECORDING_MS, stopSpeaking, unlockSpeech } from '../lib/audio'
@@ -15,6 +16,7 @@ interface RepeatSentenceProps {
 
 /** Read a sentence aloud and get its pronunciation judged against the right text. */
 export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation()
   const assess = useMutation({
     mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, sentence, true, 'repeat'),
@@ -64,7 +66,7 @@ export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
       {assess.isSuccess && (
         <>
           <p className="muted repeat-heard">
-            <Trans t={t} i18nKey="voice.heard" values={{ text: assess.data.text }} components={{ en: <span lang="en" /> }} />
+            <Trans t={t} i18nKey="voice.heard" values={{ text: assess.data.text }} components={{ en: <span lang={lang} /> }} />
           </p>
           {assess.data.pronunciation ? (
             <PronunciationNote pronunciation={assess.data.pronunciation} />

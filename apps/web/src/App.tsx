@@ -23,6 +23,8 @@ import { PlacementTestPage } from './features/placement/PlacementTestPage'
 import { ReviewPage } from './features/review/ReviewPage'
 import { StudyTimerProvider } from './features/study/StudyTimerContext'
 import { Waiting } from './components/Waiting'
+import { LanguageProvider } from './features/languages/LanguageContext'
+import { isStudiedLanguage } from './features/languages/languages'
 import { i18n } from './i18n'
 
 /** The install offer appears a few seconds after the learner is in the app. */
@@ -136,16 +138,24 @@ function SignedInApp({ user }: { user: User }) {
     dailyGoalMinutes: profile.data.daily_goal_minutes,
   }
 
-  // First run: purpose and daily goal, then the placement test (or skip it).
+  const language = isStudiedLanguage(profile.data.active_language) ? profile.data.active_language : 'en'
+
+  // First run (also for a language studied for the first time): language, purpose and daily goal, then the
+  // placement test (or skip it).
   if (!profile.data.onboarded_at) {
-    return profile.data.purpose ? (
-      <PlacementTestPage userId={user.id} firstRun onDone={() => setView('home')} />
-    ) : (
-      <OnboardingPage userId={user.id} initial={initial} onDone={() => setView('home')} />
+    return (
+      <LanguageProvider language={language}>
+        {profile.data.purpose ? (
+          <PlacementTestPage userId={user.id} firstRun onDone={() => setView('home')} />
+        ) : (
+          <OnboardingPage key={language} userId={user.id} initial={initial} onDone={() => setView('home')} />
+        )}
+      </LanguageProvider>
     )
   }
 
   return (
+    <LanguageProvider language={language}>
     <StudyTimerProvider userId={user.id}>
       {view === 'dialogue' ? (
         <DialoguePage initialMode={dialogueMode} onExit={() => setView('home')} />
@@ -205,5 +215,6 @@ function SignedInApp({ user }: { user: User }) {
       {isTab(view) && <TabBar current={view} onSelect={setView} />}
       <InstallDialog open={installOpen} mode={installMode} onClose={() => setInstallOpen(false)} />
     </StudyTimerProvider>
+    </LanguageProvider>
   )
 }

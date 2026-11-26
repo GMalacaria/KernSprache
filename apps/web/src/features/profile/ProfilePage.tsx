@@ -7,6 +7,8 @@ import { usePath } from '../path/usePath'
 import { localDay } from '../study/studyMath'
 import { Waiting } from '../../components/Waiting'
 import { fetchProfileData } from './api'
+import { useStudiedLanguage } from '../languages/useLanguage'
+import { LanguagesSection } from '../languages/LanguageSwitch'
 import {
   bestGoalStreak,
   formatDuration,
@@ -38,7 +40,8 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
   const weekdays = t('chart.weekdays').split(',')
   const profile = useProfile(userId)
   const { path } = usePath(userId)
-  const data = useQuery({ queryKey: ['profile-data'], queryFn: fetchProfileData })
+  const language = useStudiedLanguage()
+  const data = useQuery({ queryKey: ['profile-data', language], queryFn: () => fetchProfileData(language) })
 
   const today = localDay(profile.data?.timezone ?? 'Europe/Rome')
   const days = data.data?.days ?? []
@@ -62,6 +65,7 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
 
       {profile.data && (
         <section className="profile-hero">
+          <p className="profile-language">{t('languageLine', { language: t(`common:languages.${language}.the`) })}</p>
           <p className="level-badge" aria-label={t('common:level', { level: profile.data.level })}>
             {profile.data.level}
           </p>
@@ -79,6 +83,8 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
           </div>
         </section>
       )}
+
+      <LanguagesSection />
 
       {data.isPending && <Waiting title={t('loading')} compact />}
       {data.isError && <p className="error">{t('loadError')}</p>}
@@ -155,6 +161,24 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
               {t('reviewCards', { count: data.data.reviewCards })}
             </p>
           </section>
+
+          {(data.data.pronunciation.count > 0 || data.data.dictation.count > 0) && (
+            <section>
+              <h2>{t('pronunciation')}</h2>
+              <ul className="stats-grid stats-grid-4">
+                <Stat
+                  value={data.data.pronunciation.average === null ? '–' : `${data.data.pronunciation.average}/100`}
+                  label={t('pronunciationAverage')}
+                />
+                <Stat value={data.data.pronunciation.count} label={t('pronunciationCount', { count: data.data.pronunciation.count })} />
+                <Stat
+                  value={data.data.dictation.average === null ? '–' : `${data.data.dictation.average}/100`}
+                  label={t('dictationAverage')}
+                />
+                <Stat value={data.data.dictation.count} label={t('dictationCount', { count: data.data.dictation.count })} />
+              </ul>
+            </section>
+          )}
         </>
       )}
 

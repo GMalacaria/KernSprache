@@ -1,3 +1,5 @@
+import { useLanguageNames } from '../languages/useLanguage'
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { canRecord } from '../../lib/audio'
@@ -17,7 +19,9 @@ interface PlacementTestPageProps {
 type Step = { kind: 'intro' } | { kind: 'written'; index: number } | { kind: 'oral'; index: number } | { kind: 'result' }
 
 export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPageProps) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation(['tests', 'common'])
+  const names = useLanguageNames()
   const queryClient = useQueryClient()
   const test = useQuery({ queryKey: ['placement', 'questions'], queryFn: startPlacement, staleTime: Infinity })
   const [step, setStep] = useState<Step>({ kind: 'intro' })
@@ -114,12 +118,12 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
         {!firstRun && title}
         <Progress label={t('writtenPart')} current={step.index + 1} total={questions.length} />
         <p className="muted">{t('placement.writtenPrompt')}</p>
-        <p className="card-main question" lang="en">
+        <p className="card-main question" lang={lang}>
           {q.prompt}
         </p>
         <div className="stack options">
           {q.options.map((option, i) => (
-            <button key={option} type="button" className="option" lang="en" onClick={() => choose(i)}>
+            <button key={option} type="button" className="option" lang={lang} onClick={() => choose(i)}>
               {option}
             </button>
           ))}
@@ -138,7 +142,7 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
       <main className="page">
         {!firstRun && title}
         <Progress label={t('oralPart')} current={step.index + 1} total={prompts.length} />
-        <p className="muted">{t('placement.oralPrompt')}</p>
+        <p className="muted">{t('placement.oralPrompt', { language: names.lower })}</p>
         <p className="card-main question">{p.prompt}</p>
         <SpokenAnswer
           key={p.id}
