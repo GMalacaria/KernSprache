@@ -1,15 +1,20 @@
 import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import type { Database } from '../../lib/database.types'
 import { supabase } from '../../lib/supabase'
+
+type Language = Database['public']['Enums']['language_code']
 import { useProfile } from '../home/useProfile'
 import { prefetchChapter } from '../lesson/api'
 import { fetchPassedChapterIds } from '../chapter-test/api'
 import { buildPath, type ChapterRow, type ChapterView } from './progress'
 
-async function fetchChapters(): Promise<ChapterRow[]> {
+/** The curriculum of one studied language: each language has its own 24 chapters. */
+async function fetchChapters(language: Language): Promise<ChapterRow[]> {
   const { data, error } = await supabase
     .from('chapters')
     .select('id, level, sort_order, title, description_it, lessons (id, sort_order, title)')
+    .eq('language', language)
     .order('level')
     .order('sort_order')
   if (error) throw error
@@ -26,7 +31,13 @@ async function fetchCompletedLessonIds(): Promise<number[]> {
 /** The learner's path: chapters with status, built from curriculum, level and progress. */
 export function usePath(userId: string): { path: ChapterView[] | undefined; isError: boolean } {
   const profile = useProfile(userId)
-  const chapters = useQuery({ queryKey: ['chapters'], queryFn: fetchChapters, staleTime: Infinity })
+  const language = profile.data?.active_language
+  const chapters = useQuery({
+    queryKey: ['chapters', language],
+    queryFn: () => fetchChapters(language as Language),
+    enabled: language !== undefined,
+    staleTime: Infinity,
+  })
   const completed = useQuery({ queryKey: ['lesson-progress'], queryFn: fetchCompletedLessonIds })
   const passed = useQuery({ queryKey: ['passed-chapters'], queryFn: fetchPassedChapterIds })
 

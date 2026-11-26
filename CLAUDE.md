@@ -7,7 +7,7 @@ Kern Sprache (famiglia di app "Kern", come aiTool) è un'app personale (PWA) per
 Per ora l'unico utente è lo sviluppatore. Priorità: costi bassi, codice semplice e manutenibile, nessuna dipendenza da abbonamenti (si usano API a consumo).
 
 ## Obiettivi del prodotto
-- Percorso a capitoli di difficoltà crescente (6 per livello, da A1 a B2), ognuno con 4 lezioni e una verifica finale. La struttura è fissa (migration); i capitoli sotto il livello del test sono superati, il capitolo in corso è il primo non superato, le lezioni si sbloccano in ordine.
+- Percorso a capitoli di difficoltà crescente (6 per livello, da A1 a B2), ognuno con 4 lezioni e una verifica finale; un curriculum per ogni lingua studiata (EN/FR/ES/DE), e il Percorso mostra quello della lingua attiva. La struttura è fissa (migration); i capitoli sotto il livello del test sono superati, il capitolo in corso è il primo non superato, le lezioni si sbloccano in ordine.
 - Lezione: 6-8 minuti con inizio e fine (nel tempo giornaliero ne stanno una o più). Parti: grammatica, 5 parole nuove, 3 espressioni, 1 modo di dire, 3 verbi, ascolto e comprensione, dettato (3 frasi brevi da ascoltare e scrivere: le parole sbagliate si sottolineano e si riprova finché è giusto; ogni tentativo sbagliato e la lettura del testo tolgono punti alla frase e contano come errori nelle statistiche), lettura e comprensione, dialogo di 3 turni con il tutor. Parole ed espressioni finiscono nel ripasso.
 - **Lezione finita = scritto + orale.** Ogni lezione ha due parti, ognuna chiusa da un dialogo di 3 turni con il tutor:
   - **Scritto:** grammatica, parole, espressioni, verbi, dettato, lettura, dialogo scritto.
