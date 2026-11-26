@@ -3,7 +3,7 @@
 import { logAiUsage } from '../_shared/ai-usage.ts'
 import { AiError, getAiProvider } from '../_shared/ai/index.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
-import { ORAL_PROMPTS, WRITTEN_QUESTIONS } from '../_shared/placement/questions.ts'
+import { ORAL_PROMPTS, writtenQuestions } from '../_shared/placement/questions.ts'
 import { combineLevels, scoreWritten } from '../_shared/placement/scoring.ts'
 import { PLACEMENT_ORAL_PROMPT_VERSION, placementOralPrompt } from '../_shared/prompts/placement-oral.v3.ts'
 import { type Learner, loadLearner, pairNames } from '../_shared/languages.ts'
@@ -24,10 +24,15 @@ Deno.serve(
       throw new HttpError(400, 'bad_request', 'Richiesta non valida')
     }
 
+    // The test places the active language, with that language's bank.
+    const learner = await loadLearner(db, userId)
+    const questions = writtenQuestions(learner.pair.target)
+    if (!questions) throw new HttpError(400, 'bad_request', 'Richiesta non valida')
+
     if (body.data.action === 'start') {
       // Questions without answers.
       return json({
-        questions: WRITTEN_QUESTIONS.map(({ id, level, prompt, options }) => ({
+        questions: questions.map(({ id, level, prompt, options }) => ({
           id,
           level,
           prompt,
@@ -37,13 +42,11 @@ Deno.serve(
       })
     }
 
-    const written = scoreWritten(body.data.answers)
+    const written = scoreWritten(body.data.answers, questions)
     const transcripts = body.data.oral
       .filter((o) => ORAL_PROMPTS.some((p) => p.id === o.id))
       .map((o) => ({ id: o.id, transcript: o.transcript.trim() }))
     const spoken = transcripts.some((t) => t.transcript.length > 0)
-    // The questions are English for now (one set per language in PR 7): the test places the active language.
-    const learner = await loadLearner(db, userId)
     const oral = spoken ? await assessOral(userId, learner, transcripts) : null
     const finalLevel = combineLevels(written.level, oral?.level ?? null)
 
