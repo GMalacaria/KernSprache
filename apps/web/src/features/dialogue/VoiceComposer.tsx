@@ -17,7 +17,7 @@ interface VoiceComposerProps {
 export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceComposerProps) {
   const { t } = useTranslation()
   const transcribe = useMutation({
-    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, undefined, true),
+    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, undefined, true, 'dialogue'),
     onSuccess: ({ text, pronunciation }) => onTranscript(text, pronunciation ?? undefined),
   })
   const { isRecording, seconds, micError, start, stop, cancel } = useVoiceRecorder({

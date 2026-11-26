@@ -111,6 +111,10 @@ Formato delle correzioni:
 - `push_subscriptions`: id, user_id, endpoint, p256dh, auth, created_at; si registra con la RPC `register_push_subscription` (un endpoint passa a chi ha fatto l'accesso sul dispositivo)
 - `reminder_log`: user_id, day (giorno locale), kind; una riga al giorno per utente, scritta solo da `send-reminders`
 - `tts_cache`: key (sha256 di voce + frase), text, voice, path del WAV nel bucket privato `tts`; RLS attiva senza policy, solo la function `speak` (service role) la usa.
+- `session_messages`: user_id, session_id, role (learner|tutor), content, input (text|voice, solo per il learner), created_at; scritta da `tutor-chat`
+- `pronunciation_results`: user_id, language, source (dialogue|repeat|review|test), expected_text, transcript, score, words, created_at; scritta da `transcribe` a ogni valutazione
+- `dictation_results`: user_id, lesson_id, sentence, score, wrong_attempts, text_shown; scritta dalla PWA a fine frase del dettato
+- `chapter_test_attempts.oral_transcripts`: le risposte orali trascritte
 - `ai_usage`: user_id, function_name, model, token in/out/cache (scritta solo dalle Edge Functions con la service role)
 
 Su tutte le tabelle con `user_id` la RLS è attiva, con policy `user_id = auth.uid()`. Il profilo viene creato da un trigger su `auth.users`. `chapters` e `lessons` sono in sola lettura per gli utenti; `ai_usage` è in sola lettura (propri record). I test RLS (pgTAP) sono in `supabase/tests`.

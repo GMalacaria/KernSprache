@@ -79,7 +79,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
 
   useEffect(() => stopSpeaking, [])
 
-  function sendText(text: string, pronunciation?: Pronunciation) {
+  function sendText(text: string, pronunciation?: Pronunciation, input: 'text' | 'voice' = 'text') {
     const content = text.trim()
     if (!content || send.isPending) return
     const next: DialogueTurn[] = [...turns, { id: `p${turns.length}`, role: 'user', content, pronunciation }]
@@ -87,6 +87,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
     send.mutate({
       session_id: sessionId.current,
       messages: next.map(({ role, content }) => ({ role, content })),
+      input,
     })
   }
 
@@ -149,7 +150,11 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
       {send.isError && <p className="error">{send.error.message}</p>}
 
       {mode === 'oral' ? (
-        <VoiceComposer disabled={send.isPending} onTranscript={sendText} onActivity={markActivity} />
+        <VoiceComposer
+          disabled={send.isPending}
+          onTranscript={(text, pronunciation) => sendText(text, pronunciation, 'voice')}
+          onActivity={markActivity}
+        />
       ) : (
         <form onSubmit={onSubmit} className="composer">
           <textarea

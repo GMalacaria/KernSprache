@@ -7,7 +7,7 @@ import { NoMicrophone } from '../../components/NoMicrophone'
 import { StudyPrompts } from '../study/StudyPrompts'
 import { StudyTimerBar } from '../study/StudyTimerBar'
 import { useStudyActivity, useStudyTimer } from '../study/useStudyTimer'
-import { addToReview, fetchLessonProgress, getLesson, prefetchChapter, recordLessonStats, savePart } from './api'
+import { addToReview, fetchLessonProgress, saveDictationResult, getLesson, prefetchChapter, recordLessonStats, savePart } from './api'
 import { ChapterStats, StatsGrid } from './ChapterStats'
 import { Dictation } from './DictationExercise'
 import { dictationSentences, type DictationSentence } from './dictation'
@@ -354,6 +354,7 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
                 onAttempt={answer}
                 onTextShown={() => answer(false)}
                 onDone={advance}
+                onFinished={(result) => saveDictationResult(meta.id, result)}
               />
             </section>
           )}

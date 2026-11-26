@@ -8,8 +8,9 @@ import { getTranscriber } from '../_shared/ai/transcriber.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
 import { loadLearner, pairNames } from '../_shared/languages.ts'
 import { PRONUNCIATION_PROMPT_VERSION, TRANSCRIBE_PROMPT_VERSION } from '../_shared/prompts/transcribe.v2.ts'
-import { transcribeRequestSchema } from '../_shared/schemas/transcribe.ts'
-import { requireApprovedUser, userClient } from '../_shared/supabase.ts'
+import { guessSource, transcribeRequestSchema } from '../_shared/schemas/transcribe.ts'
+import { type Db, requireApprovedUser, userClient } from '../_shared/supabase.ts'
+import type { Database } from '../_shared/database.types.ts'
 
 const FUNCTION_NAME = 'transcribe'
 
@@ -77,6 +78,16 @@ Deno.serve(
         'Non ho sentito niente. Avvicina il telefono e riprova.',
       )
     }
+    if (body.data.assess && transcript.pronunciation) {
+      await savePronunciationResult(db, {
+        language: pair.target,
+        source: body.data.source ?? guessSource(body.data),
+        expected_text: body.data.expected_text ?? null,
+        transcript: transcript.text,
+        score: transcript.pronunciation.score,
+        words: transcript.pronunciation.words,
+      })
+    }
     if (body.data.assess && body.data.save_mistakes) {
       await savePronunciationCards(
         db,
@@ -91,3 +102,11 @@ Deno.serve(
     })
   }),
 )
+
+type PronunciationResult = Omit<Database['public']['Tables']['pronunciation_results']['Insert'], 'user_id'>
+
+/** Keeps every judged recording for the profile. Never throws: the learner still gets the transcript. */
+async function savePronunciationResult(db: Db, result: PronunciationResult): Promise<void> {
+  const { error } = await db.from('pronunciation_results').insert(result)
+  if (error) console.error('Failed to save the pronunciation result', error)
+}

@@ -39,14 +39,14 @@ export type Database = {
                   ]
                 },"chapter_test_attempts": {
                   Row: {
-                    "chapter_id": number,"created_at": string,"feedback": NonNullable<Json>,"id": string,"language": Database["public"]['Enums']["language_code"],"oral_score": number,"passed": boolean,"score": number,"test_id": string,"user_id": string,"written_score": number
+                    "chapter_id": number,"created_at": string,"feedback": NonNullable<Json>,"id": string,"language": Database["public"]['Enums']["language_code"],"oral_score": number,"oral_transcripts": NonNullable<Json>,"passed": boolean,"score": number,"test_id": string,"user_id": string,"written_score": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "chapter_id": number,"created_at"?: string,"feedback": NonNullable<Json>,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"oral_score": number,"passed": boolean,"score": number,"test_id": string,"user_id": string,"written_score": number
+                    "chapter_id": number,"created_at"?: string,"feedback": NonNullable<Json>,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"oral_score": number,"oral_transcripts"?: NonNullable<Json>,"passed": boolean,"score": number,"test_id": string,"user_id": string,"written_score": number
                   }
                   Update: {
-                    "chapter_id"?: number,"created_at"?: string,"feedback"?: NonNullable<Json>,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"oral_score"?: number,"passed"?: boolean,"score"?: number,"test_id"?: string,"user_id"?: string,"written_score"?: number
+                    "chapter_id"?: number,"created_at"?: string,"feedback"?: NonNullable<Json>,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"oral_score"?: number,"oral_transcripts"?: NonNullable<Json>,"passed"?: boolean,"score"?: number,"test_id"?: string,"user_id"?: string,"written_score"?: number
                   }
                   Relationships: [
                     {
@@ -96,6 +96,26 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"dictation_results": {
+                  Row: {
+                    "created_at": string,"id": string,"lesson_id": number,"score": number,"sentence": string,"text_shown": boolean,"user_id": string,"wrong_attempts": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"lesson_id": number,"score": number,"sentence": string,"text_shown": boolean,"user_id"?: string,"wrong_attempts": number
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"lesson_id"?: number,"score"?: number,"sentence"?: string,"text_shown"?: boolean,"user_id"?: string,"wrong_attempts"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dictation_results_lesson_id_fkey"
+      columns: ["lesson_id"]
+isOneToOne: false
+      referencedRelation: "lessons"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"learner_languages": {
                   Row: {
@@ -265,6 +285,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"pronunciation_results": {
+                  Row: {
+                    "created_at": string,"expected_text": string | null,"id": string,"language": Database["public"]['Enums']["language_code"],"score": number,"source": Database["public"]['Enums']["pronunciation_source"],"transcript": string,"user_id": string,"words": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"expected_text"?: string | null,"id"?: string,"language": Database["public"]['Enums']["language_code"],"score": number,"source": Database["public"]['Enums']["pronunciation_source"],"transcript": string,"user_id"?: string,"words"?: NonNullable<Json>
+                  }
+                  Update: {
+                    "created_at"?: string,"expected_text"?: string | null,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"score"?: number,"source"?: Database["public"]['Enums']["pronunciation_source"],"transcript"?: string,"user_id"?: string,"words"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"push_subscriptions": {
                   Row: {
                     "auth": string,"created_at": string,"endpoint": string,"id": string,"p256dh": string,"user_id": string
@@ -292,6 +326,26 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"session_messages": {
+                  Row: {
+                    "content": string,"created_at": string,"id": string,"input": Database["public"]['Enums']["message_input"] | null,"role": Database["public"]['Enums']["message_role"],"session_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "content": string,"created_at"?: string,"id"?: string,"input"?: Database["public"]['Enums']["message_input"] | null,"role": Database["public"]['Enums']["message_role"],"session_id": string,"user_id"?: string
+                  }
+                  Update: {
+                    "content"?: string,"created_at"?: string,"id"?: string,"input"?: Database["public"]['Enums']["message_input"] | null,"role"?: Database["public"]['Enums']["message_role"],"session_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "session_messages_session_id_user_id_fkey"
+      columns: ["session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "sessions"
+      referencedColumns: ["id","user_id"]
+    }
                   ]
                 },"sessions": {
                   Row: {
@@ -430,7 +484,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "cefr_level": "A1"|"A2"|"B1"|"B2","language_code": "it"|"en"|"fr"|"es"|"de","learning_purpose": "leisure"|"travel"|"work"|"love","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other"|"pronunciation","practice_kind": "review"|"dialogue","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
+            "cefr_level": "A1"|"A2"|"B1"|"B2","language_code": "it"|"en"|"fr"|"es"|"de","learning_purpose": "leisure"|"travel"|"work"|"love","message_input": "text"|"voice","message_role": "learner"|"tutor","mistake_category": "verb_tense"|"article"|"preposition"|"word_order"|"vocabulary"|"spelling"|"other"|"pronunciation","practice_kind": "review"|"dialogue","pronunciation_source": "dialogue"|"repeat"|"review"|"test","session_kind": "lesson"|"dialogue"|"review","study_mode": "written"|"oral"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -550,7 +604,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "cefr_level": ["A1", "A2", "B1", "B2"],"language_code": ["it", "en", "fr", "es", "de"],"learning_purpose": ["leisure", "travel", "work", "love"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other", "pronunciation"],"practice_kind": ["review", "dialogue"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
+            "cefr_level": ["A1", "A2", "B1", "B2"],"language_code": ["it", "en", "fr", "es", "de"],"learning_purpose": ["leisure", "travel", "work", "love"],"message_input": ["text", "voice"],"message_role": ["learner", "tutor"],"mistake_category": ["verb_tense", "article", "preposition", "word_order", "vocabulary", "spelling", "other", "pronunciation"],"practice_kind": ["review", "dialogue"],"pronunciation_source": ["dialogue", "repeat", "review", "test"],"session_kind": ["lesson", "dialogue", "review"],"study_mode": ["written", "oral"]
           }
         }
 } as const

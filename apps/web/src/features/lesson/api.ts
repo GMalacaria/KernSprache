@@ -12,6 +12,7 @@ import {
   type PartStats,
 } from './parts'
 import type { LessonStatsRow } from './stats'
+import type { DictationResult } from './DictationExercise'
 import type { LessonResponse } from './types'
 
 export async function getLesson(lessonId: number): Promise<LessonResponse> {
@@ -117,4 +118,20 @@ export async function fetchChapterStats(chapterId: number): Promise<LessonStatsR
     .eq('chapter_id', chapterId)
   if (error) throw error
   return data
+}
+
+/** Keeps the score of a dictation sentence for the profile. Never throws: the lesson goes on anyway. */
+export function saveDictationResult(lessonId: number, result: DictationResult): void {
+  void supabase
+    .from('dictation_results')
+    .insert({
+      lesson_id: lessonId,
+      sentence: result.sentence,
+      score: result.score,
+      wrong_attempts: result.wrongAttempts,
+      text_shown: result.textShown,
+    })
+    .then(({ error }) => {
+      if (error) console.error('Failed to save the dictation result', error)
+    })
 }

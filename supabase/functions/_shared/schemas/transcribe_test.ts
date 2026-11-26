@@ -1,5 +1,5 @@
 import { assertEquals } from 'jsr:@std/assert@1'
-import { transcribeRequestSchema } from './transcribe.ts'
+import { guessSource, transcribeRequestSchema } from './transcribe.ts'
 
 Deno.test('transcribe request normalises codec parameters in the mime type', () => {
   const r = transcribeRequestSchema.safeParse({
@@ -56,4 +56,10 @@ Deno.test('transcribe request: expected_text is optional, trimmed and capped', (
     expected_text: 'a'.repeat(301),
   })
   assertEquals(long.success, false)
+})
+
+Deno.test('guessSource: free speech is the dialogue, a sentence is an exercise or the review', () => {
+  assertEquals(guessSource({ save_mistakes: true }), 'dialogue')
+  assertEquals(guessSource({ expected_text: 'Hi there', save_mistakes: true }), 'repeat')
+  assertEquals(guessSource({ expected_text: 'Hi there', save_mistakes: false }), 'review')
 })

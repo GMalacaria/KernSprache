@@ -20,10 +20,19 @@ interface DictationProps {
   /** The learner chose to read the text: counts as one mistake. */
   onTextShown: () => void
   onDone: () => void
+  /** The sentence is right: its score, saved for the profile. */
+  onFinished?: (result: DictationResult) => void
+}
+
+export interface DictationResult {
+  sentence: string
+  score: number
+  wrongAttempts: number
+  textShown: boolean
 }
 
 /** Listen to a sentence and write it. Wrong words are marked and the learner tries again until it is right. */
-export function Dictation({ sentence, onAttempt, onTextShown, onDone }: DictationProps) {
+export function Dictation({ sentence, onAttempt, onTextShown, onDone, onFinished }: DictationProps) {
   const { t } = useTranslation(['lesson', 'common'])
   const [value, setValue] = useState('')
   const [wrong, setWrong] = useState(0)
@@ -39,6 +48,7 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone }: Dictatio
     if (comparison.correct) {
       playCorrect()
       setDone(true)
+      onFinished?.({ sentence: sentence.en, score: dictationScore(wrong, shown), wrongAttempts: wrong, textShown: shown })
     } else {
       playWrong()
       setWrong((n) => n + 1)

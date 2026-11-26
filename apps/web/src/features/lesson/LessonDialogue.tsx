@@ -61,7 +61,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
       { role: 'user', content: "Let's start the role-play." },
       ...next.map(({ role, content: c }) => ({ role, content: c })),
     ]
-    send.mutate({ session_id: sessionId.current, lesson_id: lessonId, messages })
+    send.mutate({ session_id: sessionId.current, lesson_id: lessonId, messages, input: mode === 'oral' ? 'voice' : 'text' })
   }
 
   function onSubmit(event: FormEvent) {
