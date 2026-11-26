@@ -6,6 +6,9 @@ import { GOAL_OPTIONS } from '../study/studyMath'
 import { Emoji } from '../../components/Emoji'
 import { BackHeader } from '../../components/BackHeader'
 import { PURPOSES, purposeHint, purposeLabel, type LearningPurpose } from './purposes'
+import { useLanguageNames } from '../languages/useLanguage'
+import { useSwitchLanguage } from '../languages/useLanguageSwitch'
+import { STUDIED_LANGUAGES, type StudiedLanguage } from '../languages/languages'
 
 interface OnboardingPageProps {
   userId: string
@@ -24,6 +27,9 @@ const MAX_GOAL_CHARS = 200
 export function OnboardingPage({ userId, initial, editing = false, onDone }: OnboardingPageProps) {
   const { t } = useTranslation(['onboarding', 'common'])
   const queryClient = useQueryClient()
+  const names = useLanguageNames()
+  // First access: switching here also moves to a language already set up (the app then leaves onboarding).
+  const switchTo = useSwitchLanguage()
   const [purpose, setPurpose] = useState<LearningPurpose | null>(initial?.purpose ?? null)
   const [details, setDetails] = useState(initial?.goal ?? '')
   const [minutes, setMinutes] = useState(initial?.dailyGoalMinutes ?? 20)
@@ -57,7 +63,25 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
     <main className="page">
       {editing ? <BackHeader title={t('editTitle')} onBack={onDone} /> : <h1>{t('welcome')}</h1>}
       <form onSubmit={onSubmit} className="stack">
-        <label htmlFor="purpose">{t('purposeQuestion')}</label>
+        {!editing && (
+          <>
+            <label htmlFor="language">{t('languageQuestion')}</label>
+            <select
+              id="language"
+              value={names.code}
+              disabled={switchTo.isPending}
+              onChange={(e) => switchTo.mutate(e.target.value as StudiedLanguage)}
+            >
+              {STUDIED_LANGUAGES.map((code) => (
+                <option key={code} value={code}>
+                  {t(`common:languages.${code}.name`)}
+                </option>
+              ))}
+            </select>
+            <p className="muted">{t('languageHint')}</p>
+          </>
+        )}
+        <label htmlFor="purpose">{t('purposeQuestion', { language: names.the })}</label>
         <select
           id="purpose"
           value={purpose ?? ''}

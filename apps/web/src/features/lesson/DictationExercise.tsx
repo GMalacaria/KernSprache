@@ -1,3 +1,4 @@
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { useState, type FormEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { useDock } from './useDock'
@@ -33,6 +34,7 @@ export interface DictationResult {
 
 /** Listen to a sentence and write it. Wrong words are marked and the learner tries again until it is right. */
 export function Dictation({ sentence, onAttempt, onTextShown, onDone, onFinished }: DictationProps) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation(['lesson', 'common'])
   const [value, setValue] = useState('')
   const [wrong, setWrong] = useState(0)
@@ -97,7 +99,7 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone, onFinished
       </label>
       <textarea
         id="dictation-input"
-        lang="en"
+        lang={lang}
         rows={2}
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -115,7 +117,7 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone, onFinished
 
       {result && !result.correct && (
         <div className="quiz-feedback is-wrong" role="status">
-          <p className="dictation-attempt" lang="en">
+          <p className="dictation-attempt" lang={lang}>
             {result.words.map((w, i) => (
               <span key={i} className={w.ok ? 'word-ok' : 'word-wrong'}>
                 {w.word}

@@ -233,7 +233,16 @@ Decisioni prese:
 
 8. **`feat(db): add French, Spanish and German curricula`**: una migration per lingua (24 capitoli × 4 lezioni, `grammar_focus`/`focus` in inglese come oggi, titoli in italiano), generate offline e riviste. Il test `curriculum` controlla 96 lezioni per lingua.
 
-9. **`feat(web): choose and switch learning language`**:
+9. ✅ **`feat(web): choose and switch learning language`** — fatta (migration `20261126180000_set_active_language`; da mergiare **dopo la #56**, che filtra il Percorso per lingua):
+   - **il profilo rispecchia la lingua attiva**: la RPC `set_active_language` crea la riga della lingua se manca e copia nel profilo livello, scopo, goal e `onboarded_at` di quella lingua; così il resto dell'app e delle functions continua a leggere il profilo. Una lingua nuova ha `onboarded_at` vuoto, quindi l'app mostra da sola il primo accesso (scopo, test di livello). Il trigger di sincronizzazione resta: copia le modifiche del profilo nella riga della lingua attiva. Nella PR 10 si decide se far leggere `learner_languages` all'app o tenere questo specchio;
+   - primo accesso: "Quale lingua vuoi studiare?" e "Perché vuoi imparare il francese?"; Profilo: sezione "Le tue lingue" (livello e scopo per lingua, "Studia questa", "Aggiungi una lingua"); Home: select della lingua nell'intestazione quando le lingue sono più di una. Cambiare lingua invalida tutte le query;
+   - `features/languages`: `LanguageProvider` (lingua per `lang`, voce e testi), `useStudiedLanguage`, `useLanguageNames` (nomi in `common:languages.*`, segnaposto "Write here… / Écris ici… / Escribe aquí… / Schreib hier…"), `useSwitchLanguage`;
+   - tutti i `lang="en"` diventano la lingua studiata; "in inglese" nei testi diventa `{{language}}`; `optionsLang: 'en'` → `optionsStudied`;
+   - voce: `audio.ts` ha la lingua della voce (`setSpeechLanguage`, dal provider), la manda a `speak` e la usa nella cache e nel ripiego `speechSynthesis` (`en-GB`, `fr-FR`, `es-ES`, `de-DE`, poi la prima voce della lingua);
+   - ripasso, conteggio dei ripassi, dati del Profilo (risposte, carte, e ora anche media di pronuncia e dettato) e promemoria (`send-reminders`) contano solo la lingua attiva; giorni di studio, serie e grafico restano globali;
+   - dettato multilingua: `normalizeWords` con `\p{L}\p{N}`, NFC, `¿ ¡ « »` tolti, apostrofo francese tenuto; test per tedesco, spagnolo e francese. Un accento mancante conta come errore;
+   - provato nel browser: passaggio inglese → tedesco (A2) dal Profilo e dalla Home, aggiunta del francese con primo accesso e test di livello francese (`lang="fr"`), ripasso separato per lingua.
+   - Piano originale:
    - onboarding: lingua da studiare → scopo → test di livello; `active_language` sul profilo;
    - **la pagina Profilo che esiste già** (`features/profile`) diventa:
      - in alto la parte globale: serie, tempo di studio, grafico;

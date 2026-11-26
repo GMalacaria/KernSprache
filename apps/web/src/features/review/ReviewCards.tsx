@@ -1,3 +1,4 @@
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { Trans, useTranslation } from 'react-i18next'
@@ -69,6 +70,7 @@ function AttemptsLeft({ wrong }: { wrong: number }) {
 
 /** English word -> the learner writes the Italian. Checked locally, then by the AI when it differs (synonyms). */
 export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation(['review', 'common'])
   const [value, setValue] = useState('')
   const flow = useAnswerFlow('vocab', onGraded)
@@ -94,7 +96,7 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
       <article className="flashcard">
         <p className="muted">{t('vocab.prompt')}</p>
         <div className="card-word">
-          <p className="card-main" lang="en">
+          <p className="card-main" lang={lang}>
             {item.en}
           </p>
           <ListenButton text={item.en} className="listen-button" iconSize="1.4em" />
@@ -140,6 +142,7 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
 
 /** A sentence with a mistake -> the learner writes or says it corrected. */
 export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation(['review', 'common'])
   const [value, setValue] = useState('')
   const [attempt, setAttempt] = useState<TypedWord[] | null>(null)
@@ -205,7 +208,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
       <article className="flashcard">
         <p className="muted">{t('sentence.prompt')}</p>
         <div className="card-word">
-          <p className="card-main card-sentence" lang="en">
+          <p className="card-main card-sentence" lang={lang}>
             {item.original}
           </p>
           <ListenButton text={item.original} className="listen-button" iconSize="1.4em" />
@@ -213,7 +216,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
         {flow.outcome && (
           <>
             <div className="card-word">
-              <p className="card-answer" lang="en">
+              <p className="card-answer" lang={lang}>
                 {item.corrected}
               </p>
               <ListenButton text={item.corrected} className="listen-button" iconSize="1.4em" />
@@ -226,7 +229,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
       {heard && (
         <div className="review-heard">
           <p className="muted">
-            <Trans t={t} i18nKey="common:voice.heard" values={{ text: heard.text }} components={{ en: <span lang="en" /> }} />
+            <Trans t={t} i18nKey="common:voice.heard" values={{ text: heard.text }} components={{ en: <span lang={lang} /> }} />
           </p>
           {heard.pronunciation && <PronunciationNote pronunciation={heard.pronunciation} />}
         </div>
@@ -241,7 +244,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
           </label>
           <textarea
             id="review-sentence"
-            lang="en"
+            lang={lang}
             rows={2}
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -284,7 +287,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
           {flow.hint && (
             <div className="quiz-feedback is-wrong" role="status">
               {attempt && (
-                <p className="dictation-attempt" lang="en">
+                <p className="dictation-attempt" lang={lang}>
                   {attempt.map((w, i) => (
                     <span key={i} className={w.ok ? 'word-ok' : 'word-wrong'}>
                       {w.word}
@@ -311,6 +314,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
 
 /** A mispronounced word -> the learner listens and says it; the pronunciation score is the grade. */
 export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeItem> & { onSkip: () => void }) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation(['review', 'common'])
   const [result, setResult] = useState<{ text: string; pronunciation: Pronunciation } | null>(null)
   const [unclear, setUnclear] = useState<string | null>(null)
@@ -349,7 +353,7 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
       <article className="flashcard">
         <p className="muted">{t('pron.prompt')}</p>
         <div className="card-word">
-          <p className="card-main" lang="en">
+          <p className="card-main" lang={lang}>
             {item.original}
           </p>
           <ListenButton text={item.original} className="listen-button" iconSize="1.4em" />
@@ -360,7 +364,7 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
       {result ? (
         <div className="review-heard">
           <p className="muted">
-            <Trans t={t} i18nKey="common:voice.heard" values={{ text: result.text }} components={{ en: <span lang="en" /> }} />
+            <Trans t={t} i18nKey="common:voice.heard" values={{ text: result.text }} components={{ en: <span lang={lang} /> }} />
           </p>
           <PronunciationNote pronunciation={result.pronunciation} />
         </div>

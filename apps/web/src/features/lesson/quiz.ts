@@ -29,12 +29,12 @@ export function makeQuestion(
   correct: string,
   distractors: string[],
   seed: number,
-  optionsLang?: 'en',
+  optionsStudied = false,
   feedback?: QuizQuestion['feedback'],
 ): QuizQuestion {
   const options = shuffle(unique([correct, ...distractors]).slice(0, 4), seed)
   const answer = options.findIndex((o) => o.trim().toLowerCase() === correct.trim().toLowerCase())
-  return { prompt, options, answer, optionsLang, ...(feedback ? { feedback } : {}) }
+  return { prompt, options, answer, ...(optionsStudied ? { optionsStudied } : {}), ...(feedback ? { feedback } : {}) }
 }
 
 /** "How do you say ...?" for every new word, distractors from the other words. */
@@ -49,7 +49,7 @@ export function wordQuiz(content: LessonContent): QuizQuestion[] {
         i + 7,
       ),
       i + 1,
-      'en',
+      true,
       { text: w.term, translation: w.translation },
     ),
   )
@@ -71,7 +71,7 @@ export function verbQuiz(content: LessonContent): QuizQuestion[] {
         second,
         [...v.forms.filter((_, index) => index !== 1), ...others],
         i + 11,
-        'en',
+        true,
         { text: v.forms.join(' · '), translation: v.translation },
       ),
     ]

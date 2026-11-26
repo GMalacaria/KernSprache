@@ -1,17 +1,29 @@
 {
   "welcome": "Benvenuto!",
   "editTitle": "I tuoi obiettivi",
-  "purposeQuestion": "Perché vuoi imparare l'inglese?",
+  "purposeQuestion": "Perché vuoi imparare {{language}}?",
   "choosePurpose": "Scegli un motivo",
   "detailsLabel": "Vuoi aggiungere qualcosa? (facoltativo)",
   "detailsPlaceholder": "Es. tra sei mesi mi trasferisco a Londra per lavoro",
   "minutesQuestion": "Quanti minuti vuoi studiare al giorno?",
   "halfSplit": "Metà del tempo è scritto, metà orale.",
   "purposes": {
-    "leisure": { "label": "Svago", "hint": "film, musica, amici, tempo libero" },
-    "travel": { "label": "Viaggi", "hint": "aeroporti, hotel, ristoranti, indicazioni" },
-    "work": { "label": "Lavoro", "hint": "riunioni, email, colleghi, colloqui" },
-    "love": { "label": "Amore", "hint": "appuntamenti, sentimenti, famiglia" },
+    "leisure": {
+      "label": "Svago",
+      "hint": "film, musica, amici, tempo libero"
+    },
+    "travel": {
+      "label": "Viaggi",
+      "hint": "aeroporti, hotel, ristoranti, indicazioni"
+    },
+    "work": {
+      "label": "Lavoro",
+      "hint": "riunioni, email, colleghi, colloqui"
+    },
+    "love": {
+      "label": "Amore",
+      "hint": "appuntamenti, sentimenti, famiglia"
+    },
     "none": "non scelto"
   },
   "install": {
@@ -22,5 +34,7 @@
     "iosConfirm": "Tocca <strong>Aggiungi</strong>, poi apri l'app dall'icona.",
     "iosSignInAgain": "Alla prima apertura dall'icona dovrai accedere di nuovo con email e password.",
     "install": "Installa"
-  }
+  },
+  "languageQuestion": "Quale lingua vuoi studiare?",
+  "languageHint": "Potrai aggiungere altre lingue dal Profilo."
 }

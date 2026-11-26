@@ -32,12 +32,12 @@ export interface LessonResponse {
   content: LessonContent
 }
 
-/** A multiple-choice question shown in the lesson; `optionsLang` marks options in the studied language. */
+/** A multiple-choice question shown in the lesson; `optionsStudied` marks options in the studied language. */
 export interface QuizQuestion {
   prompt: string
   options: string[]
   answer: number
-  optionsLang?: 'en'
+  optionsStudied?: boolean
   /** Sentence in the studied language and its translation, shown (and read aloud) after answering. */
   feedback?: Translated
 }

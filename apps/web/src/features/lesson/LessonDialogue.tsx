@@ -1,3 +1,5 @@
+import { useLanguageNames } from '../languages/useLanguage'
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { ListenButton } from '../../components/ListenButton'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
@@ -24,7 +26,9 @@ interface LessonDialogueProps {
 
 /** Short role-play with the tutor at the end of each part of a lesson: three learner turns. */
 export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, onFinished }: LessonDialogueProps) {
+  const lang = useStudiedLanguage()
   const { t } = useTranslation('lesson')
+  const names = useLanguageNames()
   const [turns, setTurns] = useState<DialogueTurn[]>([{ id: 'opening', role: 'assistant', content: opening }])
   const [draft, setDraft] = useState('')
   const sessionId = useRef<string | undefined>(undefined)
@@ -83,7 +87,7 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
       <ol className="turns">
         {turns.map((turn) => (
           <li key={turn.id} className={`turn turn-${turn.role}`}>
-            <p className="bubble" lang={turn.role === 'assistant' ? 'en' : undefined}>
+            <p className="bubble" lang={turn.role === 'assistant' ? lang : undefined}>
               {turn.content}
             </p>
             {turn.role === 'assistant' && (
@@ -114,13 +118,13 @@ export function LessonDialogue({ lessonId, scenario, opening, mode, onActivity, 
       ) : (
         <form onSubmit={onSubmit} className="composer">
           <textarea
-            aria-label={t('roleplay.answerAria')}
-            lang="en"
+            aria-label={t('roleplay.answerAria', { language: names.lower })}
+            lang={lang}
             rows={2}
             maxLength={2000}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={t('roleplay.placeholder')}
+            placeholder={names.writeHere}
           />
           <button type="submit" disabled={send.isPending || !draft.trim()}>
             {t('roleplay.send')}

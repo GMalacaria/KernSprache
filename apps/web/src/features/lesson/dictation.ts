@@ -10,13 +10,18 @@ const MAX_WORDS = 12
 export const WRONG_ATTEMPT_PENALTY = 20
 export const TEXT_SHOWN_PENALTY = 30
 
-/** Lowercase words without punctuation; apostrophes inside words are kept (I'm, don't). */
+/**
+ * Lowercase words without punctuation, for every studied language: letters with accents, ñ, ü, ß and ç are kept
+ * (NFC, so a typed "é" equals a composed one), apostrophes inside words too (I'm, don't, l'homme, j'ai), while
+ * punctuation around words (¿ ¡ « » quotes) is dropped.
+ */
 export function normalizeWords(text: string): string[] {
   return text
-    .toLowerCase()
+    .normalize('NFC')
+    .toLocaleLowerCase()
     .replace(/[‘’ʼ]/g, "'")
     .split(/\s+/)
-    .map((w) => w.replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, '').replace(/^'+|'+$/g, ''))
+    .map((w) => w.replace(/^[^\p{L}\p{N}']+|[^\p{L}\p{N}']+$/gu, '').replace(/^'+|'+$/g, ''))
     .filter((w) => w.length > 0)
 }
 

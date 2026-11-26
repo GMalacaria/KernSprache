@@ -81,3 +81,27 @@ describe('dictationSentences', () => {
     ])
   })
 })
+
+describe('dictation in other languages', () => {
+  it('keeps accents, ñ, ü, ß and ç', () => {
+    expect(normalizeWords('Der Fuß ist groß, ÜBER alles!')).toEqual(['der', 'fuß', 'ist', 'groß', 'über', 'alles'])
+    expect(normalizeWords('El niño está en España.')).toEqual(['el', 'niño', 'está', 'en', 'españa'])
+    expect(normalizeWords('Ça va, garçon ?')).toEqual(['ça', 'va', 'garçon'])
+  })
+
+  it('drops ¿ ¡ « » around words and keeps the French apostrophe', () => {
+    expect(normalizeWords('¿Dónde estás? ¡Hola!')).toEqual(['dónde', 'estás', 'hola'])
+    expect(normalizeWords("« J'ai vu l’homme »")).toEqual(["j'ai", 'vu', "l'homme"])
+  })
+
+  it('treats a decomposed accent like the composed one', () => {
+    const decomposed = 'café'
+    expect(compareDictation('Un café, por favor.', `un ${decomposed} por favor`).correct).toBe(true)
+  })
+
+  it('marks a missing accent as a mistake', () => {
+    const result = compareDictation('Él está aquí.', 'El esta aquí')
+    expect(result.correct).toBe(false)
+    expect(result.words.map((w) => w.ok)).toEqual([false, false, true])
+  })
+})

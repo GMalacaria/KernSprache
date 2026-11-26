@@ -536,3 +536,15 @@ button .emoji { margin-right: 0.15em; }
 .volume-track { display: block; width: min(12rem, 100%); height: 0.5rem; border-radius: 1rem; background: var(--track); overflow: hidden; }
 .volume-fill { display: block; height: 100%; background: var(--error); border-radius: inherit; transform: scaleX(0); transform-origin: left; }
 .volume-hint { margin: 0; font-size: 0.85rem; }
+
+/* Studied language: switch in the home header, list and additions in the profile. */
+.home-header h1 { margin: 0; }
+.language-select select { font-weight: 700; border-radius: 999px; padding: 0.35rem 0.8rem; }
+.profile-language { margin: 0; color: var(--muted); font-weight: 700; }
+.language-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.language-list li {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.7rem 0.9rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control);
+}
+.language-list li.active { border-color: var(--accent); }
+.language-add { justify-content: flex-start; flex-wrap: wrap; gap: 0.5rem; }

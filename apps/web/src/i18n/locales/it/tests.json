@@ -33,7 +33,7 @@
     "normal": "Serve a capire se hai capito il capitolo: con almeno 70 su 100 (media di scritto e orale) passi al capitolo successivo.",
     "answersAtEnd": "Le risposte giuste le vedi alla fine.",
     "start": "Inizia",
-    "oralPrompt": "Rispondi a voce in inglese, con qualche frase:",
+    "oralPrompt": "Rispondi a voce in {{language}}, con qualche frase:",
     "passed": "Capitolo superato",
     "notYet": "Non ancora",
     "scores": "Scritto: {{correct}} giuste su {{total}} ({{written}}/100) · Orale: {{oral}}/100",
@@ -70,7 +70,7 @@
       "hint3": "Metto insieme scritto e orale."
     },
     "writtenPrompt": "Scegli la parola giusta:",
-    "oralPrompt": "Rispondi in inglese, con qualche frase:",
+    "oralPrompt": "Rispondi in {{language}}, con qualche frase:",
     "resultTitle": "Il tuo livello",
     "writtenResult": "Scritto: {{correct}} risposte giuste su {{total}} (livello {{level}})",
     "oralResult": " · Orale: livello {{level}}",

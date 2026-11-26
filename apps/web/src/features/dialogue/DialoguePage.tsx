@@ -1,3 +1,5 @@
+import { useLanguageNames } from '../languages/useLanguage'
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -22,9 +24,11 @@ interface DialoguePageProps {
 }
 
 export function DialoguePage({ initialMode = 'written', onExit }: DialoguePageProps) {
+  const lang = useStudiedLanguage()
   const queryClient = useQueryClient()
   const voiceAvailable = canRecord()
   const { t } = useTranslation(['dialogue', 'common'])
+  const names = useLanguageNames()
   const [mode, setMode] = useState<DialogueMode>(voiceAvailable ? initialMode : 'written')
   // Free dialogue is extra practice: its time is saved for statistics, not counted towards the daily goal.
   const { markActivity } = usePracticeActivity('dialogue')
@@ -116,14 +120,14 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
 
       {turns.length === 0 && (
         <p className="muted">
-          {mode === 'oral' ? t('hintOral') : t('hintWritten')}
+          {mode === 'oral' ? t('hintOral', { language: names.lower }) : t('hintWritten', { language: names.lower })}
         </p>
       )}
 
       <ol className="turns">
         {turns.map((turn) => (
           <li key={turn.id} className={`turn turn-${turn.role}`}>
-            <p className="bubble" lang={turn.role === 'assistant' ? 'en' : undefined}>
+            <p className="bubble" lang={turn.role === 'assistant' ? lang : undefined}>
               {turn.content}
             </p>
             {turn.role === 'assistant' && (
@@ -158,8 +162,8 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
       ) : (
         <form onSubmit={onSubmit} className="composer">
           <textarea
-            aria-label={t('messageAria')}
-            lang="en"
+            aria-label={t('messageAria', { language: names.lower })}
+            lang={lang}
             rows={2}
             maxLength={MAX_CHARS}
             value={draft}
@@ -167,7 +171,7 @@ export function DialoguePage({ initialMode = 'written', onExit }: DialoguePagePr
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) onSubmit(e)
             }}
-            placeholder={t('placeholder')}
+            placeholder={names.writeHere}
           />
           <button type="submit" disabled={send.isPending || !draft.trim()}>
             {t('send')}

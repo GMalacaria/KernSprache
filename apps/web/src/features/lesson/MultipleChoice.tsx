@@ -1,3 +1,4 @@
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDock } from './useDock'
@@ -13,6 +14,7 @@ interface MultipleChoiceProps {
 /** One question: pick an option, see right/wrong, then continue. */
 export function MultipleChoice({ question, onAnswered }: MultipleChoiceProps) {
   const { t } = useTranslation(['lesson', 'common'])
+  const lang = useStudiedLanguage()
   const [chosen, setChosen] = useState<number | null>(null)
   const answered = chosen !== null
   const correct = chosen === question.answer
@@ -29,7 +31,7 @@ export function MultipleChoice({ question, onAnswered }: MultipleChoiceProps) {
               key={`${i}-${option}`}
               type="button"
               className={`option${state}`}
-              lang={question.optionsLang}
+              lang={question.optionsStudied ? lang : undefined}
               disabled={answered}
               onClick={() => {
                 setChosen(i)

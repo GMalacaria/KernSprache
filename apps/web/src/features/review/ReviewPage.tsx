@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { Grade } from 'ts-fsrs'
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { usePracticeActivity } from '../study/useStudyTimer'
 import { endReviewSession, fetchDueItems, gradeItem, startReviewSession, type ReviewItem } from './api'
 import { BackHeader } from '../../components/BackHeader'
@@ -16,7 +17,13 @@ const REQUEUE_WITHIN_MS = 30 * 60_000
 export function ReviewPage({ onExit }: { onExit: () => void }) {
   const { t } = useTranslation('review')
   const queryClient = useQueryClient()
-  const due = useQuery({ queryKey: ['review', 'due-items'], queryFn: () => fetchDueItems(new Date()), staleTime: 0, gcTime: 0 })
+  const language = useStudiedLanguage()
+  const due = useQuery({
+    queryKey: ['review', 'due-items', language],
+    queryFn: () => fetchDueItems(new Date(), language),
+    staleTime: 0,
+    gcTime: 0,
+  })
 
   async function exit(sessionId: Promise<string> | null, next: () => void = onExit) {
     if (sessionId) await endReviewSession(await sessionId).catch(() => undefined)

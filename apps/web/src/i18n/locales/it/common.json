@@ -75,5 +75,41 @@
     "no_speech": "Non ho sentito niente. Avvicina il telefono e riprova.",
     "internal": "Errore imprevisto, riprova tra poco.",
     "lesson_preparing": "La lezione è ancora in preparazione. Riprova tra poco."
+  },
+  "languages": {
+    "en": {
+      "name": "Inglese",
+      "lower": "inglese",
+      "the": "l'inglese",
+      "writeHere": "Write here…"
+    },
+    "fr": {
+      "name": "Francese",
+      "lower": "francese",
+      "the": "il francese",
+      "writeHere": "Écris ici…"
+    },
+    "es": {
+      "name": "Spagnolo",
+      "lower": "spagnolo",
+      "the": "lo spagnolo",
+      "writeHere": "Escribe aquí…"
+    },
+    "de": {
+      "name": "Tedesco",
+      "lower": "tedesco",
+      "the": "il tedesco",
+      "writeHere": "Schreib hier…"
+    }
+  },
+  "languageSwitch": {
+    "label": "Lingua che stai studiando",
+    "yours": "Le tue lingue",
+    "studying": "In corso",
+    "study": "Studia questa",
+    "add": "Aggiungi una lingua",
+    "addHint": "Per ogni lingua scegli lo scopo e fai il test di livello: livello e progressi restano separati.",
+    "switching": "Cambio lingua…",
+    "error": "Non sono riuscito a cambiare lingua. Riprova."
   }
 }
