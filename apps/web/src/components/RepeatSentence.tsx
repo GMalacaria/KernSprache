@@ -5,6 +5,7 @@ import { useVoiceRecorder } from '../lib/useVoiceRecorder'
 import { transcribeWithPronunciation } from '../features/dialogue/api'
 import { PronunciationNote } from '../features/dialogue/PronunciationNote'
 import { Emoji } from './Emoji'
+import { VolumeMeter } from './VolumeMeter'
 
 interface RepeatSentenceProps {
   sentence: string
@@ -21,7 +22,7 @@ export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
       if (result.pronunciation) onAssessed?.(result.pronunciation.score)
     },
   })
-  const { isRecording, seconds, micError, start, stop } = useVoiceRecorder({
+  const { isRecording, seconds, micError, level, autoStops, start, stop } = useVoiceRecorder({
     onRecorded: (audio) => assess.mutate(audio),
   })
 
@@ -57,6 +58,7 @@ export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
       >
         {label}
       </button>
+      {isRecording && <VolumeMeter level={level} autoStops={autoStops} />}
       {micError && <p className="error">{micError}</p>}
       {assess.isError && <p className="error">{assess.error.message}</p>}
       {assess.isSuccess && (

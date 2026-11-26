@@ -8,6 +8,7 @@ import { ListenButton } from '../../components/ListenButton'
 import { canRecord, MAX_RECORDING_MS, stopSpeaking, unlockSpeech } from '../../lib/audio'
 import { playCorrect, playWrong } from '../../lib/sounds'
 import { useVoiceRecorder } from '../../lib/useVoiceRecorder'
+import { VolumeMeter } from '../../components/VolumeMeter'
 import { transcribeWithPronunciation } from '../dialogue/api'
 import { PronunciationNote } from '../dialogue/PronunciationNote'
 import type { Pronunciation } from '../dialogue/types'
@@ -277,6 +278,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
               </button>
             )}
           </div>
+          {recorder.isRecording && <VolumeMeter level={recorder.level} autoStops={recorder.autoStops} />}
           {recorder.micError && <p className="error">{recorder.micError}</p>}
           {transcribe.isError && <p className="error">{transcribe.error.message}</p>}
           {flow.hint && (
@@ -385,6 +387,7 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
           ) : (
             <p className="muted">{t('pron.noMic')}</p>
           )}
+          {recorder.isRecording && <VolumeMeter level={recorder.level} autoStops={recorder.autoStops} />}
           {unclear !== null && (
             <p className="error">
               {unclear ? t('pron.unclearHeard', { text: unclear }) : t('pron.unclear')}

@@ -1,18 +1,25 @@
 import { i18n } from '../i18n'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { startRecording, type Recording } from './audio'
-
+import { SHORT_SILENCE_MS } from './speechLevel'
 
 interface Options {
   /** Called with the audio when the recording ends, by the learner or at the time limit. */
   onRecorded: (audio: Blob) => void
   /** Called every second while recording: the study timer counts it as activity. */
   onTick?: () => void
+  /**
+   * Pause after speech that ends the recording by itself (ms). Defaults to SHORT_SILENCE_MS; longer
+   * for answers that need thinking, null to end only on a tap.
+   */
+  silenceMs?: number | null
 }
 
 /** Microphone recording shared by the oral dialogue and the spoken answers: state, timer, cleanup. */
-export function useVoiceRecorder({ onRecorded, onTick }: Options) {
+export function useVoiceRecorder({ onRecorded, onTick, silenceMs = SHORT_SILENCE_MS }: Options) {
   const recording = useRef<Recording | null>(null)
+  /** Latest microphone volume (RMS), read by VolumeMeter on each frame without re-rendering. */
+  const level = useRef(0)
   const [isRecording, setIsRecording] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [micError, setMicError] = useState<string | null>(null)
@@ -53,13 +60,19 @@ export function useVoiceRecorder({ onRecorded, onTick }: Options) {
   const start = useCallback(async () => {
     setMicError(null)
     try {
-      recording.current = await startRecording(() => void stop())
+      level.current = 0
+      recording.current = await startRecording(() => void stop(), {
+        onLevel: (rms) => {
+          level.current = rms
+        },
+        silenceMs: silenceMs ?? undefined,
+      })
       setSeconds(0)
       setIsRecording(true)
     } catch {
       setMicError(i18n.t('voice.micError'))
     }
-  }, [stop])
+  }, [stop, silenceMs])
 
   /** Stops and throws the audio away. */
   const cancel = useCallback(() => {
@@ -68,5 +81,5 @@ export function useVoiceRecorder({ onRecorded, onTick }: Options) {
     setIsRecording(false)
   }, [])
 
-  return { isRecording, seconds, micError, start, stop, cancel }
+  return { isRecording, seconds, micError, level, autoStops: silenceMs !== null, start, stop, cancel }
 }

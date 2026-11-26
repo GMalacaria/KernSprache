@@ -58,7 +58,8 @@
     "repeat": "Ripeti la frase",
     "repeatAgain": "Riprova a ripetere",
     "unclear": "Non riesco a valutarla: riprova avvicinando il telefono.",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "autoStop": "Mi fermo da solo quando smetti di parlare."
   },
   "serverErrors": {
     "bad_request": "Richiesta non valida.",

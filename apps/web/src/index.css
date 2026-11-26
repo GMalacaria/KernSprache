@@ -530,3 +530,9 @@ button .emoji { margin-right: 0.15em; }
   .spinner { animation: spin 0.8s linear infinite; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Volume meter shown while recording */
+.volume-meter { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; width: 100%; }
+.volume-track { display: block; width: min(12rem, 100%); height: 0.5rem; border-radius: 1rem; background: var(--track); overflow: hidden; }
+.volume-fill { display: block; height: 100%; background: var(--error); border-radius: inherit; transform: scaleX(0); transform-origin: left; }
+.volume-hint { margin: 0; font-size: 0.85rem; }

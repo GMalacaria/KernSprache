@@ -1,7 +1,9 @@
 import { Emoji } from '../../components/Emoji'
+import { VolumeMeter } from '../../components/VolumeMeter'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_RECORDING_MS } from '../../lib/audio'
 import { useVoiceRecorder } from '../../lib/useVoiceRecorder'
+import { LONG_SILENCE_MS } from '../../lib/speechLevel'
 import { transcribeAudio } from '../dialogue/api'
 import { useTranslation } from 'react-i18next'
 
@@ -14,8 +16,10 @@ interface SpokenAnswerProps {
 export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
   const { t } = useTranslation(['tests', 'common'])
   const transcribe = useMutation({ mutationFn: transcribeAudio })
-  const { isRecording, seconds, micError, start, stop } = useVoiceRecorder({
+  const { isRecording, seconds, micError, level, autoStops, start, stop } = useVoiceRecorder({
     onRecorded: (audio) => transcribe.mutate(audio),
+    // Test answers are longer and need thinking between sentences.
+    silenceMs: LONG_SILENCE_MS,
   })
 
   async function begin() {
@@ -58,6 +62,7 @@ export function SpokenAnswer({ onDone, onSkip }: SpokenAnswerProps) {
                 </>
               )}
       </button>
+      {isRecording && <VolumeMeter level={level} autoStops={autoStops} />}
       {!isRecording && !transcribe.isPending && (
         <button type="button" className="link" onClick={onSkip}>
           {t('spoken.skip')}

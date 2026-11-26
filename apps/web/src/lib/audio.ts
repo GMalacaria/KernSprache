@@ -1,7 +1,7 @@
 // Microphone recording (MediaRecorder) and text-to-speech: a Gemini voice (function `speak`,
 // cached on the server) with the browser's own voice (speechSynthesis) as a fallback.
 import { supabase } from './supabase'
-import { containsSpeech } from './speechLevel'
+import { containsSpeech, endOfSpeech, READING_MS } from './speechLevel'
 
 /** First container the browser can record: webm/ogg on Android and desktop, mp4 on iOS Safari. */
 export function pickRecordingMimeType(): string | undefined {
@@ -23,11 +23,21 @@ export interface Recording {
   heardSpeech: () => boolean
 }
 
+export interface LevelListeners {
+  /** Called with each volume reading (RMS, 0-1), every READING_MS: drives the volume meter. */
+  onLevel?: (rms: number) => void
+  /** Called once when the learner has spoken and then stayed quiet for `silenceMs`. */
+  onEndOfSpeech?: () => void
+  /** Pause after speech that calls onEndOfSpeech; without it the recording only ends on a tap. */
+  silenceMs?: number
+}
+
 /**
- * Listens to the microphone stream while it records and keeps its volume every 50 ms, so a silent
- * recording is never sent to be transcribed (the model would invent the expected sentence and grade it).
+ * Listens to the microphone stream while it records and keeps its volume every READING_MS, so a
+ * silent recording is never sent to be transcribed (the model would invent the expected sentence
+ * and grade it), the meter follows the voice and the recording can end on a pause.
  */
-function watchLevels(stream: MediaStream): { levels: number[]; close: () => void } | null {
+function watchLevels(stream: MediaStream, listeners: LevelListeners): { levels: number[]; close: () => void } | null {
   const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
   if (!Ctx) return null
   try {
@@ -37,12 +47,19 @@ function watchLevels(stream: MediaStream): { levels: number[]; close: () => void
     ctx.createMediaStreamSource(stream).connect(analyser)
     const samples = new Float32Array(analyser.fftSize)
     const levels: number[] = []
+    let ended = false
     const id = window.setInterval(() => {
       analyser.getFloatTimeDomainData(samples)
       let sum = 0
       for (const v of samples) sum += v * v
-      levels.push(Math.sqrt(sum / samples.length))
-    }, 50)
+      const rms = Math.sqrt(sum / samples.length)
+      levels.push(rms)
+      listeners.onLevel?.(rms)
+      if (!ended && listeners.silenceMs !== undefined && endOfSpeech(levels, listeners.silenceMs)) {
+        ended = true
+        listeners.onEndOfSpeech?.()
+      }
+    }, READING_MS)
     return {
       levels,
       close: () => {
@@ -57,8 +74,11 @@ function watchLevels(stream: MediaStream): { levels: number[]; close: () => void
 
 export const MAX_RECORDING_MS = 60_000
 
-/** Starts recording from the microphone. Stops by itself after MAX_RECORDING_MS. */
-export async function startRecording(onAutoStop: () => void): Promise<Recording> {
+/**
+ * Starts recording from the microphone. Calls onAutoStop after MAX_RECORDING_MS, or after a pause
+ * once the learner has spoken if `listeners.silenceMs` is set.
+ */
+export async function startRecording(onAutoStop: () => void, listeners: LevelListeners = {}): Promise<Recording> {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
   const mimeType = pickRecordingMimeType()
   const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
@@ -73,7 +93,7 @@ export async function startRecording(onAutoStop: () => void): Promise<Recording>
     }
   })
   recorder.start()
-  const watcher = watchLevels(stream)
+  const watcher = watchLevels(stream, { ...listeners, onEndOfSpeech: onAutoStop })
   const timer = window.setTimeout(onAutoStop, MAX_RECORDING_MS)
 
   return {
