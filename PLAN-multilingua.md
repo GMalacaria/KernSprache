@@ -231,7 +231,7 @@ Decisioni prese:
    - `ORAL_PROMPTS` con testo nella lingua madre;
    - `placement-test` sceglie in base alla lingua attiva; `placement_results.language`.
 
-8. ✅ **`feat(db): add French, Spanish and German curricula`** — PR aperta, **da rivedere dall'utente prima del merge** (sono contenuti):
+8. ✅ **`feat(db): add French, Spanish and German curricula`** — fatta (#56), rivista dall'utente:
    - migration `20261126160000_curriculum_fr`, `…160100_curriculum_es`, `…160200_curriculum_de`: 24 capitoli × 4 lezioni ciascuna, stessa struttura dell'inglese, progressione grammaticale tipica di ogni lingua (es. tedesco: casi accusativo → dativo → genitivo, Konjunktiv II e I; francese: passé composé con avoir/être, imparfait, subjonctif; spagnolo: indefinido/imperfecto/perfecto, subjuntivo);
    - titoli e descrizioni in italiano, `grammar_focus`/`focus` in inglese per i prompt; slug unici per lingua (capitoli) e per capitolo (lezioni);
    - il Percorso (`usePath`) legge solo i capitoli della lingua attiva (`profiles.active_language`), altrimenti mostrerebbe i 96 capitoli insieme;
@@ -239,7 +239,7 @@ Decisioni prese:
    - provato: con il tedesco attivo il Percorso mostra il curriculum tedesco e una lezione tedesca si genera con verbi separabili, forme "aufstehen · stand auf · ist aufgestanden" e sostantivi con l'articolo.
    - Piano originale: una migration per lingua (24 capitoli × 4 lezioni, `grammar_focus`/`focus` in inglese come oggi, titoli in italiano), generate offline e riviste. Il test `curriculum` controlla 96 lezioni per lingua.
 
-9. ✅ **`feat(web): choose and switch learning language`** — fatta (migration `20261126180000_set_active_language`; da mergiare **dopo la #56**, che filtra il Percorso per lingua):
+9. ✅ **`feat(web): choose and switch learning language`** — fatta (migration `20261126180000_set_active_language`; mergiata dopo la #56, che filtra il Percorso per lingua):
    - **il profilo rispecchia la lingua attiva**: la RPC `set_active_language` crea la riga della lingua se manca e copia nel profilo livello, scopo, goal e `onboarded_at` di quella lingua; così il resto dell'app e delle functions continua a leggere il profilo. Una lingua nuova ha `onboarded_at` vuoto, quindi l'app mostra da sola il primo accesso (scopo, test di livello). Il trigger di sincronizzazione resta: copia le modifiche del profilo nella riga della lingua attiva. Nella PR 10 si decide se far leggere `learner_languages` all'app o tenere questo specchio;
    - primo accesso: "Quale lingua vuoi studiare?" e "Perché vuoi imparare il francese?"; Profilo: sezione "Le tue lingue" (livello e scopo per lingua, "Studia questa", "Aggiungi una lingua"); Home: select della lingua nell'intestazione quando le lingue sono più di una. Cambiare lingua invalida tutte le query;
    - `features/languages`: `LanguageProvider` (lingua per `lang`, voce e testi), `useStudiedLanguage`, `useLanguageNames` (nomi in `common:languages.*`, segnaposto "Write here… / Écris ici… / Escribe aquí… / Schreib hier…"), `useSwitchLanguage`;
