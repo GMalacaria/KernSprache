@@ -79,11 +79,11 @@ select ok(
 
 -- Curriculum: the same slug and position can exist in another language, not twice in one.
 insert into public.chapters (language, level, sort_order, slug, title)
-select 'de', level, sort_order, slug, title from public.chapters where language = 'en' and sort_order = 1 and level = 'A1';
-select is((select count(*) from public.chapters where slug = (select slug from public.chapters where language = 'de'))::int, 2,
+select 'it', level, sort_order, slug, title from public.chapters where language = 'en' and sort_order = 1 and level = 'A1';
+select is((select count(*) from public.chapters where slug = (select slug from public.chapters where language = 'it'))::int, 2,
   'a chapter slug can repeat in another language');
 select throws_ok(
-  $$ insert into public.chapters (language, level, sort_order, slug, title) values ('de', 'A1', 1, 'other', 'x') $$,
+  $$ insert into public.chapters (language, level, sort_order, slug, title) values ('it', 'A1', 1, 'other', 'x') $$,
   '23505', null, 'level and order are unique within a language'
 );
 

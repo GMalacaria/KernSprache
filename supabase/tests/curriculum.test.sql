@@ -1,6 +1,6 @@
 -- Curriculum: shared read-only chapters/lessons, per-user lesson progress. Run with: pnpm test:db
 begin;
-select plan(10);
+select plan(12);
 
 insert into auth.users (id, email) values
   ('55555555-5555-5555-5555-555555555555', 'eva@example.com'),
@@ -9,8 +9,31 @@ insert into auth.users (id, email) values
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"55555555-5555-5555-5555-555555555555","role":"authenticated"}', true);
 
-select is((select count(*) from public.chapters)::int, 24, 'learners can read the 24 chapters');
-select is((select count(*) from public.lessons)::int, 96, 'learners can read the 96 lessons');
+select is(
+  (select string_agg(language || ':' || n, ' ' order by language) from (
+    select language::text, count(*) n from public.chapters group by language) x),
+  'de:24 en:24 es:24 fr:24',
+  'learners can read 24 chapters per studied language'
+);
+select is(
+  (select string_agg(language || ':' || n, ' ' order by language) from (
+    select c.language::text, count(*) n from public.lessons l join public.chapters c on c.id = l.chapter_id
+    group by c.language) x),
+  'de:96 en:96 es:96 fr:96',
+  'every curriculum has 96 lessons'
+);
+select is(
+  (select count(*) from (
+    select c.language, c.level from public.chapters c group by c.language, c.level having count(*) <> 6) x)::int,
+  0,
+  'six chapters per level in every language'
+);
+select is(
+  (select count(*) from public.chapters c
+   where (select count(*) from public.lessons l where l.chapter_id = c.id) <> 4)::int,
+  0,
+  'four lessons per chapter'
+);
 
 select throws_ok(
   $$ insert into public.lessons (chapter_id, sort_order, slug, title, focus)
