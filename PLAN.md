@@ -81,7 +81,7 @@ Modellato su aiTool (`src/install.ts`). Provato in emulazione mobile (evento `be
 
 - `pnpm fn:serve` ora è provato in locale e funziona (dopo `pnpm db:start`).
 - Se `pnpm` o `deno` cercano pacchetti su `npm.pepita.io` (registry aziendale, senza VPN non risolve): usare `npm_config_manage_package_manager_versions=false` per pnpm e `NPM_CONFIG_REGISTRY=https://registry.npmjs.org` per Deno.
-- Se la prima lezione si apre mentre il prefetch dello stesso capitolo è in corso, la lezione può essere generata due volte (costo minimo). Lo risolve il lock della cache condivisa in `PLAN-multilingua.md` (PR 5).
+- Chiuso il 2026-11-26: le lezioni generate due volte durante la preparazione anticipata (lock della cache condivisa, `PLAN-multilingua.md` PR 5).
 - I tipi delle risposte delle functions sono duplicati nella PWA (`features/dialogue/types.ts`, `features/lesson/types.ts`, `features/placement/api.ts`): tenerli allineati agli schemi zod. Scelta del proprietario: si lasciano così (il piano multilingua riscrive comunque quegli schemi).
 - `profiles.goal` contiene i dettagli dello scopo in parole dell'utente (il nome è storico; col multilingua passa a `learner_languages`).
 - Chiuso il 2026-11-24: hook `useVoiceRecorder` condiviso da `VoiceComposer` e `SpokenAnswer`; prompt `tutor-chat.v2` verificato con Gemini reale (le risposte cambiano con lo scopo, correzioni identiche); i test pgTAP passano anche su un database con dati (le conte sono filtrate dalla RLS e il test di approvazione cancella gli utenti dentro la transazione); colonna `elapsed_days` tolta da `vocab_items` e `mistakes`.

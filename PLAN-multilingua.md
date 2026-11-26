@@ -174,7 +174,7 @@ Decisioni prese:
      - `raiseLevel` alza il livello in `learner_languages` per la lingua del capitolo e nel profilo solo se è la lingua attiva;
      - **rilascio**: richiede la migration della PR 3 in produzione prima del deploy delle functions (leggono `learner_languages` e `language`);
      - provato con le functions di questa worktree (`deno run` su porte locali) e Gemini vero: dialogo in inglese e in tedesco (correzioni giuste, spiegazioni in italiano, righe salvate con `de`), voce tedesca in cache con `de`, lezione inglese generata con `lesson.v2` e lo scopo della lingua del capitolo.
-   - **4b**: nomi neutri dei campi e verbi generici, con la PWA che legge il formato vecchio e il nuovo.
+   - **4b rinviata (decisione del 2026-11-26, stesso principio della PR 3: niente rinomine adesso)**: i campi JSON `_en`/`_it` restano, dichiarati "historical" nei prompt. Rinominarli vuol dire convertire lezioni e verifiche salvate e far leggere due formati alla PWA, per un guadagno solo estetico. La parte funzionale (etichette dei verbi e "in inglese" nei quiz secondo la lingua) va nella PR 9; la rinomina, se si vuole, nella PR 10 insieme alle colonne.
    - Piano originale:
    - nuove versioni dei prompt in `_shared/prompts/`: `tutor-chat.v3`, `lesson.v2`, `chapter-test.v3`, `placement-oral.v2`, `transcribe.v2`, `pronunciation.v3`;
      - `{native}`/`{target}` vanno nella parte fissa, così il caching implicito di Gemini resta per coppia;
@@ -188,7 +188,14 @@ Decisioni prese:
    - `transcribe` e `speak` ricevono `language`;
    - aggiornare i test Deno `*_test.ts` (`transcribe_test`, `pronunciation_test`, `speak_test`, `chapter-test_test`, …) e i tipi duplicati nella PWA (`dialogue/types.ts`, `lesson/types.ts`, `placement/api.ts`).
 
-5. **`feat(db): share lesson content cache`**:
+5. ✅ **`feat(db): share lesson content cache`** — fatta (migration `20261126100000_lesson_content_cache`):
+   - tabella `lesson_content_cache` con chiave unica `(lesson_id, native_language, purpose, prompt_version)` `NULLS NOT DISTINCT` (lo scopo può mancare), RLS senza policy: la usa solo la function `lesson` con la service role;
+   - lock: RPC `claim_lesson_generation` (solo service role) inserisce la riga con `content` nullo e `generating_until`; chi non vince aspetta (poll ogni 2 s, fino a 60 s, poi errore `lesson_preparing`); un claim scaduto (120 s) si può riprendere, un errore lo rilascia. Risolve le lezioni generate due volte durante la preparazione anticipata;
+   - il prompt non contiene più dati del singolo: tolto il `goal` (parole dell'utente); le parole già insegnate vengono dalle lezioni condivise precedenti dello stesso capitolo;
+   - `lesson_contents` resta: la lezione già aperta da un learner (stesso scopo) viene ancora da lì, e ogni lezione condivisa viene copiata lì perché la verifica di capitolo la legge. Si toglie nella PR 10;
+   - provato con due account con lo stesso scopo che aprono insieme la stessa lezione nuova: una sola generazione (`ai_usage` +1), copia per tutti e due, riapertura dalla cache in 35 ms;
+   - **non fatto** (opzionale): preparare gli audio delle frasi appena generata la lezione.
+   - Piano originale:
    - tabella `lesson_content_cache` (lesson_id, native_language, purpose, prompt_version, content, created_at; PK sui primi quattro), senza accesso per gli utenti; la legge e la scrive la function `lesson` con la service role;
    - il prompt della lezione non deve contenere dati del singolo utente: va verificato in `lesson/index.ts`;
    - lock sulla generazione (insert `on conflict do nothing` di una riga "in corso", oppure advisory lock). Risolve anche il debito "lezioni generate due volte durante la preparazione anticipata" citato in `PLAN.md`;

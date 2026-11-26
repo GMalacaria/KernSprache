@@ -96,52 +96,147 @@ async function loadLesson(db: Db, lessonId: number): Promise<LessonInfo> {
   return data as LessonInfo
 }
 
-/** Cached content if written for the current purpose, otherwise newly generated and saved. */
+/** The shared cache key of a lesson: no data of a single learner, so everyone with the same key reuses it. */
+interface CacheKey {
+  lesson_id: number
+  native_language: LanguageCode
+  purpose: Learner['purpose']
+  prompt_version: string
+}
+
+const CLAIM_SECONDS = 120
+const WAIT_STEP_MS = 2000
+const WAIT_LIMIT_MS = 60_000
+
+/**
+ * The learner's own copy if it was written for their purpose (a lesson in progress keeps its content), otherwise
+ * the shared one, generated once for everyone with the same native language and purpose. The learner gets a copy
+ * in lesson_contents, which the chapter test still reads.
+ */
 async function getOrGenerate(
   db: Db,
   userId: string,
   lesson: LessonInfo,
   learner: Learner,
 ): Promise<{ content: LessonContent; generated: boolean }> {
-  const { data: cached, error } = await db
+  const { data: own, error } = await db
     .from('lesson_contents')
     .select('content, purpose')
     .eq('lesson_id', lesson.id)
     .maybeSingle()
   if (error) throw error
-  if (cached && cached.purpose === learner.purpose) {
-    const parsed = lessonContentSchema.safeParse(cached.content)
+  if (own && own.purpose === learner.purpose) {
+    const parsed = lessonContentSchema.safeParse(own.content)
     if (parsed.success) return { content: parsed.data, generated: false }
   }
 
-  const content = await generate(db, userId, lesson, learner)
+  const key: CacheKey = {
+    lesson_id: lesson.id,
+    native_language: learner.pair.native,
+    purpose: learner.purpose,
+    prompt_version: LESSON_PROMPT_VERSION,
+  }
+  const shared = await sharedContent(key, userId, lesson, learner)
   const { error: saveError } = await adminClient().from('lesson_contents')
     .upsert({
       user_id: userId,
       lesson_id: lesson.id,
       purpose: learner.purpose,
-      content,
+      content: shared.content,
       prompt_version: LESSON_PROMPT_VERSION,
     })
   if (saveError) throw saveError
-  return { content, generated: true }
+  return shared
 }
 
-async function generate(
-  db: Db,
+/** Reads the shared content; generates it when this request wins the claim, otherwise waits for the one that did. */
+async function sharedContent(
+  key: CacheKey,
   userId: string,
   lesson: LessonInfo,
   learner: Learner,
+): Promise<{ content: LessonContent; generated: boolean }> {
+  const admin = adminClient()
+  const deadline = Date.now() + WAIT_LIMIT_MS
+  while (true) {
+    const cached = await readShared(key)
+    if (cached) return { content: cached, generated: false }
+
+    const { data: claimed, error } = await admin.rpc('claim_lesson_generation', {
+      p_lesson_id: key.lesson_id,
+      p_native_language: key.native_language,
+      // The SQL function takes a null purpose; the generated type does not say so.
+      p_purpose: key.purpose as NonNullable<CacheKey['purpose']>,
+      p_prompt_version: key.prompt_version,
+      p_seconds: CLAIM_SECONDS,
+    })
+    if (error) throw error
+    if (claimed) {
+      let content: LessonContent
+      try {
+        content = await generate(userId, lesson, learner, key)
+      } catch (err) {
+        // Release the claim so the next request can try again straight away.
+        await updateShared(key, { generating_until: null })
+        throw err
+      }
+      await updateShared(key, { content, generating_until: null })
+      return { content, generated: true }
+    }
+    // Another request is generating it (e.g. the chapter being prepared in the background).
+    if (Date.now() > deadline) {
+      throw new HttpError(503, 'lesson_preparing', 'La lezione è ancora in preparazione. Riprova tra poco.')
+    }
+    await new Promise((resolve) => setTimeout(resolve, WAIT_STEP_MS))
+  }
+}
+
+async function readShared(key: CacheKey): Promise<LessonContent | null> {
+  let query = adminClient()
+    .from('lesson_content_cache')
+    .select('content')
+    .eq('lesson_id', key.lesson_id)
+    .eq('native_language', key.native_language)
+    .eq('prompt_version', key.prompt_version)
+  // A missing purpose is a key value too (unique NULLS NOT DISTINCT): match it with IS NULL.
+  query = key.purpose === null ? query.is('purpose', null) : query.eq('purpose', key.purpose)
+  const { data, error } = await query.maybeSingle()
+  if (error) throw error
+  const parsed = lessonContentSchema.safeParse(data?.content)
+  return parsed.success ? parsed.data : null
+}
+
+async function updateShared(
+  key: CacheKey,
+  values: { content?: LessonContent; generating_until: null },
+): Promise<void> {
+  let query = adminClient()
+    .from('lesson_content_cache')
+    .update(values)
+    .eq('lesson_id', key.lesson_id)
+    .eq('native_language', key.native_language)
+    .eq('prompt_version', key.prompt_version)
+  query = key.purpose === null ? query.is('purpose', null) : query.eq('purpose', key.purpose)
+  const { error } = await query
+  if (error) throw error
+}
+
+async function generate(
+  userId: string,
+  lesson: LessonInfo,
+  learner: Learner,
+  key: CacheKey,
 ): Promise<LessonContent> {
-  const taughtWords = await wordsTaughtInChapter(db, lesson)
+  // Shared content: only the course, the purpose and the earlier shared lessons go into the prompt, never the
+  // learner's own words or history.
+  const taughtWords = await wordsTaughtInChapter(lesson, key)
   const context = [
     '# Lesson context',
     `- Chapter: "${lesson.chapters?.title}" (CEFR ${lesson.chapters?.level}) - ${lesson.chapters?.grammar_focus}`,
     `- Lesson ${lesson.sort_order} of the chapter: "${lesson.title}" - focus: ${lesson.focus}`,
     `- Learner's purpose: ${learner.purpose ?? 'not specified'}`,
-    learner.goal ? `- In the learner's own words: ${learner.goal}` : null,
     `- Words already taught in this chapter: ${taughtWords.length ? taughtWords.join(', ') : 'none'}`,
-  ].filter((line): line is string => line !== null).join('\n')
+  ].join('\n')
 
   try {
     const result = await getAiProvider().generateStructured({
@@ -184,24 +279,20 @@ async function generate(
   }
 }
 
-/** English words of the earlier lessons of the same chapter, to avoid repeating them. */
-async function wordsTaughtInChapter(
-  db: Db,
-  lesson: LessonInfo,
-): Promise<string[]> {
-  const { data, error } = await db
-    .from('lesson_contents')
+/** Words of the earlier shared lessons of the same chapter (same native language and purpose), not to repeat them. */
+async function wordsTaughtInChapter(lesson: LessonInfo, key: CacheKey): Promise<string[]> {
+  let query = adminClient()
+    .from('lesson_content_cache')
     .select('content, lessons!inner (chapter_id, sort_order)')
     .eq('lessons.chapter_id', lesson.chapter_id)
     .lt('lessons.sort_order', lesson.sort_order)
+    .eq('native_language', key.native_language)
+    .eq('prompt_version', key.prompt_version)
+  query = key.purpose === null ? query.is('purpose', null) : query.eq('purpose', key.purpose)
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []).flatMap((row) => {
     const parsed = lessonContentSchema.safeParse(row.content)
-    return parsed.success
-      ? [
-        ...parsed.data.words.map((w) => w.en),
-        ...parsed.data.phrases.map((p) => p.en),
-      ]
-      : []
+    return parsed.success ? [...parsed.data.words.map((w) => w.en), ...parsed.data.phrases.map((p) => p.en)] : []
   })
 }

@@ -111,6 +111,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"lesson_content_cache": {
+                  Row: {
+                    "content": Json | null,"created_at": string,"generating_until": string | null,"lesson_id": number,"native_language": Database["public"]['Enums']["language_code"],"prompt_version": string,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "content"?: Json | null,"created_at"?: string,"generating_until"?: string | null,"lesson_id": number,"native_language": Database["public"]['Enums']["language_code"],"prompt_version": string,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "content"?: Json | null,"created_at"?: string,"generating_until"?: string | null,"lesson_id"?: number,"native_language"?: Database["public"]['Enums']["language_code"],"prompt_version"?: string,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lesson_content_cache_lesson_id_fkey"
+      columns: ["lesson_id"]
+isOneToOne: false
+      referencedRelation: "lessons"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"lesson_contents": {
                   Row: {
                     "content": NonNullable<Json>,"created_at": string,"lesson_id": number,"prompt_version": string,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"user_id": string
@@ -385,6 +405,9 @@ isOneToOne: false
       } },
 "call_send_reminders":
 { Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"claim_lesson_generation":
+{ Args: { "p_lesson_id": number,"p_native_language": Database["public"]['Enums']["language_code"],"p_prompt_version": string,"p_purpose": Database["public"]['Enums']["learning_purpose"],"p_seconds"?: number }; Returns: boolean
                            },
 "record_lesson_stats":
 { Args: { "p_answers": number,"p_best_streak": number,"p_correct": number,"p_lesson_id": number }; Returns: {
