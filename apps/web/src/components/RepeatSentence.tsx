@@ -16,7 +16,7 @@ interface RepeatSentenceProps {
 export function RepeatSentence({ sentence, onAssessed }: RepeatSentenceProps) {
   const { t } = useTranslation()
   const assess = useMutation({
-    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, sentence, true),
+    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, sentence, true, 'repeat'),
     onSuccess: (result) => {
       if (result.pronunciation) onAssessed?.(result.pronunciation.score)
     },

@@ -27,6 +27,16 @@ export const transcribeRequestSchema = z.object({
   save_mistakes: z.boolean().default(false),
   /** Language being spoken; the learner's active language when missing (older clients). */
   language: languageSchema.optional(),
+  /** Where the recording comes from, for the saved pronunciation result; guessed for older clients. */
+  source: z.enum(['dialogue', 'repeat', 'review', 'test']).optional(),
   mime_type: z.string().transform((m) => m.split(';')[0]!.trim().toLowerCase())
     .pipe(z.enum(AUDIO_MIME_TYPES)),
 })
+
+/** Older clients do not send the source: a sentence to read is an exercise (or the review), free speech the dialogue. */
+export function guessSource(
+  request: { expected_text?: string; save_mistakes: boolean },
+): 'dialogue' | 'repeat' | 'review' {
+  if (!request.expected_text) return 'dialogue'
+  return request.save_mistakes ? 'repeat' : 'review'
+}

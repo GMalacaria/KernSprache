@@ -30,6 +30,8 @@ export interface TutorChatRequest {
   session_id?: string
   lesson_id?: number
   messages: ChatMessage[]
+  /** How the learner wrote the last message: a voice message is its transcript. */
+  input?: 'text' | 'voice'
 }
 
 export interface TutorChatResponse {

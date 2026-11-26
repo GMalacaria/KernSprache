@@ -4,6 +4,9 @@ import { functionErrorMessage } from '../../lib/functionError'
 import { supabase } from '../../lib/supabase'
 import type { Pronunciation, TutorChatRequest, TutorChatResponse } from './types'
 
+/** Where a judged recording comes from (`pronunciation_results.source`). */
+export type PronunciationSource = 'dialogue' | 'repeat' | 'review' | 'test'
+
 const tutorError = () => i18n.t('errors.tutorNoReply')
 const transcribeError = () => i18n.t('errors.transcribe')
 
@@ -31,6 +34,8 @@ export async function transcribeWithPronunciation(
   expectedText?: string,
   /** Store the mispronounced words as review cards (dialogue and exercises, not the review itself). */
   saveMistakes = false,
+  /** Where the recording comes from, saved with the pronunciation result. */
+  source?: PronunciationSource,
 ): Promise<{ text: string; pronunciation: Pronunciation | null }> {
   const { data, error } = await supabase.functions.invoke<{ text: string; pronunciation: Pronunciation | null }>(
     'transcribe',
@@ -41,6 +46,7 @@ export async function transcribeWithPronunciation(
         assess: true,
         ...(expectedText ? { expected_text: expectedText } : {}),
         save_mistakes: saveMistakes,
+        ...(source ? { source } : {}),
       },
     },
   )

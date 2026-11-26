@@ -202,7 +202,14 @@ Decisioni prese:
    - opzionale, ripreso da `PLAN.md`: appena si genera una lezione si preparano in anticipo gli audio delle sue frasi con `speak`, per togliere i 3-4 secondi della prima riproduzione. Con la cache condivisa si fa una volta sola per tutti;
    - `lesson_contents` resta per un rilascio e poi si elimina.
 
-6. **`feat(db): save tutor messages, transcripts and pronunciation`**:
+6. ✅ **`feat(db): save tutor messages, transcripts and pronunciation`** — fatta (migration `20261126120000_messages_and_results`):
+   - `session_messages` (ruolo `learner|tutor`, `input text|voice` per il learner; il contenuto di un messaggio a voce è la sua trascrizione, quindi niente colonna `transcript`), scritta da `tutor-chat` (la PWA manda `input`);
+   - `pronunciation_results` (lingua, `source dialogue|repeat|review|test`, frase attesa, trascrizione, punteggio, parole), scritta da `transcribe` per ogni valutazione; la PWA manda `source`, per i client vecchi la function la ricava (`guessSource`);
+   - `dictation_results` (una riga per frase: punteggio, tentativi sbagliati, testo mostrato), scritta dalla PWA a fine frase con RLS e vincoli sui numeri, come `lesson_stats`;
+   - `chapter_test_attempts.oral_transcripts`;
+   - provato con le functions di questa worktree e Gemini vero: frase generata da `speak` e ripetuta a `transcribe` come "Ripeti la frase" → riga in `pronunciation_results`; messaggio a voce a `tutor-chat` → due righe in `session_messages`; dettato salvato dalla PWA nel browser;
+   - il profilo li mostra nella PR 9.
+   - Piano originale:
    - tabella `session_messages` (id, user_id, session_id, role user|tutor, content, input voice|text, transcript, created_at; RLS propria), scritta da `tutor-chat`;
    - esiti della pronuncia salvati, come chiede la fase 5 in `PLAN.md`: tabella `pronunciation_results` (user_id, language, source dialogue|repeat|test, expected_text, transcript, score, words, created_at; RLS select propri), scritta da `transcribe` quando c'è `assess`;
    - punteggi del dettato accanto a `lesson_stats`, per esempio con colonne `dictation_*` o una tabella propria, così il profilo li mostra;

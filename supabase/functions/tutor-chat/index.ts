@@ -74,14 +74,32 @@ Deno.serve(
     })
 
     const reply = cleanReply(result.data, new Set(snapshot.reviewWords), language === 'de')
+    const learnerMessage = body.data.messages.at(-1)?.content ?? ''
     await Promise.all([
       saveMistakes(db, sessionId, reply, language),
       saveVocab(db, userId, reply, language),
+      saveMessages(db, sessionId, learnerMessage, body.data.input, reply.reply),
     ])
 
     return json({ session_id: sessionId, ...reply })
   }),
 )
+
+/** Keeps the learner's message and the tutor's reply (for the profile and a future history). Never throws. */
+async function saveMessages(
+  db: Db,
+  sessionId: string,
+  learner: string,
+  input: 'text' | 'voice',
+  tutor: string,
+): Promise<void> {
+  const rows = [
+    { session_id: sessionId, role: 'learner' as const, content: learner, input },
+    ...(tutor ? [{ session_id: sessionId, role: 'tutor' as const, content: tutor, input: null }] : []),
+  ]
+  const { error } = await db.from('session_messages').insert(rows)
+  if (error) console.error('Failed to save the dialogue messages', error)
+}
 
 function aiErrorMessage(err: AiError): string {
   switch (err.code) {

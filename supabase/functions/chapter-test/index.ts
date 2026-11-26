@@ -272,6 +272,7 @@ async function submit(
       passed,
       feedback,
       language: chapter.language,
+      oral_transcripts: transcripts,
     })
   if (insertError) throw insertError
 

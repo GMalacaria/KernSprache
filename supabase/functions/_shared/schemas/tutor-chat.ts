@@ -33,6 +33,8 @@ export const tutorChatRequestSchema = z.object({
   session_id: z.uuid().optional(),
   /** Lesson whose dialogue step this conversation belongs to. */
   lesson_id: z.number().int().positive().optional(),
+  /** How the learner wrote the last message (a voice message is its transcript); older clients do not say. */
+  input: z.enum(['text', 'voice']).default('text'),
   messages: z
     .array(
       z.object({

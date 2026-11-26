@@ -169,7 +169,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
   }
 
   const transcribe = useMutation({
-    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, item.corrected),
+    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, item.corrected, false, 'review'),
     onSuccess: (result) => {
       setHeard(result)
       void evaluate(result.text, true)
@@ -315,7 +315,7 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
   const voice = canRecord()
 
   const assess = useMutation({
-    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, item.corrected),
+    mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, item.corrected, false, 'review'),
     onSuccess: ({ text, pronunciation }) => {
       if (!pronunciation) {
         setUnclear(text)
