@@ -1,8 +1,9 @@
 // Versioned prompt: change the text => bump the version (it is logged in ai_usage).
 // v2: the language pair comes from the backend instead of Italian -> English.
+// v3: neutral field name (feedback).
 import type { PairNames } from '../languages.ts'
 
-export const REVIEW_CHECK_PROMPT_VERSION = 'review-check.v2'
+export const REVIEW_CHECK_PROMPT_VERSION = 'review-check.v3'
 
 export function reviewCheckPrompt({ native, target }: PairNames): string {
   return `You check one answer of a ${native} learner of ${target} in a flashcard review. The app already compared the answer with the stored solution and they differ: decide whether the answer is still right.
@@ -13,7 +14,7 @@ There are two kinds of card:
 
 ## Output
 - "correct": true or false.
-- "feedback_it": one short sentence in ${native} (the field name is historical), addressing the learner informally. If right but different from the solution, say so and mention the stored solution only if it is useful. If wrong, say precisely what is wrong without giving away the full solution (the learner may try again). No generic praise.`
+- "feedback": one short sentence in ${native}, addressing the learner informally. If right but different from the solution, say so and mention the stored solution only if it is useful. If wrong, say precisely what is wrong without giving away the full solution (the learner may try again). No generic praise.`
 }
 
 export { reviewCheckMessage } from './review-check.v1.ts'

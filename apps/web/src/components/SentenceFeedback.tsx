@@ -3,26 +3,26 @@ import { ListenButton } from './ListenButton'
 import { RepeatSentence } from './RepeatSentence'
 
 interface SentenceFeedbackProps {
-  /** English sentence (or word), read aloud on request. */
-  en: string
-  /** Italian translation shown under it. */
-  it?: string | null
+  /** Sentence (or word) in the studied language, read aloud on request. */
+  text: string
+  /** Translation in the native language, shown under it. */
+  translation?: string | null
 }
 
-/** After an answer: the English sentence with a button to hear it, its Italian translation and a way to repeat it aloud. */
-export function SentenceFeedback({ en, it }: SentenceFeedbackProps) {
+/** After an answer: the sentence with a button to hear it, its translation and a way to repeat it aloud. */
+export function SentenceFeedback({ text, translation }: SentenceFeedbackProps) {
   return (
     <div className="sentence-block">
       <div className="sentence-feedback">
-        <ListenButton text={en} className="listen-button" iconSize="1.4em" />
+        <ListenButton text={text} className="listen-button" iconSize="1.4em" />
         <div>
           <p lang="en" className="sentence-en">
-            {en}
+            {text}
           </p>
-          {it && <p className="sentence-it">{it}</p>}
+          {translation && <p className="sentence-it">{translation}</p>}
         </div>
       </div>
-      {canRecord() && <RepeatSentence sentence={en} />}
+      {canRecord() && <RepeatSentence sentence={text} />}
     </div>
   )
 }

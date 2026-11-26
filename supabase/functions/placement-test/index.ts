@@ -5,7 +5,7 @@ import { AiError, getAiProvider } from '../_shared/ai/index.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
 import { ORAL_PROMPTS, WRITTEN_QUESTIONS } from '../_shared/placement/questions.ts'
 import { combineLevels, scoreWritten } from '../_shared/placement/scoring.ts'
-import { PLACEMENT_ORAL_PROMPT_VERSION, placementOralPrompt } from '../_shared/prompts/placement-oral.v2.ts'
+import { PLACEMENT_ORAL_PROMPT_VERSION, placementOralPrompt } from '../_shared/prompts/placement-oral.v3.ts'
 import { type Learner, loadLearner, pairNames } from '../_shared/languages.ts'
 import { type OralAssessment, oralAssessmentSchema, placementRequestSchema } from '../_shared/schemas/placement.ts'
 import { adminClient, requireApprovedUser, userClient } from '../_shared/supabase.ts'
@@ -58,9 +58,9 @@ Deno.serve(
         oral_level: oral?.level ?? null,
         oral_feedback: oral
           ? {
-            feedback_it: oral.feedback_it,
-            strengths_it: oral.strengths_it,
-            to_improve_it: oral.to_improve_it,
+            feedback: oral.feedback,
+            strengths: oral.strengths,
+            to_improve: oral.to_improve,
           }
           : null,
         final_level: finalLevel,
@@ -92,7 +92,7 @@ async function assessOral(
   learner: Learner,
   transcripts: { id: string; transcript: string }[],
 ): Promise<OralAssessment> {
-  const tasks = ORAL_PROMPTS.map((p) => `- ${p.id} (${p.level}): ${p.prompt_it}`).join('\n')
+  const tasks = ORAL_PROMPTS.map((p) => `- ${p.id} (${p.level}): ${p.prompt}`).join('\n')
   const answers = ORAL_PROMPTS.map((p) => {
     const t = transcripts.find((x) => x.id === p.id)?.transcript
     return `## ${p.id} (${p.level})\n${t ? t : '(no answer)'}`

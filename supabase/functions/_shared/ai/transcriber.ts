@@ -1,7 +1,7 @@
 import { GeminiApiError, GoogleGenAI, ThinkingLevel } from '../deps.ts'
 import { requireEnv } from '../env.ts'
 import type { PairNames } from '../languages.ts'
-import { NO_SPEECH_MARKER, pronunciationPrompt, transcribePrompt } from '../prompts/transcribe.v2.ts'
+import { NO_SPEECH_MARKER, pronunciationPrompt, transcribePrompt } from '../prompts/transcribe.v3.ts'
 import { assessedTranscriptSchema, type Pronunciation } from '../schemas/pronunciation.ts'
 import { toTokenUsage } from './gemini.ts'
 import { AiError, type TokenUsage } from './types.ts'

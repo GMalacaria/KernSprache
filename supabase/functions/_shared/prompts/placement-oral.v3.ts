@@ -1,8 +1,9 @@
 // Versioned prompt: change the text => bump the version (it is logged in ai_usage).
 // v2: the language pair comes from the backend instead of Italian -> English.
+// v3: neutral field names (feedback, strengths, to_improve).
 import type { PairNames } from '../languages.ts'
 
-export const PLACEMENT_ORAL_PROMPT_VERSION = 'placement-oral.v2'
+export const PLACEMENT_ORAL_PROMPT_VERSION = 'placement-oral.v3'
 
 export function placementOralPrompt({ native, target }: PairNames): string {
   return `You assess the spoken ${target} level of a ${native} learner for a placement test.
@@ -16,8 +17,8 @@ You receive the learner's transcribed spoken answers to up to four tasks of incr
 - If even the A1 task is not completed, the level is A1.
 
 ## Feedback
-- All feedback is in ${native} (field names ending in "_it" are historical) and addresses the learner informally.
-- "feedback_it": two or three sentences: an honest overall judgement, concrete, without generic praise.
-- "strengths_it": up to 3 specific things done well, quoting short examples from the answers where useful.
-- "to_improve_it": up to 3 specific points to work on, each with the correct form of a real mistake when there is one.`
+- All feedback is in ${native} and addresses the learner informally.
+- "feedback": two or three sentences: an honest overall judgement, concrete, without generic praise.
+- "strengths": up to 3 specific things done well, quoting short examples from the answers where useful.
+- "to_improve": up to 3 specific points to work on, each with the correct form of a real mistake when there is one.`
 }

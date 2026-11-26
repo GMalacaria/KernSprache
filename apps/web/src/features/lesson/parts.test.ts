@@ -58,34 +58,34 @@ describe('stats', () => {
 })
 
 const content: LessonContent = {
-  intro_it: 'x',
+  intro: 'x',
   grammar: {
-    explanation_it: 'x',
+    explanation: 'x',
     examples: [
-      { en: 'Nice to meet you, Anna.', it: 'Piacere, Anna.' },
-      { en: 'I am from Rome.', it: 'Sono di Roma.' },
-      { en: 'She is a teacher.', it: 'Lei è insegnante.' },
+      { text: 'Nice to meet you, Anna.', translation: 'Piacere, Anna.' },
+      { text: 'I am from Rome.', translation: 'Sono di Roma.' },
+      { text: 'She is a teacher.', translation: 'Lei è insegnante.' },
     ],
   },
   words: [
-    { en: 'hotel', it: 'albergo', example_en: 'The hotel is near the station.' },
-    { en: 'city', it: 'città', example_en: '' },
-    { en: 'summer', it: 'estate', example_en: 'We go to the sea in summer.' },
+    { term: 'hotel', translation: 'albergo', example: 'The hotel is near the station.' },
+    { term: 'city', translation: 'città', example: '' },
+    { term: 'summer', translation: 'estate', example: 'We go to the sea in summer.' },
   ],
   phrases: [
-    { en: 'Nice to meet you, Anna.', it: 'Piacere di conoscerti, Anna.' },
-    { en: 'Where are you from?', it: 'Di dove sei?' },
+    { text: 'Nice to meet you, Anna.', translation: 'Piacere di conoscerti, Anna.' },
+    { text: 'Where are you from?', translation: 'Di dove sei?' },
   ],
   idioms: [],
   verbs: [],
-  listening: { text_en: 'x', questions: [] },
-  reading: { title_en: 'x', text_en: 'x', questions: [] },
-  dialogue: { scenario_it: 'x', opening_en: 'Hi!' },
+  listening: { text: 'x', questions: [] },
+  reading: { title: 'x', text: 'x', questions: [] },
+  dialogue: { scenario: 'x', opening: 'Hi!' },
 }
 
 describe('repeatSentences', () => {
   it('picks up to three sentences that the dictation does not use', () => {
-    const picked = repeatSentences(content).map((s) => s.en)
+    const picked = repeatSentences(content).map((s) => s.text)
     // The dictation takes the phrases first and then the grammar examples (up to three).
     expect(picked).not.toContain('Nice to meet you, Anna.')
     expect(picked).not.toContain('Where are you from?')

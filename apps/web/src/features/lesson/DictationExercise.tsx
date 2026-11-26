@@ -43,12 +43,12 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone, onFinished
   function check(event: FormEvent) {
     event.preventDefault()
     if (!value.trim() || done) return
-    const comparison = compareDictation(sentence.en, value)
+    const comparison = compareDictation(sentence.text, value)
     onAttempt(comparison.correct)
     if (comparison.correct) {
       playCorrect()
       setDone(true)
-      onFinished?.({ sentence: sentence.en, score: dictationScore(wrong, shown), wrongAttempts: wrong, textShown: shown })
+      onFinished?.({ sentence: sentence.text, score: dictationScore(wrong, shown), wrongAttempts: wrong, textShown: shown })
     } else {
       playWrong()
       setWrong((n) => n + 1)
@@ -70,7 +70,7 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone, onFinished
         <p className="ok">
           <strong>{t('quiz.right')}</strong>
         </p>
-        <SentenceFeedback en={sentence.en} it={sentence.it} />
+        <SentenceFeedback text={sentence.text} translation={sentence.translation} />
         <p className="dictation-score">
           <Trans t={t} i18nKey="dictation.score" values={{ score }} components={{ strong: <strong /> }} />
           {(wrong > 0 || shown) && (
@@ -91,7 +91,7 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone, onFinished
 
   return (
     <form className="stack dictation" onSubmit={check}>
-      <ListenButton text={sentence.en} className="secondary" label={t('dictation.listen')} />
+      <ListenButton text={sentence.text} className="secondary" label={t('dictation.listen')} />
       <label htmlFor="dictation-input" className="visually-hidden">
         {t('dictation.write')}
       </label>
@@ -131,7 +131,7 @@ export function Dictation({ sentence, onAttempt, onTextShown, onDone, onFinished
         </div>
       )}
 
-      {shown && <SentenceFeedback en={sentence.en} it={sentence.it} />}
+      {shown && <SentenceFeedback text={sentence.text} translation={sentence.translation} />}
       {wrong > 0 && !shown && (
         <button type="button" className="link" onClick={showText}>
           {t('dictation.showText', { points: TEXT_SHOWN_PENALTY })}

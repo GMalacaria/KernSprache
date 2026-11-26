@@ -37,62 +37,69 @@ export function makeQuestion(
   return { prompt, options, answer, optionsLang, ...(feedback ? { feedback } : {}) }
 }
 
-/** "Come si dice ... in inglese?" for every new word, distractors from the other words. */
+/** "How do you say ...?" for every new word, distractors from the other words. */
 export function wordQuiz(content: LessonContent): QuizQuestion[] {
-  const all = content.words.map((w) => w.en)
+  const all = content.words.map((w) => w.term)
   return content.words.map((w, i) =>
     makeQuestion(
-      i18n.t('quiz.wordPrompt', { ns: 'lesson', word: w.it }),
-      w.en,
+      i18n.t('quiz.wordPrompt', { ns: 'lesson', word: w.translation }),
+      w.term,
       shuffle(
-        all.filter((x) => x !== w.en),
+        all.filter((x) => x !== w.term),
         i + 7,
       ),
       i + 1,
       'en',
-      { en: w.en, it: w.it },
+      { text: w.term, translation: w.translation },
     ),
   )
 }
 
-/** Past simple of each verb; distractors include the typical "-ed" mistake. */
+/**
+ * The second form of each verb, with the others shown around the gap ("go · ___ · gone"): it works for every
+ * language, whatever its forms are. Verbs with a single form are skipped.
+ */
 export function verbQuiz(content: LessonContent): QuizQuestion[] {
-  return content.verbs.map((v, i) => {
-    const others = content.verbs.filter((x) => x.base !== v.base).map((x) => x.past)
-    const regularMistake = v.base.endsWith('e') ? `${v.base}d` : `${v.base}ed`
-    return makeQuestion(
-      i18n.t('quiz.verbPrompt', { ns: 'lesson', verb: v.base, translation: v.it }),
-      v.past,
-      [regularMistake, v.base, v.past_participle, ...others],
-      i + 11,
-      'en',
-      { en: `${v.base}, ${v.past}, ${v.past_participle}`, it: v.it },
-    )
+  return content.verbs.flatMap((v, i) => {
+    const [first, second] = v.forms
+    if (first === undefined || second === undefined) return []
+    const others = content.verbs.filter((x) => x !== v).map((x) => x.forms[1] ?? '')
+    const shown = v.forms.map((form, index) => (index === 1 ? '___' : form)).join(' · ')
+    return [
+      makeQuestion(
+        i18n.t('quiz.verbPrompt', { ns: 'lesson', forms: shown, translation: v.translation }),
+        second,
+        [...v.forms.filter((_, index) => index !== 1), ...others],
+        i + 11,
+        'en',
+        { text: v.forms.join(' · '), translation: v.translation },
+      ),
+    ]
   })
 }
 
-/** Meaning of each phrase and idiom, in Italian. */
+/** Meaning of each phrase and idiom, in the native language. */
 export function phraseQuiz(content: LessonContent): QuizQuestion[] {
-  const phraseMeanings = content.phrases.map((p) => p.it)
+  const phraseMeanings = content.phrases.map((p) => p.translation)
   const idiomQuestions = content.idioms.map((idiom, i) =>
     makeQuestion(
-      i18n.t('quiz.meaningPrompt', { ns: 'lesson', text: idiom.en }),
-      idiom.meaning_it,
-      [idiom.it, ...phraseMeanings],
+      i18n.t('quiz.meaningPrompt', { ns: 'lesson', text: idiom.text }),
+      idiom.meaning,
+      [idiom.literal, ...phraseMeanings],
       i + 21,
       undefined,
-      { en: idiom.en, it: idiom.meaning_it },
+      { text: idiom.text, translation: idiom.meaning },
     ),
   )
   const phraseQuestion = content.phrases[0]
     ? [
         makeQuestion(
-          i18n.t('quiz.meaningPrompt', { ns: 'lesson', text: content.phrases[0].en }),
-          content.phrases[0].it,
+          i18n.t('quiz.meaningPrompt', { ns: 'lesson', text: content.phrases[0].text }),
+          content.phrases[0].translation,
           phraseMeanings.slice(1),
           31,
           undefined,
-          { en: content.phrases[0].en, it: content.phrases[0].it },
+          content.phrases[0],
         ),
       ]
     : []
@@ -103,7 +110,7 @@ export function phraseQuiz(content: LessonContent): QuizQuestion[] {
 export function comprehensionQuiz(questions: LessonContent['listening']['questions']): QuizQuestion[] {
   return questions
     .filter((q) => q.options.length >= 2 && q.answer >= 0 && q.answer < q.options.length)
-    .map((q) => ({ prompt: q.question_it, options: q.options, answer: q.answer }))
+    .map((q) => ({ prompt: q.question, options: q.options, answer: q.answer }))
 }
 
 /** Running count of a lesson's answers: total, correct and the longest run of correct answers. */

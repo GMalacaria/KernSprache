@@ -1,7 +1,14 @@
 import { assertEquals } from 'jsr:@std/assert@1'
 import { combineScores, levelAfterPass, PASS_SCORE, scoreOral, scoreWritten } from './scoring.ts'
 
-const questions = [0, 1, 2, 3].map((i) => ({ id: `q${i}`, prompt: 'x', options: ['a', 'b', 'c', 'd'], answer: i }))
+const questions = [0, 1, 2, 3].map((i) => ({
+  id: `q${i}`,
+  prompt: 'x',
+  options: ['a', 'b', 'c', 'd'],
+  answer: i,
+  sentence: 'x',
+  translation: 'x',
+}))
 
 Deno.test('scoreWritten: percentage and wrong answers', () => {
   const r = scoreWritten(questions, { q0: 0, q1: 2, q2: 2 })
@@ -14,7 +21,7 @@ Deno.test('scoreWritten: percentage and wrong answers', () => {
 })
 
 Deno.test('scoreOral: mean, missing task counts as 0', () => {
-  const tasks = [{ id: 'o1', prompt_it: 'x' }, { id: 'o2', prompt_it: 'y' }]
+  const tasks = [{ id: 'o1', prompt: 'x' }, { id: 'o2', prompt: 'y' }]
   assertEquals(scoreOral(tasks, [{ id: 'o1', score: 80 }, { id: 'o2', score: 61 }]), 71)
   assertEquals(scoreOral(tasks, [{ id: 'o1', score: 90 }]), 45)
 })

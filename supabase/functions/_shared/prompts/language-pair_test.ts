@@ -1,11 +1,11 @@
 import { assert, assertEquals, assertStringIncludes } from 'jsr:@std/assert@1'
 import { pairNames } from '../languages.ts'
-import { chapterTestOralPrompt, chapterTestPrompt } from './chapter-test.v3.ts'
-import { lessonPrompt } from './lesson.v2.ts'
-import { placementOralPrompt } from './placement-oral.v2.ts'
-import { reviewCheckPrompt } from './review-check.v2.ts'
-import { pronunciationPrompt, transcribePrompt } from './transcribe.v2.ts'
-import { tutorChatPrompt } from './tutor-chat.v3.ts'
+import { chapterTestOralPrompt, chapterTestPrompt } from './chapter-test.v4.ts'
+import { lessonPrompt } from './lesson.v3.ts'
+import { placementOralPrompt } from './placement-oral.v3.ts'
+import { reviewCheckPrompt } from './review-check.v3.ts'
+import { pronunciationPrompt, transcribePrompt } from './transcribe.v3.ts'
+import { tutorChatPrompt } from './tutor-chat.v4.ts'
 
 const german = pairNames({ native: 'it', target: 'de' })
 const english = pairNames({ native: 'it', target: 'en' })

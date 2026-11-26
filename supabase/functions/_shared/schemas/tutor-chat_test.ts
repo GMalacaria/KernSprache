@@ -16,7 +16,7 @@ Deno.test('request must end with a user message', () => {
 Deno.test('reply schema rejects unknown categories', () => {
   const r = tutorReplySchema.safeParse({
     reply: 'Hi',
-    corrections: [{ original: 'a', corrected: 'b', explanation_it: 'c', category: 'grammar' }],
+    corrections: [{ original: 'a', corrected: 'b', explanation: 'c', category: 'grammar' }],
     new_vocab: [],
   })
   assertEquals(r.success, false)

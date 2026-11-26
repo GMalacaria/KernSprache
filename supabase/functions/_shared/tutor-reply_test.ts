@@ -6,22 +6,22 @@ Deno.test('cleanReply drops no-op corrections and normalises vocabulary', () => 
     {
       reply: '  Nice! What do you do?  ',
       corrections: [
-        { original: 'I has', corrected: 'I have', explanation_it: 'Con "I" si usa "have".', category: 'verb_tense' },
-        { original: 'dog', corrected: 'dog', explanation_it: 'x', category: 'other' },
-        { original: ' ', corrected: 'a', explanation_it: 'x', category: 'article' },
+        { original: 'I has', corrected: 'I have', explanation: 'Con "I" si usa "have".', category: 'verb_tense' },
+        { original: 'dog', corrected: 'dog', explanation: 'x', category: 'other' },
+        { original: ' ', corrected: 'a', explanation: 'x', category: 'article' },
       ],
       new_vocab: [
-        { en: ' Job ', it: 'lavoro' },
-        { en: 'job', it: 'impiego' },
-        { en: 'dog', it: 'cane' },
-        { en: 'kitchen', it: '' },
+        { term: ' Job ', translation: 'lavoro' },
+        { term: 'job', translation: 'impiego' },
+        { term: 'dog', translation: 'cane' },
+        { term: 'kitchen', translation: '' },
       ],
     },
     new Set(['dog']),
   )
   assertEquals(result.reply, 'Nice! What do you do?')
   assertEquals(result.corrections.map((c) => c.original), ['I has'])
-  assertEquals(result.new_vocab, [{ en: 'job', it: 'lavoro' }])
+  assertEquals(result.new_vocab, [{ term: 'job', translation: 'lavoro' }])
 })
 
 Deno.test('cleanReply keeps the case of German nouns, still de-duplicating case-insensitively', () => {
@@ -30,13 +30,13 @@ Deno.test('cleanReply keeps the case of German nouns, still de-duplicating case-
       reply: 'Schön!',
       corrections: [],
       new_vocab: [
-        { en: ' der Kinobesuch ', it: 'la visita al cinema' },
-        { en: 'der kinobesuch', it: 'doppione' },
-        { en: 'Der Film', it: 'il film' },
+        { term: ' der Kinobesuch ', translation: 'la visita al cinema' },
+        { term: 'der kinobesuch', translation: 'doppione' },
+        { term: 'Der Film', translation: 'il film' },
       ],
     },
     new Set(['der film']),
     true,
   )
-  assertEquals(result.new_vocab, [{ en: 'der Kinobesuch', it: 'la visita al cinema' }])
+  assertEquals(result.new_vocab, [{ term: 'der Kinobesuch', translation: 'la visita al cinema' }])
 })

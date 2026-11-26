@@ -11,10 +11,13 @@ export function cleanReply(reply: TutorReply, reviewWords: Set<string>, keepCase
   const review = new Set([...reviewWords].map((w) => w.toLowerCase()))
   const seen = new Set<string>()
   const new_vocab = reply.new_vocab
-    .map((v) => ({ en: keepCase ? v.en.trim() : v.en.trim().toLowerCase(), it: v.it.trim() }))
+    .map((v) => ({
+      term: keepCase ? v.term.trim() : v.term.trim().toLowerCase(),
+      translation: v.translation.trim(),
+    }))
     .filter((v) => {
-      const key = v.en.toLowerCase()
-      if (!v.en || !v.it || seen.has(key) || review.has(key)) return false
+      const key = v.term.toLowerCase()
+      if (!v.term || !v.translation || seen.has(key) || review.has(key)) return false
       seen.add(key)
       return true
     })

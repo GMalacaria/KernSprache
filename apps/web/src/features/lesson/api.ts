@@ -13,7 +13,7 @@ import {
 } from './parts'
 import type { LessonStatsRow } from './stats'
 import type { DictationResult } from './DictationExercise'
-import type { LessonResponse } from './types'
+import type { LessonResponse, Translated } from './types'
 
 export async function getLesson(lessonId: number): Promise<LessonResponse> {
   const { data, error } = await supabase.functions.invoke<LessonResponse>('lesson', {
@@ -79,8 +79,11 @@ export async function savePart(lessonId: number, part: LessonPart, stats: PartSt
 }
 
 /** Adds the lesson's words and expressions to spaced-repetition review; returns how many were new. */
-export async function addToReview(userId: string, items: { en: string; it: string }[]): Promise<number> {
-  const normalized = items.map((i) => ({ en: i.en.trim().toLowerCase(), it: i.it.trim() })).filter((i) => i.en && i.it)
+export async function addToReview(userId: string, items: Translated[]): Promise<number> {
+  // vocab_items still has the single-language column names (en = studied language, it = translation).
+  const normalized = items
+    .map((i) => ({ en: i.text.trim().toLowerCase(), it: i.translation.trim() }))
+    .filter((i) => i.en && i.it)
   if (!normalized.length) return 0
   const { data: existing, error } = await supabase
     .from('vocab_items')

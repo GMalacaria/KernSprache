@@ -15,12 +15,13 @@ export interface PlacementQuestion {
 export interface OralPrompt {
   id: string
   level: CefrLevel
-  prompt_it: string
+  /** In the native language. */
+  prompt: string
 }
 
 export interface PlacementResult {
   written: { correct: number; total: number; level: CefrLevel }
-  oral: { level: CefrLevel; feedback_it: string; strengths_it: string[]; to_improve_it: string[] } | null
+  oral: { level: CefrLevel; feedback: string; strengths: string[]; to_improve: string[] } | null
   final_level: CefrLevel
 }
 

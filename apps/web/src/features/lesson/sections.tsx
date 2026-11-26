@@ -10,14 +10,14 @@ function Listen({ text }: { text: string }) {
 export function GrammarView({ content }: { content: LessonContent }) {
   return (
     <>
-      <p className="lesson-intro">{content.intro_it}</p>
-      <p>{content.grammar.explanation_it}</p>
+      <p className="lesson-intro">{content.intro}</p>
+      <p>{content.grammar.explanation}</p>
       <ul className="examples">
         {content.grammar.examples.map((e) => (
-          <li key={e.en}>
-            <span lang="en">{e.en}</span> <Listen text={e.en} />
+          <li key={e.text}>
+            <span lang="en">{e.text}</span> <Listen text={e.text} />
             <br />
-            <small className="muted">{e.it}</small>
+            <small className="muted">{e.translation}</small>
           </li>
         ))}
       </ul>
@@ -29,11 +29,11 @@ export function WordsView({ content }: { content: LessonContent }) {
   return (
     <ul className="cards">
       {content.words.map((w) => (
-        <li key={w.en} className="card">
-          <strong lang="en">{w.en}</strong> <Listen text={w.en} /> = {w.it}
+        <li key={w.term} className="card">
+          <strong lang="en">{w.term}</strong> <Listen text={w.term} /> = {w.translation}
           <br />
           <small className="muted" lang="en">
-            {w.example_en}
+            {w.example}
           </small>
         </li>
       ))}
@@ -48,10 +48,10 @@ export function PhrasesView({ content }: { content: LessonContent }) {
       <h3 className="small-heading">{t('views.usefulPhrases')}</h3>
       <ul className="cards">
         {content.phrases.map((p) => (
-          <li key={p.en} className="card">
-            <strong lang="en">{p.en}</strong> <Listen text={p.en} />
+          <li key={p.text} className="card">
+            <strong lang="en">{p.text}</strong> <Listen text={p.text} />
             <br />
-            {p.it}
+            {p.translation}
           </li>
         ))}
       </ul>
@@ -60,12 +60,12 @@ export function PhrasesView({ content }: { content: LessonContent }) {
           <h3 className="small-heading">{t('views.idioms')}</h3>
           <ul className="cards">
             {content.idioms.map((i) => (
-              <li key={i.en} className="card">
-                <strong lang="en">{i.en}</strong> <Listen text={i.en} />
+              <li key={i.text} className="card">
+                <strong lang="en">{i.text}</strong> <Listen text={i.text} />
                 <br />
-                <small className="muted">{t('views.literally', { text: i.it })}</small>
+                <small className="muted">{t('views.literally', { text: i.literal })}</small>
                 <br />
-                {t('views.means', { text: i.meaning_it })}
+                {t('views.means', { text: i.meaning })}
               </li>
             ))}
           </ul>
@@ -81,19 +81,15 @@ export function VerbsView({ content }: { content: LessonContent }) {
     <table className="verbs">
       <thead>
         <tr>
-          <th>{t('views.verbBase')}</th>
-          <th>{t('views.verbPast')}</th>
-          <th>{t('views.verbParticiple')}</th>
-          <th>{t('views.verbNative')}</th>
+          <th>{t('views.verbForms')}</th>
+          <th>{t('views.verbTranslation')}</th>
         </tr>
       </thead>
       <tbody>
         {content.verbs.map((v) => (
-          <tr key={v.base} lang="en">
-            <td>{v.base}</td>
-            <td>{v.past}</td>
-            <td>{v.past_participle}</td>
-            <td lang="it">{v.it}</td>
+          <tr key={v.forms.join('-')}>
+            <td lang="en">{v.forms.join(' · ')}</td>
+            <td>{v.translation}</td>
           </tr>
         ))}
       </tbody>
@@ -126,13 +122,13 @@ export function ListeningView({ content, showText }: { content: LessonContent; s
   return (
     <div className="stack">
       {canSpeak() ? (
-        <ListenButton text={content.listening.text_en} label={t('views.listenText')} />
+        <ListenButton text={content.listening.text} label={t('views.listenText')} />
       ) : (
         <p className="muted">{t('views.noSpeech')}</p>
       )}
       {(showText || !canSpeak()) && (
         <p className="passage" lang="en">
-          {content.listening.text_en}
+          {content.listening.text}
         </p>
       )}
     </div>
@@ -142,8 +138,8 @@ export function ListeningView({ content, showText }: { content: LessonContent; s
 export function ReadingView({ content }: { content: LessonContent }) {
   return (
     <article className="passage">
-      <h3 lang="en">{content.reading.title_en}</h3>
-      <p lang="en">{content.reading.text_en}</p>
+      <h3 lang="en">{content.reading.title}</h3>
+      <p lang="en">{content.reading.text}</p>
     </article>
   )
 }

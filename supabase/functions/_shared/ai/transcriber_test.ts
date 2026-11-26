@@ -20,8 +20,8 @@ const assessed = (pronunciation: unknown, transcript = 'I think it is good.') =>
 Deno.test('parseAssessment: transcript and pronunciation from valid JSON', () => {
   const pronunciation = {
     score: 72,
-    words: [{ word: 'think', tip_it: 'Metti la lingua tra i denti.' }],
-    feedback_it: 'Chiaro.',
+    words: [{ word: 'think', tip: 'Metti la lingua tra i denti.' }],
+    feedback: 'Chiaro.',
   }
   assertEquals(parseAssessment(assessed(pronunciation)), {
     text: 'I think it is good.',
@@ -37,7 +37,7 @@ Deno.test('parseAssessment: accepts JSON in a markdown fence', () => {
 })
 
 Deno.test('parseAssessment: no speech drops the score', () => {
-  const pronunciation = { score: 80, words: [], feedback_it: 'x' }
+  const pronunciation = { score: 80, words: [], feedback: 'x' }
   assertEquals(parseAssessment(assessed(pronunciation, '')), {
     text: '',
     pronunciation: null,
@@ -48,15 +48,15 @@ Deno.test('parseAssessment: invalid or out-of-range output is rejected', () => {
   assertEquals(parseAssessment('not json'), null)
   assertEquals(parseAssessment(undefined), null)
   assertEquals(
-    parseAssessment(assessed({ score: 140, words: [], feedback_it: 'x' })),
+    parseAssessment(assessed({ score: 140, words: [], feedback: 'x' })),
     null,
   )
   assertEquals(
     parseAssessment(
       assessed({
         score: 60,
-        words: [1, 2, 3, 4].map((n) => ({ word: `w${n}`, tip_it: 't' })),
-        feedback_it: 'x',
+        words: [1, 2, 3, 4].map((n) => ({ word: `w${n}`, tip: 't' })),
+        feedback: 'x',
       }),
     ),
     null,

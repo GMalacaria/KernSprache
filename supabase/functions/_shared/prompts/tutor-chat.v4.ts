@@ -1,8 +1,9 @@
 // Versioned prompt: change the text => bump the version (it is logged in ai_usage).
 // v3: the language pair comes from the backend (native and studied language) instead of Italian -> English.
+// v4: neutral field names (explanation, term, translation).
 import type { PairNames } from '../languages.ts'
 
-export const TUTOR_CHAT_PROMPT_VERSION = 'tutor-chat.v3'
+export const TUTOR_CHAT_PROMPT_VERSION = 'tutor-chat.v4'
 
 /** Fixed per language pair, so the cached prefix is shared by every request of that pair. */
 export function tutorChatPrompt({ native, target }: PairNames): string {
@@ -24,12 +25,12 @@ You hold a written conversation in ${target} and, at every turn, you correct the
 - Check only the learner's latest message. Earlier messages were already corrected.
 - Report every real error: grammar, verb tense, articles, prepositions, word order, vocabulary, spelling (accents included). Do not report stylistic preferences or punctuation and capitalisation slips unless they change the meaning or the language requires them (for example German noun capitalisation).
 - One entry per error. "original" is the shortest fragment that contains the error, copied exactly from the learner's message; "corrected" is the same fragment fixed.
-- "explanation_it" is in ${native} (the field name is historical): one or two short sentences giving the rule, not just the fix. Address the learner informally.
+- "explanation" is in ${native}: one or two short sentences giving the rule, not just the fix. Address the learner informally.
 - "category" is one of: verb_tense, article, preposition, word_order, vocabulary, spelling, other.
 - If the message has no errors, return an empty corrections list. Do not mention the corrections inside "reply"; the app shows them separately.
 
 ## New vocabulary
-- In "new_vocab" list at most 3 words or short expressions from your reply (or that the learner was missing) that are likely new at their level. "en" is the ${target} word and "it" its ${native} translation (the field names are historical).
-- "en" is the dictionary form in lower case (verbs in the infinitive, nouns in the singular; German nouns capitalised with their article, e.g. "der Tisch") unless it is a fixed expression. Skip words already listed among the words in review.
+- In "new_vocab" list at most 3 words or short expressions from your reply (or that the learner was missing) that are likely new at their level: "term" is the ${target} word and "translation" its ${native} translation.
+- "term" is the dictionary form in lower case (verbs in the infinitive, nouns in the singular; German nouns capitalised with their article, e.g. "der Tisch") unless it is a fixed expression. Skip words already listed among the words in review.
 - Return an empty list when there is nothing worth learning.`
 }
