@@ -221,7 +221,7 @@ Decisioni prese:
    - punteggi del dettato accanto a `lesson_stats`, per esempio con colonne `dictation_*` o una tabella propria, così il profilo li mostra;
    - `chapter_test_attempts.oral_transcripts jsonb`.
 
-7. ✅ **`feat(functions): placement test per language`** — PR aperta, **da rivedere dall'utente prima del merge** (sono contenuti):
+7. ✅ **`feat(functions): placement test per language`** — fatta (#53), domande riviste e aggiornate dall'utente (B2 più selettivo):
    - `_shared/placement/questions/{en,fr,es,de}.ts`, 16 domande ciascuno, 4 per livello, scritte una volta e fisse (stile della banca inglese: frase con un buco sulla grammatica tipica del livello). Già tolte tre domande ambigue (tedesco "Sie ___ Lehrerin" accettava *sind*; spagnolo "Este año ___ a Madrid" accettava il *pretérito*; "Aunque ___ mañana" accettava il futuro);
    - `writtenQuestions(language)`; `placement-test` usa la banca della lingua attiva, sia all'inizio sia nella correzione; le consegne orali restano in italiano (lingua madre) e valgono per tutte le lingue;
    - test Deno: ogni banca ha 16 domande, 4 per livello, id unici, opzioni distinte, risposta giusta in posizioni diverse;
@@ -231,7 +231,13 @@ Decisioni prese:
    - `ORAL_PROMPTS` con testo nella lingua madre;
    - `placement-test` sceglie in base alla lingua attiva; `placement_results.language`.
 
-8. **`feat(db): add French, Spanish and German curricula`**: una migration per lingua (24 capitoli × 4 lezioni, `grammar_focus`/`focus` in inglese come oggi, titoli in italiano), generate offline e riviste. Il test `curriculum` controlla 96 lezioni per lingua.
+8. ✅ **`feat(db): add French, Spanish and German curricula`** — PR aperta, **da rivedere dall'utente prima del merge** (sono contenuti):
+   - migration `20261126160000_curriculum_fr`, `…160100_curriculum_es`, `…160200_curriculum_de`: 24 capitoli × 4 lezioni ciascuna, stessa struttura dell'inglese, progressione grammaticale tipica di ogni lingua (es. tedesco: casi accusativo → dativo → genitivo, Konjunktiv II e I; francese: passé composé con avoir/être, imparfait, subjonctif; spagnolo: indefinido/imperfecto/perfecto, subjuntivo);
+   - titoli e descrizioni in italiano, `grammar_focus`/`focus` in inglese per i prompt; slug unici per lingua (capitoli) e per capitolo (lezioni);
+   - il Percorso (`usePath`) legge solo i capitoli della lingua attiva (`profiles.active_language`), altrimenti mostrerebbe i 96 capitoli insieme;
+   - test `curriculum`: 24 capitoli e 96 lezioni per lingua, 6 capitoli per livello, 4 lezioni per capitolo;
+   - provato: con il tedesco attivo il Percorso mostra il curriculum tedesco e una lezione tedesca si genera con verbi separabili, forme "aufstehen · stand auf · ist aufgestanden" e sostantivi con l'articolo.
+   - Piano originale: una migration per lingua (24 capitoli × 4 lezioni, `grammar_focus`/`focus` in inglese come oggi, titoli in italiano), generate offline e riviste. Il test `curriculum` controlla 96 lezioni per lingua.
 
 9. **`feat(web): choose and switch learning language`**:
    - onboarding: lingua da studiare → scopo → test di livello; `active_language` sul profilo;
