@@ -72,6 +72,7 @@
     "already_submitted": "Hai già consegnato questa verifica: iniziane una nuova.",
     "session_ended": "Questa conversazione è già terminata.",
     "no_speech": "Non ho sentito niente. Avvicina il telefono e riprova.",
-    "internal": "Errore imprevisto, riprova tra poco."
+    "internal": "Errore imprevisto, riprova tra poco.",
+    "lesson_preparing": "La lezione è ancora in preparazione. Riprova tra poco."
   }
 }
