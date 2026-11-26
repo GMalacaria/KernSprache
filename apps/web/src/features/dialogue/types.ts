@@ -12,13 +12,15 @@ export type MistakeCategory =
 export interface Correction {
   original: string
   corrected: string
-  explanation_it: string
+  /** In the learner's native language. */
+  explanation: string
   category: MistakeCategory
 }
 
 export interface VocabEntry {
-  en: string
-  it: string
+  /** In the studied language. */
+  term: string
+  translation: string
 }
 
 export interface ChatMessage {
@@ -44,8 +46,8 @@ export interface TutorChatResponse {
 /** Mirrors supabase/functions/_shared/schemas/pronunciation.ts. */
 export interface Pronunciation {
   score: number
-  words: { word: string; tip_it: string }[]
-  feedback_it: string
+  words: { word: string; tip: string }[]
+  feedback: string
 }
 
 /** A message as shown in the UI: user turns carry the corrections they received. */

@@ -178,9 +178,9 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
   useEffect(() => {
     if (!content) return
     void prefetchSpeech([
-      content.listening.text_en,
-      ...dictationSentences(content).map((d) => d.en),
-      ...repeatSentences(content).map((d) => d.en),
+      content.listening.text,
+      ...dictationSentences(content).map((d) => d.text),
+      ...repeatSentences(content).map((d) => d.text),
     ])
   }, [content])
 
@@ -396,8 +396,8 @@ export function LessonPage({ userId, lessonId, nextLessonId, nextChapterId, onOp
               <LessonDialogue
                 key={part}
                 lessonId={meta.id}
-                scenario={lessonContent.dialogue.scenario_it}
-                opening={lessonContent.dialogue.opening_en}
+                scenario={lessonContent.dialogue.scenario}
+                opening={lessonContent.dialogue.opening}
                 mode={part}
                 onActivity={markActivity}
                 onFinished={finishPart}
@@ -458,9 +458,9 @@ function PartDone({
       if (!saved.completed || !saved.total) return { ...saved, added: 0 }
       await recordLessonStats(lessonId, saved.total)
       const added = await addToReview(userId, [
-        ...content.words,
+        ...content.words.map((w) => ({ text: w.term, translation: w.translation })),
         ...content.phrases,
-        ...content.idioms.map((i) => ({ en: i.en, it: i.meaning_it })),
+        ...content.idioms.map((i) => ({ text: i.text, translation: i.meaning })),
       ])
       return { ...saved, added }
     },

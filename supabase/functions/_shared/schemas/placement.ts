@@ -14,8 +14,8 @@ export const placementRequestSchema = z.discriminatedUnion('action', [
 
 export const oralAssessmentSchema = z.object({
   level: z.enum(CEFR_LEVELS),
-  feedback_it: z.string(),
-  strengths_it: z.array(z.string()),
-  to_improve_it: z.array(z.string()),
+  feedback: z.string(),
+  strengths: z.array(z.string()),
+  to_improve: z.array(z.string()),
 })
 export type OralAssessment = z.infer<typeof oralAssessmentSchema>

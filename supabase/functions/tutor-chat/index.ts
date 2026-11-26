@@ -5,7 +5,7 @@ import { AiError, getAiProvider } from '../_shared/ai/index.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
 import { cleanReply } from '../_shared/tutor-reply.ts'
 import { loadLearnerSnapshot, renderLearnerContext } from '../_shared/learner-context.ts'
-import { TUTOR_CHAT_PROMPT_VERSION, tutorChatPrompt } from '../_shared/prompts/tutor-chat.v3.ts'
+import { TUTOR_CHAT_PROMPT_VERSION, tutorChatPrompt } from '../_shared/prompts/tutor-chat.v4.ts'
 import { type LanguageCode, pairNames } from '../_shared/languages.ts'
 import {
   MAX_HISTORY_MESSAGES,
@@ -163,7 +163,7 @@ async function saveMistakes(
       session_id: sessionId,
       original: c.original,
       corrected: c.corrected,
-      explanation_it: c.explanation_it,
+      explanation_it: c.explanation,
       category: c.category,
       language,
     })),
@@ -180,16 +180,17 @@ async function saveVocab(
 ): Promise<void> {
   if (!reply.new_vocab.length) return
   // Also the lower-case spelling: the unique index is on lower(en), and German nouns keep their capital.
-  const words = [...new Set(reply.new_vocab.flatMap((v) => [v.en, v.en.toLowerCase()]))]
+  const words = [...new Set(reply.new_vocab.flatMap((v) => [v.term, v.term.toLowerCase()]))]
   const { data: existing, error } = await db.from('vocab_items').select('en')
     .eq('user_id', userId)
     .eq('language', language).in('en', words)
   if (error) throw error
   const known = new Set((existing ?? []).map((v) => v.en.toLowerCase()))
-  const fresh = reply.new_vocab.filter((v) => !known.has(v.en.toLowerCase()))
+  const fresh = reply.new_vocab.filter((v) => !known.has(v.term.toLowerCase()))
   if (!fresh.length) return
   const { error: insertError } = await db.from('vocab_items').insert(
-    fresh.map((v) => ({ ...v, language })),
+    // The table still has the single-language column names (renamed in a later step).
+    fresh.map((v) => ({ en: v.term, it: v.translation, language })),
   )
   // 23505: a concurrent request inserted the same word; nothing to do.
   if (insertError && insertError.code !== '23505') throw insertError

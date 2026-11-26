@@ -3,9 +3,9 @@ import { z } from '../deps.ts'
 export const pronunciationSchema = z.object({
   score: z.number().int().min(0).max(100),
   words: z.array(
-    z.object({ word: z.string().min(1), tip_it: z.string().min(1) }),
+    z.object({ word: z.string().min(1), tip: z.string().min(1) }),
   ).max(3),
-  feedback_it: z.string().min(1),
+  feedback: z.string().min(1),
 })
 export type Pronunciation = z.infer<typeof pronunciationSchema>
 

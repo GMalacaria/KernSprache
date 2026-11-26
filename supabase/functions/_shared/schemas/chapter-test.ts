@@ -10,11 +10,12 @@ export const generatedTestSchema = z.object({
     options: z.array(z.string()),
     /** Index of the correct option. */
     answer: z.number().int().min(0).max(3),
-    /** The full correct sentence, shown with its translation after the test. */
-    sentence_en: z.string(),
-    translation_it: z.string(),
+    /** The full correct sentence in the studied language, shown with its translation after the test. */
+    sentence: z.string(),
+    translation: z.string(),
   })),
-  oral_tasks: z.array(z.object({ prompt_it: z.string() })),
+  /** Instructions in the native language. */
+  oral_tasks: z.array(z.object({ prompt: z.string() })),
 })
 export type GeneratedTest = z.infer<typeof generatedTestSchema>
 
@@ -25,35 +26,30 @@ export function testIsValid(test: GeneratedTest): boolean {
     test.questions.every((q) => q.options.length === 4 && q.answer < 4 && q.prompt.trim() !== '')
 }
 
-/** A question as stored on the server (with the answer). Tests saved before
- * chapter-test.v2 have no sentence and translation. */
+/** A question as stored on the server (with the answer). */
 export const storedQuestionSchema = z.object({
   id: z.string(),
   prompt: z.string(),
   options: z.array(z.string()),
   answer: z.number().int().min(0).max(3),
-  sentence_en: z.string().optional(),
-  translation_it: z.string().optional(),
+  sentence: z.string(),
+  translation: z.string(),
 })
 export type StoredQuestion = z.infer<typeof storedQuestionSchema>
 
-/** What the learner sees about a question after submitting (nothing when the test predates v2). */
-export function questionReview(
-  q: StoredQuestion,
-): { id: string; sentence_en: string | null; translation_it: string | null } {
-  const sentence = q.sentence_en?.trim()
-  const translation = q.translation_it?.trim()
-  return { id: q.id, sentence_en: sentence || null, translation_it: (sentence && translation) || null }
+/** What the learner sees about a question after submitting: the full sentence and its translation. */
+export function questionReview(q: StoredQuestion): { id: string; sentence: string; translation: string } {
+  return { id: q.id, sentence: q.sentence.trim(), translation: q.translation.trim() }
 }
 
-export const oralTaskSchema = z.object({ id: z.string(), prompt_it: z.string() })
+export const oralTaskSchema = z.object({ id: z.string(), prompt: z.string() })
 export type OralTask = z.infer<typeof oralTaskSchema>
 
 export const oralAssessmentSchema = z.object({
   scores: z.array(z.object({ id: z.string(), score: z.number().min(0).max(100) })),
-  feedback_it: z.string(),
-  strengths_it: z.array(z.string()),
-  to_improve_it: z.array(z.string()),
+  feedback: z.string(),
+  strengths: z.array(z.string()),
+  to_improve: z.array(z.string()),
 })
 export type OralAssessment = z.infer<typeof oralAssessmentSchema>
 

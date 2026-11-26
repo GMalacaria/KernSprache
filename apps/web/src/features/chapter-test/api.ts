@@ -14,7 +14,8 @@ export interface TestQuestion {
 
 export interface OralTask {
   id: string
-  prompt_it: string
+  /** In the native language. */
+  prompt: string
 }
 
 export interface ChapterTest {
@@ -25,8 +26,8 @@ export interface ChapterTest {
 
 export interface QuestionReview {
   id: string
-  sentence_en: string | null
-  translation_it: string | null
+  sentence: string
+  translation: string
 }
 
 export interface ChapterTestResult {
@@ -37,13 +38,13 @@ export interface ChapterTestResult {
     score: number
     wrong: { id: string; chosen: number | null; answer: number }[]
   }
-  /** Full sentence and translation of every question; missing from older servers, null for tests made before v2. */
-  review?: QuestionReview[]
+  /** Full sentence and translation of every question. */
+  review: QuestionReview[]
   oral: {
     score: number
-    feedback_it: string
-    strengths_it: string[]
-    to_improve_it: string[]
+    feedback: string
+    strengths: string[]
+    to_improve: string[]
   }
   score: number
   passed: boolean

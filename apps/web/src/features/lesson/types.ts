@@ -1,21 +1,30 @@
 // Mirrors supabase/functions/_shared/schemas/lesson.ts (content returned by the `lesson` function).
+// Studied language: text, term, example, forms, title, opening; native language: translation, literal, meaning,
+// intro, explanation, question, scenario.
+
+/** A sentence or expression in the studied language with its translation in the native one. */
+export interface Translated {
+  text: string
+  translation: string
+}
 
 export interface ComprehensionQuestion {
-  question_it: string
+  question: string
   options: string[]
   answer: number
 }
 
 export interface LessonContent {
-  intro_it: string
-  grammar: { explanation_it: string; examples: { en: string; it: string }[] }
-  words: { en: string; it: string; example_en: string }[]
-  phrases: { en: string; it: string }[]
-  idioms: { en: string; it: string; meaning_it: string }[]
-  verbs: { base: string; past: string; past_participle: string; it: string }[]
-  listening: { text_en: string; questions: ComprehensionQuestion[] }
-  reading: { title_en: string; text_en: string; questions: ComprehensionQuestion[] }
-  dialogue: { scenario_it: string; opening_en: string }
+  intro: string
+  grammar: { explanation: string; examples: Translated[] }
+  words: { term: string; translation: string; example: string }[]
+  phrases: Translated[]
+  idioms: { text: string; literal: string; meaning: string }[]
+  /** The forms learners memorise, dictionary form first. */
+  verbs: { forms: string[]; translation: string }[]
+  listening: { text: string; questions: ComprehensionQuestion[] }
+  reading: { title: string; text: string; questions: ComprehensionQuestion[] }
+  dialogue: { scenario: string; opening: string }
 }
 
 export interface LessonResponse {
@@ -23,12 +32,12 @@ export interface LessonResponse {
   content: LessonContent
 }
 
-/** A multiple-choice question shown in the lesson; `lang` marks English options. */
+/** A multiple-choice question shown in the lesson; `optionsLang` marks options in the studied language. */
 export interface QuizQuestion {
   prompt: string
   options: string[]
   answer: number
   optionsLang?: 'en'
-  /** English sentence and Italian translation shown (and read aloud) after answering. */
-  feedback?: { en: string; it: string }
+  /** Sentence in the studied language and its translation, shown (and read aloud) after answering. */
+  feedback?: Translated
 }

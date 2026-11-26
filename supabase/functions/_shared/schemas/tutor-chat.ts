@@ -17,11 +17,13 @@ export const tutorReplySchema = z.object({
     z.object({
       original: z.string(),
       corrected: z.string(),
-      explanation_it: z.string(),
+      /** In the learner's native language. */
+      explanation: z.string(),
       category: z.enum(MISTAKE_CATEGORIES),
     }),
   ),
-  new_vocab: z.array(z.object({ en: z.string(), it: z.string() })),
+  /** term: studied language; translation: native language. */
+  new_vocab: z.array(z.object({ term: z.string(), translation: z.string() })),
 })
 export type TutorReply = z.infer<typeof tutorReplySchema>
 

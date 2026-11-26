@@ -58,23 +58,23 @@ describe('dictationScore', () => {
 describe('dictationSentences', () => {
   const content = {
     phrases: [
-      { en: 'Hi!', it: 'Ciao!' },
-      { en: 'Where were you?', it: "Dov'eri?" },
-      { en: 'I was at work.', it: 'Ero al lavoro.' },
+      { text: 'Hi!', translation: 'Ciao!' },
+      { text: 'Where were you?', translation: "Dov'eri?" },
+      { text: 'I was at work.', translation: 'Ero al lavoro.' },
     ],
     grammar: {
-      explanation_it: '',
+      explanation: '',
       examples: [
-        { en: 'Where were you?', it: 'duplicate' },
-        { en: 'They were tired after the long trip to the mountains last week with all of us.', it: 'too long' },
-        { en: 'It was great!', it: 'Era fantastico!' },
-        { en: 'We were late for the train.', it: 'Eravamo in ritardo.' },
+        { text: 'Where were you?', translation: 'duplicate' },
+        { text: 'They were tired after the long trip to the mountains last week with all of us.', translation: 'too long' },
+        { text: 'It was great!', translation: 'Era fantastico!' },
+        { text: 'We were late for the train.', translation: 'Eravamo in ritardo.' },
       ],
     },
   } as unknown as LessonContent
 
   it('skips too short, too long and repeated sentences and stops at three', () => {
-    expect(dictationSentences(content).map((s) => s.en)).toEqual([
+    expect(dictationSentences(content).map((s) => s.text)).toEqual([
       'Where were you?',
       'I was at work.',
       'It was great!',

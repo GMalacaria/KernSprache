@@ -25,15 +25,15 @@ export function RepeatExercise({ sentence, onAnswered, onDone }: RepeatExerciseP
   return (
     <div className="stack">
       <div className="sentence-feedback">
-        <ListenButton text={sentence.en} className="listen-button" iconSize="1.4em" />
+        <ListenButton text={sentence.text} className="listen-button" iconSize="1.4em" />
         <div>
           <p lang="en" className="sentence-en">
-            {sentence.en}
+            {sentence.text}
           </p>
-          {sentence.it && <p className="sentence-it">{sentence.it}</p>}
+          {sentence.translation && <p className="sentence-it">{sentence.translation}</p>}
         </div>
       </div>
-      <RepeatSentence sentence={sentence.en} onAssessed={assessed} />
+      <RepeatSentence sentence={sentence.text} onAssessed={assessed} />
       {best !== null && (
         <button type="button" className="next-step" onClick={onDone}>
           {t('actions.next')}

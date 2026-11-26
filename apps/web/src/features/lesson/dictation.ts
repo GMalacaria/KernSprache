@@ -1,9 +1,6 @@
-import type { LessonContent } from './types'
+import type { LessonContent, Translated } from './types'
 
-export interface DictationSentence {
-  en: string
-  it: string
-}
+export type DictationSentence = Translated
 
 export const MAX_DICTATION_SENTENCES = 3
 const MIN_WORDS = 3
@@ -80,14 +77,14 @@ export function dictationScore(wrongAttempts: number, textShown: boolean): numbe
 /** Short sentences from the lesson (expressions first, then grammar examples), at most three. */
 export function dictationSentences(content: LessonContent): DictationSentence[] {
   const candidates: DictationSentence[] = [
-    ...content.phrases.map((p) => ({ en: p.en, it: p.it })),
-    ...content.grammar.examples.map((e) => ({ en: e.en, it: e.it })),
+    ...content.phrases,
+    ...content.grammar.examples,
   ]
   const seen = new Set<string>()
   const picked: DictationSentence[] = []
   for (const sentence of candidates) {
-    const key = normalizeWords(sentence.en).join(' ')
-    const count = normalizeWords(sentence.en).length
+    const key = normalizeWords(sentence.text).join(' ')
+    const count = normalizeWords(sentence.text).length
     if (count < MIN_WORDS || count > MAX_WORDS || seen.has(key)) continue
     seen.add(key)
     picked.push(sentence)

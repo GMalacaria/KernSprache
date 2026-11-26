@@ -31,7 +31,7 @@ export function pronunciationCards(
   if (!pronunciation || pronunciation.score > MAX_SCORE_FOR_CARDS) return []
   const seen = new Set([...existing].map(cardKey))
   const cards: PronunciationCard[] = []
-  for (const { word, tip_it } of pronunciation.words) {
+  for (const { word, tip } of pronunciation.words) {
     const key = cardKey(word)
     if (!key || seen.has(key)) continue
     seen.add(key)
@@ -39,7 +39,7 @@ export function pronunciationCards(
     cards.push({
       original: clean,
       corrected: clean,
-      explanation_it: tip_it.trim(),
+      explanation_it: tip.trim(),
       category: 'pronunciation',
     })
   }

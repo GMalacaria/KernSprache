@@ -4,7 +4,7 @@
 import { logAiUsage } from '../_shared/ai-usage.ts'
 import { AiError, getAiProvider } from '../_shared/ai/index.ts'
 import { handle, HttpError, json } from '../_shared/http.ts'
-import { LESSON_PROMPT_VERSION, lessonPrompt } from '../_shared/prompts/lesson.v2.ts'
+import { LESSON_PROMPT_VERSION, lessonPrompt } from '../_shared/prompts/lesson.v3.ts'
 import { type LanguageCode, type Learner, loadLearner, pairNames } from '../_shared/languages.ts'
 import {
   type LessonContent,
@@ -293,6 +293,6 @@ async function wordsTaughtInChapter(lesson: LessonInfo, key: CacheKey): Promise<
   if (error) throw error
   return (data ?? []).flatMap((row) => {
     const parsed = lessonContentSchema.safeParse(row.content)
-    return parsed.success ? [...parsed.data.words.map((w) => w.en), ...parsed.data.phrases.map((p) => p.en)] : []
+    return parsed.success ? [...parsed.data.words.map((w) => w.term), ...parsed.data.phrases.map((p) => p.text)] : []
   })
 }

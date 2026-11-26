@@ -10,7 +10,7 @@ import {
   CHAPTER_TEST_PROMPT_VERSION,
   chapterTestOralPrompt,
   chapterTestPrompt,
-} from '../_shared/prompts/chapter-test.v3.ts'
+} from '../_shared/prompts/chapter-test.v4.ts'
 import { type LanguageCode, type Learner, loadLearner, pairNames } from '../_shared/languages.ts'
 import {
   chapterTestRequestSchema,
@@ -174,14 +174,10 @@ async function generateTest(
     const c = parsed.data
     return [
       `## Lesson ${i + 1}`,
-      `- Grammar: ${c.grammar.examples.map((e) => e.en).join(' / ')}`,
-      `- Words: ${c.words.map((w) => `${w.en} (${w.it})`).join(', ')}`,
-      `- Phrases: ${c.phrases.map((p) => p.en).join(' / ')}`,
-      `- Verbs: ${
-        c.verbs.map((v) => `${v.base}-${v.past}-${v.past_participle}`).join(
-          ', ',
-        )
-      }`,
+      `- Grammar: ${c.grammar.examples.map((e) => e.text).join(' / ')}`,
+      `- Words: ${c.words.map((w) => `${w.term} (${w.translation})`).join(', ')}`,
+      `- Phrases: ${c.phrases.map((p) => p.text).join(' / ')}`,
+      `- Verbs: ${c.verbs.map((v) => v.forms.join('-')).join(', ')}`,
     ]
   })
   const context = [
@@ -251,10 +247,10 @@ async function submit(
   const { score, passed } = combineScores(written.score, oralScore)
 
   const feedback = {
-    feedback_it: assessment?.feedback_it ??
+    feedback: assessment?.feedback ??
       'Non hai risposto alle consegne orali: senza la parte orale la verifica non può essere superata.',
-    strengths_it: assessment?.strengths_it ?? [],
-    to_improve_it: assessment?.to_improve_it ?? [],
+    strengths: assessment?.strengths ?? [],
+    to_improve: assessment?.to_improve ?? [],
     oral_scores: oralTasks.map((t) => ({
       id: t.id,
       score: assessment?.scores.find((s) => s.id === t.id)?.score ?? 0,
@@ -291,9 +287,9 @@ async function submit(
     review: questions.map(questionReview),
     oral: {
       score: oralScore,
-      feedback_it: feedback.feedback_it,
-      strengths_it: feedback.strengths_it,
-      to_improve_it: feedback.to_improve_it,
+      feedback: feedback.feedback,
+      strengths: feedback.strengths,
+      to_improve: feedback.to_improve,
       scores: feedback.oral_scores,
     },
     score,
@@ -345,7 +341,7 @@ function assessOral(
   const context = [
     `# Chapter: "${chapter.title}" (CEFR ${chapter.level}): ${chapter.grammar_focus}`,
     '# Tasks (instructions given to the learner in their native language)',
-    ...tasks.map((t) => `- ${t.id}: ${t.prompt_it}`),
+    ...tasks.map((t) => `- ${t.id}: ${t.prompt}`),
   ].join('\n')
   const answers = tasks.map((t) => {
     const text = transcripts.find((x) => x.id === t.id)?.transcript

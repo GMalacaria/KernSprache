@@ -1,10 +1,11 @@
 // Versioned prompts: change the text => bump the version (it is logged in ai_usage).
+// transcribe.v3 / pronunciation.v5: neutral field names (tip, feedback).
 // transcribe.v2 / pronunciation.v4: the language pair comes from the backend; pronunciation tips are about the sounds
 // of the studied language, explained to a speaker of the native one. pronunciation.v4 keeps the silence rule of v3.
 import type { PairNames } from '../languages.ts'
 
-export const TRANSCRIBE_PROMPT_VERSION = 'transcribe.v2'
-export const PRONUNCIATION_PROMPT_VERSION = 'pronunciation.v4'
+export const TRANSCRIBE_PROMPT_VERSION = 'transcribe.v3'
+export const PRONUNCIATION_PROMPT_VERSION = 'pronunciation.v5'
 
 export { NO_SPEECH_MARKER } from './transcribe.v1.ts'
 import { NO_SPEECH_MARKER } from './transcribe.v1.ts'
@@ -24,8 +25,7 @@ export function transcribePrompt({ native, target }: PairNames): string {
 function basePronunciationPrompt({ native, target }: PairNames): string {
   return `You listen to a recording of a ${native} learner speaking ${target}.
 Do two things and reply with JSON only, in exactly this shape:
-{"transcript": string, "pronunciation": null | {"score": integer 0-100, "words": [{"word": string, "tip_it": string}], "feedback_it": string}}
-(The field names ending in "_it" are historical: they hold ${native} text.)
+{"transcript": string, "pronunciation": null | {"score": integer 0-100, "words": [{"word": string, "tip": string}], "feedback": string}}
 
 transcript
 - Write exactly what was said, word for word, in the normal spelling of ${target}. Keep every grammar, vocabulary and word-order mistake as spoken: never fix, improve or complete anything.
@@ -35,8 +35,8 @@ transcript
 pronunciation
 - Judge only how the words SOUND, never the grammar or the vocabulary.
 - score: 90-100 clear and natural, 70-89 easy to understand with small slips, 50-69 understandable with effort, below 50 hard to understand. Be honest: do not inflate the score to please the learner.
-- words: at most 3 words that were mispronounced, most important first, each with the word as written and tip_it, one short sentence in ${native} saying what to change, about the sounds of ${target} that are hard for ${native} speakers (for example a sound that does not exist in ${native}, a short vs long vowel, a nasal or rounded vowel, the stressed syllable, a final consonant or ending that must be heard or stay silent). Leave the array empty when nothing needs work.
-- feedback_it: one or two short sentences in ${native}: what is working and the one thing to focus on next. No generic praise.
+- words: at most 3 words that were mispronounced, most important first, each with the word as written and tip, one short sentence in ${native} saying what to change, about the sounds of ${target} that are hard for ${native} speakers (for example a sound that does not exist in ${native}, a short vs long vowel, a nasal or rounded vowel, the stressed syllable, a final consonant or ending that must be heard or stay silent). Leave the array empty when nothing needs work.
+- feedback: one or two short sentences in ${native}: what is working and the one thing to focus on next. No generic praise.
 - If the learner says fewer than 3 words, set pronunciation to null: there is too little to judge.`
 }
 
@@ -51,9 +51,9 @@ export function pronunciationPrompt(
 
 The learner was asked to read this sentence aloud: ${JSON.stringify(expectedText)}
 - The transcript must be what you actually hear, word for word. Never copy it from the sentence above and never fix it to match: if the learner said a different word or form, write what they said.
-- Judge the pronunciation against that sentence: a word that is missing, replaced or unclear counts as a mistake, and a word read well is not a mistake. List a replaced or missing word first in "words", with a tip_it that says which word was expected.
+- Judge the pronunciation against that sentence: a word that is missing, replaced or unclear counts as a mistake, and a word read well is not a mistake. List a replaced or missing word first in "words", with a tip that says which word was expected.
 - A missing or replaced word caps the score at 75, and more than one caps it at 60. Do not give above 85 unless every word was clear.
-- feedback_it names the one thing to fix; no generic praise.
+- feedback names the one thing to fix; no generic praise.
 - With a known sentence, do not return null for a short reading: judge it, even if it is one or two words.
 ${SILENCE_RULE}`
 }

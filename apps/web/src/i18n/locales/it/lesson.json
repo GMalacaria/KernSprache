@@ -74,10 +74,6 @@
     "idioms": "Modi di dire",
     "literally": "Letteralmente: {{text}}",
     "means": "Significa: {{text}}",
-    "verbBase": "Base",
-    "verbPast": "Past simple",
-    "verbParticiple": "Past participle",
-    "verbNative": "Italiano",
     "dictationIntro_one": "Ascolterai {{count}} frase e la scriverai. Se sbagli, vedrai sottolineate le parole che non coincidono e riproverai finché la frase è giusta.",
     "dictationIntro_other": "Ascolterai {{count}} frasi e le scriverai. Se sbagli, vedrai sottolineate le parole che non coincidono e riproverai finché la frase è giusta.",
     "dictationRules": "Puoi leggere il testo, ma ogni tentativo sbagliato e la lettura del testo abbassano il punteggio.",
@@ -85,13 +81,15 @@
     "repeatIntro_other": "Ascolta {{count}} frasi e ripetile a voce: valuto la pronuncia parola per parola.",
     "repeatRules": "Conta il primo tentativo valutato; puoi riprovare quante volte vuoi per migliorare.",
     "listenText": "Ascolta il testo",
-    "noSpeech": "La sintesi vocale non è disponibile: leggi il testo."
+    "noSpeech": "La sintesi vocale non è disponibile: leggi il testo.",
+    "verbForms": "Forme",
+    "verbTranslation": "Traduzione"
   },
   "quiz": {
     "right": "Giusto!",
     "wrong": "Non proprio: la risposta giusta è \"{{answer}}\".",
-    "wordPrompt": "Come si dice \"{{word}}\" in inglese?",
-    "verbPrompt": "Past simple di \"{{verb}}\" ({{translation}})?",
+    "wordPrompt": "Come si dice \"{{word}}\"?",
+    "verbPrompt": "Completa le forme di «{{translation}}»: {{forms}}",
     "meaningPrompt": "Che cosa significa \"{{text}}\"?"
   },
   "dictation": {
