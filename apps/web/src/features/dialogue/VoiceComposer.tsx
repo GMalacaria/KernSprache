@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Emoji } from '../../components/Emoji'
+import { VolumeMeter } from '../../components/VolumeMeter'
 import { useMutation } from '@tanstack/react-query'
 import { MAX_RECORDING_MS, stopSpeaking, unlockSpeech } from '../../lib/audio'
 import { useVoiceRecorder } from '../../lib/useVoiceRecorder'
@@ -13,14 +14,14 @@ interface VoiceComposerProps {
   onActivity?: () => void
 }
 
-/** Tap to start speaking, tap again to send. The transcript goes to the tutor like a typed message. */
+/** Tap to start speaking; it sends on a pause or on a second tap. The transcript goes to the tutor like a typed message. */
 export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceComposerProps) {
   const { t } = useTranslation()
   const transcribe = useMutation({
     mutationFn: (audio: Blob) => transcribeWithPronunciation(audio, undefined, true),
     onSuccess: ({ text, pronunciation }) => onTranscript(text, pronunciation ?? undefined),
   })
-  const { isRecording, seconds, micError, start, stop, cancel } = useVoiceRecorder({
+  const { isRecording, seconds, micError, level, autoStops, start, stop, cancel } = useVoiceRecorder({
     onRecorded: (audio) => transcribe.mutate(audio),
     onTick: onActivity,
   })
@@ -56,6 +57,7 @@ export function VoiceComposer({ disabled, onTranscript, onActivity }: VoiceCompo
           </>
         )}
       </button>
+      {isRecording && <VolumeMeter level={level} autoStops={autoStops} />}
       {isRecording && (
         <button
           type="button"
