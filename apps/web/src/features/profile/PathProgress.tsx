@@ -5,22 +5,12 @@ import { usePathOf } from '../path/usePath'
 import { levelProgress } from './profileStats'
 
 /** Chapters passed per level in one language: the path is never added up across languages. */
-export function PathProgress({
-  language,
-  level,
-  showName,
-}: {
-  language: StudiedLanguage
-  level: CefrLevel
-  /** With more than one language on screen, each block says which one it is. */
-  showName: boolean
-}) {
+export function PathProgress({ language, level }: { language: StudiedLanguage; level: CefrLevel }) {
   const { t } = useTranslation(['profile', 'common'])
   const { path } = usePathOf(language, level)
   if (!path) return null
   return (
-    <div className="path-progress">
-      {showName && <h3 className="small-heading">{t(`common:languages.${language}.name`)}</h3>}
+    <div>
       <ul className="level-progress">
         {levelProgress(path).map((item) => (
           <li key={item.level}>
