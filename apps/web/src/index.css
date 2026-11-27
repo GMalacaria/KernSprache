@@ -557,3 +557,8 @@ button .emoji { margin-right: 0.15em; }
 .language-list li.active { border-color: var(--accent); }
 .language-add { margin-top: 1rem; gap: 0.4rem; }
 .language-add label { margin: 0; }
+
+/* Profile: language filter for answers and pronunciation; one path block per language. */
+.stats-filter { justify-content: flex-start; gap: 0.6rem; margin-top: 1.5rem; font-weight: 700; }
+.path-progress + .path-progress { margin-top: 1.1rem; }
+.path-progress h3 { margin-bottom: 0.4rem; }

@@ -7,7 +7,7 @@ type Language = Database['public']['Enums']['language_code']
 import { useProfile } from '../home/useProfile'
 import { prefetchChapter } from '../lesson/api'
 import { fetchPassedChapterIds } from '../chapter-test/api'
-import { buildPath, type ChapterRow, type ChapterView } from './progress'
+import { buildPath, type CefrLevel, type ChapterRow, type ChapterView } from './progress'
 
 /** The curriculum of one studied language: each language has its own 24 chapters. */
 async function fetchChapters(language: Language): Promise<ChapterRow[]> {
@@ -28,34 +28,40 @@ async function fetchCompletedLessonIds(): Promise<number[]> {
   return data.map((row) => row.lesson_id)
 }
 
-/** The learner's path: chapters with status, built from curriculum, level and progress. */
-export function usePath(userId: string): { path: ChapterView[] | undefined; isError: boolean } {
-  const profile = useProfile(userId)
-  const language = profile.data?.active_language
+/** The path of one language: chapters with status, built from its curriculum, the level and the progress. */
+export function usePathOf(
+  language: Language | undefined,
+  level: CefrLevel | undefined,
+): { path: ChapterView[] | undefined; isError: boolean } {
   const chapters = useQuery({
     queryKey: ['chapters', language],
     queryFn: () => fetchChapters(language as Language),
     enabled: language !== undefined,
     staleTime: Infinity,
   })
+  // Progress and passed tests are read once for all languages: chapter and lesson ids are unique across them.
   const completed = useQuery({ queryKey: ['lesson-progress'], queryFn: fetchCompletedLessonIds })
   const passed = useQuery({ queryKey: ['passed-chapters'], queryFn: fetchPassedChapterIds })
 
-  if (!profile.data || !chapters.data || !completed.data || !passed.data) {
-    return {
-      path: undefined,
-      isError: profile.isError || chapters.isError || completed.isError || passed.isError,
-    }
+  if (!level || !chapters.data || !completed.data || !passed.data) {
+    return { path: undefined, isError: chapters.isError || completed.isError || passed.isError }
   }
   return {
     path: buildPath({
       chapters: chapters.data,
-      level: profile.data.level,
+      level,
       completedLessonIds: new Set(completed.data),
       passedChapterIds: new Set(passed.data),
     }),
     isError: false,
   }
+}
+
+/** The learner's path in the language being studied. */
+export function usePath(userId: string): { path: ChapterView[] | undefined; isError: boolean } {
+  const profile = useProfile(userId)
+  const result = usePathOf(profile.data?.active_language, profile.data?.level)
+  return { path: result.path, isError: result.isError || profile.isError }
 }
 
 /** Prepares the current chapter's lessons in the background as soon as the path is known. */
