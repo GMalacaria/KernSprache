@@ -39,5 +39,9 @@
   "dictationAverage": "media del dettato",
   "dictationCount_one": "{{count}} frase dettata",
   "dictationCount_other": "{{count}} frasi dettate",
-  "global": "Tutte le lingue"
+  "global": "Tutte le lingue",
+  "statsFilter": {
+    "label": "Lingua",
+    "all": "Tutte"
+  }
 }

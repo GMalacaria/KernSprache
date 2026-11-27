@@ -1,12 +1,15 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useProfile } from '../home/useProfile'
 import { purposeLabel } from '../onboarding/purposes'
 import { summarizeStats } from '../lesson/stats'
-import { usePath } from '../path/usePath'
 import { localDay } from '../study/studyMath'
 import { Waiting } from '../../components/Waiting'
-import { fetchProfileData } from './api'
+import { fetchProfileData, type StatsScope } from './api'
+import { PathProgress } from './PathProgress'
+import { useLearnerLanguages } from '../languages/useLanguageSwitch'
+import { isStudiedLanguage, type StudiedLanguage } from '../languages/languages'
 import { useStudiedLanguage } from '../languages/useLanguage'
 import { LanguagesSection } from '../languages/LanguageSwitch'
 import {
@@ -14,7 +17,6 @@ import {
   formatDuration,
   goalStreak,
   lastDaysMinutes,
-  levelProgress,
   studiedDays,
   totalStudySeconds,
 } from './profileStats'
@@ -39,9 +41,14 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
   const { t, i18n } = useTranslation(['profile', 'common'])
   const weekdays = t('chart.weekdays').split(',')
   const profile = useProfile(userId)
-  const { path } = usePath(userId)
   const language = useStudiedLanguage()
-  const data = useQuery({ queryKey: ['profile-data', language], queryFn: () => fetchProfileData(language) })
+  const languages = (useLearnerLanguages().data ?? []).filter(
+    (l): l is typeof l & { language: StudiedLanguage } => isStudiedLanguage(l.language),
+  )
+  // Answers and pronunciation of one language or of all together; the path is always per language.
+  const [scope, setScope] = useState<StatsScope>('all')
+  const data = useQuery({ queryKey: ['profile-data', scope], queryFn: () => fetchProfileData(scope) })
+  const pathLanguages = scope === 'all' ? languages : languages.filter((l) => l.language === scope)
 
   const today = localDay(profile.data?.timezone ?? 'Europe/Rome')
   const days = data.data?.days ?? []
@@ -149,6 +156,20 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
             </figure>
           </section>
 
+          {languages.length > 1 && (
+            <label className="row stats-filter">
+              <span>{t('statsFilter.label')}</span>
+              <select value={scope} onChange={(e) => setScope(e.target.value as StatsScope)}>
+                <option value="all">{t('statsFilter.all')}</option>
+                {languages.map((l) => (
+                  <option key={l.language} value={l.language}>
+                    {t(`common:languages.${l.language}.name`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
           <section>
             <h2>{t('answers')}</h2>
             <ul className="stats-grid stats-grid-4">
@@ -182,29 +203,12 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
         </>
       )}
 
-      {path && (
+      {pathLanguages.length > 0 && (
         <section>
           <h2>{t('path')}</h2>
-          <ul className="level-progress">
-            {levelProgress(path).map((level) => (
-              <li key={level.level}>
-                <span className="level-name">{level.level}</span>
-                <div
-                  className="bar"
-                  role="progressbar"
-                  aria-label={t('common:level', { level: level.level })}
-                  aria-valuemin={0}
-                  aria-valuemax={level.total}
-                  aria-valuenow={level.done}
-                >
-                  <span style={{ width: `${level.total ? (level.done / level.total) * 100 : 0}%` }} />
-                </div>
-                <small>
-                  {t('chapters', { done: level.done, total: level.total })}
-                </small>
-              </li>
-            ))}
-          </ul>
+          {pathLanguages.map((l) => (
+            <PathProgress key={l.language} language={l.language} level={l.level} showName={pathLanguages.length > 1} />
+          ))}
         </section>
       )}
 
