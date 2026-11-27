@@ -2,7 +2,7 @@
 
 Punto di ripartenza per una nuova sessione. Le regole del progetto (stack, convenzioni, comandi) sono in [CLAUDE.md](./CLAUDE.md): questo file dice **dove siamo e cosa fare dopo**.
 
-Ultimo aggiornamento: 2026-11-24. `main` a `b6d75fe` (PR #22), **tutto mergiato e in produzione** (frontend da Cloudflare; migration `lesson_stats` e function `chapter-test` v2 rilasciate a mano). Resta sul remoto solo `docs/next-steps-plan` (un vecchio commit di piano mai mergiato: si può cancellare).
+Ultimo aggiornamento: 2026-11-27. `main` a `34f102e` (PR #62), **tutto mergiato e in produzione**: il piano multilingua (`PLAN-multilingua.md`) è completo e rilasciato. L'app insegna inglese, francese, spagnolo e tedesco a chi parla italiano, con livello, scopo, percorso, ripasso e statistiche per lingua.
 
 ## Stato attuale (tutto su `main` e in produzione)
 
@@ -62,6 +62,8 @@ Modellato su aiTool (`src/install.ts`). Provato in emulazione mobile (evento `be
 ## Produzione (2026-11-23)
 
 - **Sito:** https://aitool-kernsprache.geom-malacaria.workers.dev (Cloudflare Workers, build da `main` con `pnpm run build` + `npx wrangler deploy`, config in `wrangler.jsonc`; i build leggono le variabili `VITE_*` **di build** del Worker). Attenzione: `aitool-kernsprache.kernsprache.workers.dev` è una vecchia copia di un altro account, non si aggiorna dal repo. Il frontend si pubblica da solo a ogni merge su `main` (circa 3-4 minuti); migration, functions e secret **no**.
+- **Rilascio del 2026-11-27 (multilingua):** prima un dump di produzione (schema e dati, nella cartella delle note della sessione `backup-produzione-2026-11-27`), poi applicate le 8 migration dalla `20261126100000_lesson_content_cache` alla `20261127100000_drop_single_language_columns` (la `20261125180000_learner_languages` c'era già) e pubblicate `tutor-chat`, `lesson`, `chapter-test`, `placement-test`, `transcribe`, `speak`, `review-check`, `send-reminders`. Verificato: nessuna migration in sospeso, functions online (401 senza accesso), sito online. Da provare dal proprietario: accesso, Profilo con le lingue, una lezione, il dialogo, un'altra lingua dal Profilo. Le lezioni salvate prima sono state cancellate (si rigenerano nel formato nuovo).
+- **Rilasciare da una worktree:** la worktree non è collegata al progetto; si copiano in `supabase/.temp` i file di collegamento del checkout principale (`project-ref`, `linked-project.json`, `pooler-url`, versioni: nessuna credenziale), invece di rifare `supabase link`.
 - **Rilascio del 2026-11-25:** applicate le migration `20261125100000_pronunciation_mistakes`, `20261125120000_goal_half_split`, `20261125140000_lesson_parts` (PR #35, #37, #38) e pubblicate `review-check` (nuova), `transcribe` e `tutor-chat` (rimaste indietro dalla #35). Verificato: nessuna migration in sospeso, functions online (401 senza accesso). Da provare sul telefono: lezione divisa in scritto e orale e ripasso con voto automatico.
 - **Supabase:** progetto `KernSprache` (produzione), repo collegato con `supabase link`; 17 migration applicate, 8 functions pubblicate, secret impostati (`GEMINI_API_KEY`, `AI_*`, `VAPID_KEYS`, `VAPID_SUBJECT`, `CRON_SECRET`), Vault con `project_url` e `reminders_secret`. Auth: Site URL e Redirect URLs sull'indirizzo `geom-malacaria`, "Confirm email" disattivato.
 - **Provato in produzione:** accesso, dialogo con l'IA, reset password.
