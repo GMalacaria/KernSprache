@@ -1,6 +1,6 @@
 # Kern Sprache: multilingua + i18n
 
-> Aggiornato il 2026-11-25 su `main` a `aa4da98` (PR #39). La PR 1 (nome e icona) è fatta (#31). Il blocco "scritto + orale e navigazione" di `PLAN.md` è chiuso (#37-#39 e la PR 0, orale obbligatorio nelle verifiche di capitolo). Il refactoring tocca quasi tutti i file, quindi va fatto **da solo**, senza altre sessioni che scrivono in parallelo.
+> **Completato e rilasciato in produzione il 2026-11-27** (PR #41–#62): tutte le PR del piano sono su `main` e il rilascio coordinato (migration delle PR 3–10 e functions) è fatto. Le sezioni sotto restano come storia delle scelte. Stesura precedente: aggiornato il 2026-11-25 su `main` a `aa4da98` (PR #39). La PR 1 (nome e icona) è fatta (#31). Il blocco "scritto + orale e navigazione" di `PLAN.md` è chiuso (#37-#39 e la PR 0, orale obbligatorio nelle verifiche di capitolo). Il refactoring tocca quasi tutti i file, quindi va fatto **da solo**, senza altre sessioni che scrivono in parallelo.
 
 ## Prerequisiti prima di partire
 1. Nessun'altra sessione al lavoro sul repo e `main` aggiornato (`git pull`, `gh pr list`). Al 2026-11-25 nessuna PR aperta.
