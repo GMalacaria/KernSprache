@@ -8,7 +8,6 @@ import { useStudyTimer } from '../study/useStudyTimer'
 import { chapterAwaitingTest, nextLesson } from '../path/progress'
 import { usePath } from '../path/usePath'
 import { useProfile } from './useProfile'
-import { LanguageSelect } from '../languages/LanguageSwitch'
 
 interface HomePageProps {
   user: User
@@ -40,9 +39,8 @@ export function HomePage({
 
   return (
     <main className="page home">
-      <header className="row home-header">
+      <header>
         <h1>{t('common:appName')}</h1>
-        <LanguageSelect />
       </header>
 
       {profile.data && (

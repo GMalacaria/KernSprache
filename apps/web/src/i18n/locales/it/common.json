@@ -103,13 +103,13 @@
     }
   },
   "languageSwitch": {
-    "label": "Lingua che stai studiando",
     "yours": "Le tue lingue",
     "studying": "In corso",
     "study": "Studia questa",
     "add": "Aggiungi una lingua",
     "addHint": "Per ogni lingua scegli lo scopo e fai il test di livello: livello e progressi restano separati.",
     "switching": "Cambio lingua…",
-    "error": "Non sono riuscito a cambiare lingua. Riprova."
+    "error": "Non sono riuscito a cambiare lingua. Riprova.",
+    "choose": "Scegli una lingua"
   }
 }
