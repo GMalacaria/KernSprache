@@ -45,10 +45,11 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
   const languages = (useLearnerLanguages().data ?? []).filter(
     (l): l is typeof l & { language: StudiedLanguage } => isStudiedLanguage(l.language),
   )
-  // Answers and pronunciation of one language or of all together; the path is always per language.
+  // Answers and pronunciation of one language or of all together; the path only for one language (with a single
+  // language studied there is no filter, so its path is always shown).
   const [scope, setScope] = useState<StatsScope>('all')
   const data = useQuery({ queryKey: ['profile-data', scope], queryFn: () => fetchProfileData(scope) })
-  const pathLanguages = scope === 'all' ? languages : languages.filter((l) => l.language === scope)
+  const pathLanguage = scope === 'all' ? (languages.length === 1 ? languages[0] : undefined) : languages.find((l) => l.language === scope)
 
   const today = localDay(profile.data?.timezone ?? 'Europe/Rome')
   const days = data.data?.days ?? []
@@ -203,12 +204,10 @@ export function ProfilePage({ userId, onEditGoals, onRetakePlacement }: ProfileP
         </>
       )}
 
-      {pathLanguages.length > 0 && (
+      {pathLanguage && (
         <section>
           <h2>{t('path')}</h2>
-          {pathLanguages.map((l) => (
-            <PathProgress key={l.language} language={l.language} level={l.level} showName={pathLanguages.length > 1} />
-          ))}
+          <PathProgress language={pathLanguage.language} level={pathLanguage.level} />
         </section>
       )}
 
