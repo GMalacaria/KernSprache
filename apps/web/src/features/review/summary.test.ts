@@ -3,9 +3,9 @@ import type { ReviewItem } from './api'
 import { dueSummary } from './summary'
 
 const fsrs = { due: '', stability: 0, difficulty: 0, scheduled_days: 0, learning_steps: 0, reps: 0, lapses: 0, state: 0, last_review: null }
-const vocab = { kind: 'vocab', id: 'v', en: 'hotel', it: 'albergo', ...fsrs } as ReviewItem
+const vocab = { kind: 'vocab', id: 'v', term: 'hotel', translation: 'albergo', ...fsrs } as ReviewItem
 const mistake = (category: string) =>
-  ({ kind: 'mistake', id: category, original: 'x', corrected: 'y', explanation_it: 'z', category, ...fsrs }) as ReviewItem
+  ({ kind: 'mistake', id: category, original: 'x', corrected: 'y', explanation: 'z', category, ...fsrs }) as ReviewItem
 
 describe('dueSummary', () => {
   it('counts words, grammar mistakes and words to pronounce', () => {

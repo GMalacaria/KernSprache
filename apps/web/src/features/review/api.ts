@@ -11,13 +11,13 @@ const FSRS_SELECT = 'due, stability, difficulty, scheduled_days, learning_steps,
 export const DAILY_REVIEW_LIMIT = 30
 
 export type ReviewItem =
-  | ({ kind: 'vocab'; id: string; en: string; it: string } & FsrsColumns)
+  | ({ kind: 'vocab'; id: string; term: string; translation: string } & FsrsColumns)
   | ({
     kind: 'mistake'
     id: string
     original: string
     corrected: string
-    explanation_it: string
+    explanation: string
     /** "pronunciation": a word to say aloud; any other category: a sentence to correct. */
     category: Database['public']['Enums']['mistake_category']
   } & FsrsColumns)
@@ -28,14 +28,14 @@ export async function fetchDueItems(now: Date, language: StudiedLanguage): Promi
   const [vocab, mistakes] = await Promise.all([
     supabase
       .from('vocab_items')
-      .select(`id, en, it, ${FSRS_SELECT}`)
+      .select(`id, term, translation, ${FSRS_SELECT}`)
       .eq('language', language)
       .lte('due', iso)
       .order('due')
       .limit(DAILY_REVIEW_LIMIT),
     supabase
       .from('mistakes')
-      .select(`id, original, corrected, explanation_it, category, ${FSRS_SELECT}`)
+      .select(`id, original, corrected, explanation, category, ${FSRS_SELECT}`)
       .eq('language', language)
       .lte('due', iso)
       .order('due')
@@ -73,8 +73,8 @@ export async function gradeItem(item: ReviewItem, grade: Grade, now: Date): Prom
   return { ...item, ...columns }
 }
 
-export async function startReviewSession(): Promise<string> {
-  const { data, error } = await supabase.from('sessions').insert({ kind: 'review' }).select('id').single()
+export async function startReviewSession(language: StudiedLanguage): Promise<string> {
+  const { data, error } = await supabase.from('sessions').insert({ kind: 'review', language }).select('id').single()
   if (error) throw error
   return data.id
 }

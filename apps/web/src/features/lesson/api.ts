@@ -1,3 +1,4 @@
+import type { StudiedLanguage } from '../languages/languages'
 import { i18n } from '../../i18n'
 import { functionErrorMessage } from '../../lib/functionError'
 import { supabase } from '../../lib/supabase'
@@ -79,25 +80,26 @@ export async function savePart(lessonId: number, part: LessonPart, stats: PartSt
 }
 
 /** Adds the lesson's words and expressions to spaced-repetition review; returns how many were new. */
-export async function addToReview(userId: string, items: Translated[]): Promise<number> {
-  // vocab_items still has the single-language column names (en = studied language, it = translation).
+export async function addToReview(userId: string, language: StudiedLanguage, items: Translated[]): Promise<number> {
+  // German nouns keep their capital (der Tisch); duplicates are compared case-insensitively.
   const normalized = items
-    .map((i) => ({ en: i.text.trim().toLowerCase(), it: i.translation.trim() }))
-    .filter((i) => i.en && i.it)
+    .map((i) => ({ term: i.text.trim(), translation: i.translation.trim() }))
+    .filter((i) => i.term && i.translation)
   if (!normalized.length) return 0
   const { data: existing, error } = await supabase
     .from('vocab_items')
-    .select('en')
+    .select('term')
     .eq('user_id', userId)
-    .in(
-      'en',
-      normalized.map((i) => i.en),
-    )
+    .eq('language', language)
   if (error) throw error
-  const known = new Set((existing ?? []).map((v) => v.en.toLowerCase()))
-  const fresh = normalized.filter((i, idx) => !known.has(i.en) && normalized.findIndex((x) => x.en === i.en) === idx)
+  const known = new Set((existing ?? []).map((v) => v.term.toLowerCase()))
+  const fresh = normalized.filter(
+    (i, idx) =>
+      !known.has(i.term.toLowerCase()) &&
+      normalized.findIndex((x) => x.term.toLowerCase() === i.term.toLowerCase()) === idx,
+  )
   if (!fresh.length) return 0
-  const { error: insertError } = await supabase.from('vocab_items').insert(fresh)
+  const { error: insertError } = await supabase.from('vocab_items').insert(fresh.map((i) => ({ ...i, language })))
   if (insertError && insertError.code !== '23505') throw insertError
   return fresh.length
 }

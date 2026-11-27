@@ -27,7 +27,7 @@ select throws_ok(
   '42501', null, 'a learner cannot approve themselves'
 );
 select lives_ok(
-  $$ update public.profiles set goal = 'viaggi' where id = 'aaaaaaaa-0000-0000-0000-000000000002' $$,
+  $$ update public.profiles set daily_goal_minutes = 30 where id = 'aaaaaaaa-0000-0000-0000-000000000002' $$,
   'but can still edit the rest of their profile'
 );
 select is((select approved from public.profiles), false, 'and stays unapproved');

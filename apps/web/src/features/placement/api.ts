@@ -1,3 +1,4 @@
+import type { StudiedLanguage } from '../languages/languages'
 import { i18n } from '../../i18n'
 import { functionErrorMessage } from '../../lib/functionError'
 import type { Database } from '../../lib/database.types'
@@ -40,8 +41,10 @@ export function submitPlacement(answers: Record<string, number>, oral: { id: str
   return invoke<PlacementResult>({ action: 'submit', answers, oral })
 }
 
-/** Skipping the test on first run: keep A1 and finish onboarding. */
-export async function skipPlacement(userId: string): Promise<void> {
-  const { error } = await supabase.from('profiles').update({ onboarded_at: new Date().toISOString() }).eq('id', userId)
+/** Skipping the test on first run: keep A1 and finish the first access of the studied language. */
+export async function skipPlacement(userId: string, language: StudiedLanguage): Promise<void> {
+  const { error } = await supabase
+    .from('learner_languages')
+    .upsert({ user_id: userId, language, onboarded_at: new Date().toISOString() })
   if (error) throw error
 }

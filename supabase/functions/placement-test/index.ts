@@ -71,11 +71,16 @@ Deno.serve(
       })
     if (insertError) throw insertError
 
-    const { error: profileError } = await db
-      .from('profiles')
-      .update({ level: finalLevel, onboarded_at: new Date().toISOString() })
-      .eq('id', userId)
-    if (profileError) throw profileError
+    // The test places the studied language and ends its first access.
+    const { error: languageError } = await db
+      .from('learner_languages')
+      .upsert({
+        user_id: userId,
+        language: learner.pair.target,
+        level: finalLevel,
+        onboarded_at: new Date().toISOString(),
+      })
+    if (languageError) throw languageError
 
     return json({
       written: {

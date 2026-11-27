@@ -13,7 +13,7 @@ import { buildPath, type ChapterRow, type ChapterView } from './progress'
 async function fetchChapters(language: Language): Promise<ChapterRow[]> {
   const { data, error } = await supabase
     .from('chapters')
-    .select('id, level, sort_order, title, description_it, lessons (id, sort_order, title)')
+    .select('id, level, sort_order, title, description, lessons (id, sort_order, title)')
     .eq('language', language)
     .order('level')
     .order('sort_order')

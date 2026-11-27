@@ -36,18 +36,19 @@ export function OnboardingPage({ userId, initial, editing = false, onDone }: Onb
 
   const save = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          purpose,
-          goal: details.trim() || null,
-          daily_goal_minutes: minutes,
-        })
-        .eq('id', userId)
-      if (error) throw error
+      // The daily goal is one for all languages; purpose and details belong to the studied language.
+      const [profile, language] = await Promise.all([
+        supabase.from('profiles').update({ daily_goal_minutes: minutes }).eq('id', userId),
+        supabase
+          .from('learner_languages')
+          .upsert({ user_id: userId, language: names.code, purpose, goal: details.trim() || null }),
+      ])
+      if (profile.error) throw profile.error
+      if (language.error) throw language.error
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['profile', userId] })
+      await queryClient.invalidateQueries({ queryKey: ['learner-languages'] })
       onDone()
     },
   })

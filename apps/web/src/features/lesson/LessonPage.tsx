@@ -1,3 +1,4 @@
+import { useStudiedLanguage } from '../languages/useLanguage'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -448,6 +449,7 @@ function PartDone({
 }: PartDoneProps) {
   const { t } = useTranslation(['lesson', 'common'])
   const { part, stats } = finished
+  const language = useStudiedLanguage()
   const other = otherPart(part)
   const lastOfChapter = nextLessonId === undefined
   const queryClient = useQueryClient()
@@ -457,7 +459,7 @@ function PartDone({
       const saved = await savePart(lessonId, part, stats)
       if (!saved.completed || !saved.total) return { ...saved, added: 0 }
       await recordLessonStats(lessonId, saved.total)
-      const added = await addToReview(userId, [
+      const added = await addToReview(userId, language, [
         ...content.words.map((w) => ({ text: w.term, translation: w.translation })),
         ...content.phrases,
         ...content.idioms.map((i) => ({ text: i.text, translation: i.meaning })),

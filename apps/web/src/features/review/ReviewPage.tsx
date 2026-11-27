@@ -61,6 +61,7 @@ interface ReviewSessionProps {
 function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
   // Review is extra practice: its time is saved for statistics, not counted towards the daily goal.
   usePracticeActivity('review')
+  const language = useStudiedLanguage()
   const { t } = useTranslation(['review', 'common'])
   const [queue, setQueue] = useState(initialItems)
   const [done, setDone] = useState(0)
@@ -71,7 +72,7 @@ function ReviewSession({ initialItems, onExit }: ReviewSessionProps) {
 
   const save = useMutation({
     mutationFn: async ({ item, value, at }: { item: ReviewItem; value: Grade; at: Date }) => {
-      sessionId.current ??= startReviewSession()
+      sessionId.current ??= startReviewSession(language)
       await sessionId.current
       return gradeItem(item, value, at)
     },

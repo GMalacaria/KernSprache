@@ -11,7 +11,7 @@ export const MAX_SCORE_FOR_CARDS = 85
 export interface PronunciationCard {
   original: string
   corrected: string
-  explanation_it: string
+  explanation: string
   category: 'pronunciation'
 }
 
@@ -39,7 +39,7 @@ export function pronunciationCards(
     cards.push({
       original: clean,
       corrected: clean,
-      explanation_it: tip.trim(),
+      explanation: tip.trim(),
       category: 'pronunciation',
     })
   }

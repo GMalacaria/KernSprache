@@ -39,7 +39,7 @@ export function PlacementTestPage({ userId, firstRun, onDone }: PlacementTestPag
     onSuccess: () => setStep({ kind: 'result' }),
   })
 
-  const skip = useMutation({ mutationFn: () => skipPlacement(userId), onSuccess: finish })
+  const skip = useMutation({ mutationFn: () => skipPlacement(userId, lang), onSuccess: finish })
   // Retaken from the profile: a back arrow leaves at any step. The first run has no way back, only "Salta".
   const title = firstRun ? <h1>{t('placement.title')}</h1> : <BackHeader title={t('placement.title')} onBack={onDone} />
 

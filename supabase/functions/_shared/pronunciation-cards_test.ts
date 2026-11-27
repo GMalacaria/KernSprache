@@ -13,13 +13,13 @@ Deno.test('pronunciation cards: one card per word, the word is both original and
     {
       original: 'think',
       corrected: 'think',
-      explanation_it: 'Consiglio per think',
+      explanation: 'Consiglio per think',
       category: 'pronunciation',
     },
     {
       original: 'world',
       corrected: 'world',
-      explanation_it: 'Consiglio per world',
+      explanation: 'Consiglio per world',
       category: 'pronunciation',
     },
   ])

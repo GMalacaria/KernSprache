@@ -72,7 +72,7 @@ export function PathPage({ userId, onOpenLesson, onOpenTest, landOnCurrent }: Pa
                   )
                   const body = (
                     <>
-                      <p className="muted">{chapter.description_it}</p>
+                      <p className="muted">{chapter.description}</p>
                       {chapter.status !== 'locked' && (
                         <ol className="lessons">
                           {chapter.lessons.map((lesson) => (

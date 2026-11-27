@@ -264,7 +264,13 @@ Decisioni prese:
    - `send-reminders`: il promemoria usa la lingua attiva (testi ancora in italiano).
    - **cambio di lingua attiva**: copiare nel profilo livello, scopo, goal e `onboarded_at` della riga di `learner_languages` della nuova lingua (o, meglio, far leggere alla PWA `learner_languages` e togliere il trigger di sincronizzazione), altrimenti il profilo resta con il livello della lingua di prima (visto provando il test di livello tedesco).
 
-10. **`chore(db): drop single-language columns`** (con i rename spostati qui dalla PR 3; questa sì richiede un rilascio coordinato di migration e functions):
+10. ✅ **`chore(db): drop single-language columns`** — fatta (migration `20261127100000_drop_single_language_columns`, rilascio coordinato):
+    - il profilo non rispecchia più la lingua attiva: tolti `profiles.level/purpose/goal/onboarded_at`, il trigger di sincronizzazione e la sua funzione; `set_active_language` cambia solo `active_language` (e crea la riga); la PWA legge la riga di `learner_languages` della lingua attiva (`useProfile` restituisce la stessa forma di prima), onboarding e salto del test scrivono lì, e così `placement-test` e `chapter-test`; `loadLearner` non ha più il ripiego sul profilo;
+    - colonne neutre: `vocab_items.term/translation`, `mistakes.explanation`, `chapters.description`;
+    - niente più default `en` su `language`: ogni riga dice la sua lingua (anche le sessioni di ripasso e le parole aggiunte dalla PWA);
+    - tolta `lesson_contents`: la lezione viene solo da `lesson_content_cache`, e la verifica di capitolo legge le lezioni condivise della stessa lingua madre, scopo e versione;
+    - provato: migration su una copia del DB locale (tutti i test pgTAP), poi sul DB locale; nel browser home, Percorso, Profilo, modifica di scopo e minuti (scritti in tabelle diverse), cambio di lingua, ripasso; `tutor-chat` e `lesson` con Gemini vero scrivono nelle colonne nuove.
+    - Piano originale:
     - togliere `profiles.level/purpose/goal/onboarded_at` e `lesson_contents`;
     - aggiornare `CLAUDE.md` (modello dati, obiettivi, sezione Voce) e `PLAN.md`.
 

@@ -5,10 +5,10 @@ const lessons = (chapterId: number) =>
   [1, 2, 3, 4].map((n) => ({ id: chapterId * 10 + n, sort_order: n, title: `L${chapterId}.${n}` }))
 
 const chapters: ChapterRow[] = [
-  { id: 2, level: 'A1', sort_order: 2, title: 'A1-2', description_it: '', lessons: lessons(2) },
-  { id: 1, level: 'A1', sort_order: 1, title: 'A1-1', description_it: '', lessons: lessons(1) },
-  { id: 3, level: 'A2', sort_order: 1, title: 'A2-1', description_it: '', lessons: lessons(3) },
-  { id: 4, level: 'A2', sort_order: 2, title: 'A2-2', description_it: '', lessons: lessons(4) },
+  { id: 2, level: 'A1', sort_order: 2, title: 'A1-2', description: '', lessons: lessons(2) },
+  { id: 1, level: 'A1', sort_order: 1, title: 'A1-1', description: '', lessons: lessons(1) },
+  { id: 3, level: 'A2', sort_order: 1, title: 'A2-1', description: '', lessons: lessons(3) },
+  { id: 4, level: 'A2', sort_order: 2, title: 'A2-2', description: '', lessons: lessons(4) },
 ]
 
 const none = new Set<number>()

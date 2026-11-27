@@ -46,7 +46,7 @@ Deno.serve(
     if (body.data.action === 'get') {
       const lesson = await loadLesson(db, body.data.lesson_id)
       const learner = await loadLearner(db, userId, lesson.chapters?.language)
-      const { content } = await getOrGenerate(db, userId, lesson, learner)
+      const { content } = await getOrGenerate(userId, lesson, learner)
       return json({
         lesson: {
           id: lesson.id,
@@ -73,7 +73,7 @@ Deno.serve(
     while (queue.length) {
       const batch = queue.splice(0, PREFETCH_CONCURRENCY)
       const results = await Promise.all(
-        batch.map((l) => getOrGenerate(db, userId, l, learner)),
+        batch.map((l) => getOrGenerate(userId, l, learner)),
       )
       generated += results.filter((r) => r.generated).length
     }
@@ -108,45 +108,23 @@ const CLAIM_SECONDS = 120
 const WAIT_STEP_MS = 2000
 const WAIT_LIMIT_MS = 60_000
 
-/**
- * The learner's own copy if it was written for their purpose (a lesson in progress keeps its content), otherwise
- * the shared one, generated once for everyone with the same native language and purpose. The learner gets a copy
- * in lesson_contents, which the chapter test still reads.
- */
+/** The lesson for the learner's native language and purpose: generated once and shared by everyone with them. */
 async function getOrGenerate(
-  db: Db,
   userId: string,
   lesson: LessonInfo,
   learner: Learner,
 ): Promise<{ content: LessonContent; generated: boolean }> {
-  const { data: own, error } = await db
-    .from('lesson_contents')
-    .select('content, purpose')
-    .eq('lesson_id', lesson.id)
-    .maybeSingle()
-  if (error) throw error
-  if (own && own.purpose === learner.purpose) {
-    const parsed = lessonContentSchema.safeParse(own.content)
-    if (parsed.success) return { content: parsed.data, generated: false }
-  }
+  return await sharedContent(cacheKey(lesson, learner), userId, lesson, learner)
+}
 
-  const key: CacheKey = {
+/** The shared cache key of a lesson for this learner. */
+function cacheKey(lesson: LessonInfo, learner: Learner): CacheKey {
+  return {
     lesson_id: lesson.id,
     native_language: learner.pair.native,
     purpose: learner.purpose,
     prompt_version: LESSON_PROMPT_VERSION,
   }
-  const shared = await sharedContent(key, userId, lesson, learner)
-  const { error: saveError } = await adminClient().from('lesson_contents')
-    .upsert({
-      user_id: userId,
-      lesson_id: lesson.id,
-      purpose: learner.purpose,
-      content: shared.content,
-      prompt_version: LESSON_PROMPT_VERSION,
-    })
-  if (saveError) throw saveError
-  return shared
 }
 
 /** Reads the shared content; generates it when this request wins the claim, otherwise waits for the one that did. */

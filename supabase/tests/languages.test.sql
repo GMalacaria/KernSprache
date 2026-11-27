@@ -1,18 +1,12 @@
--- Languages per learner: learner_languages (RLS, kept in sync with the profile), language on the learner tables,
--- curriculum unique per language. Run with: pnpm test:db
+-- Languages per learner: learner_languages (RLS), language on the learner tables, curriculum unique per language.
+-- Run with: pnpm test:db
 begin;
-select plan(14);
+select plan(13);
 
 insert into auth.users (id, email) values
   ('77777777-7777-7777-7777-777777777777', 'gina@example.com'),
   ('88888888-8888-8888-8888-888888888888', 'hugo@example.com');
 
-select is(
-  (select language::text || ' ' || level::text from public.learner_languages
-    where user_id = '77777777-7777-7777-7777-777777777777'),
-  'en A1',
-  'a new learner studies English from A1'
-);
 select is(
   (select native_language::text || ' ' || active_language::text from public.profiles
     where id = '77777777-7777-7777-7777-777777777777'),
@@ -23,14 +17,12 @@ select is(
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"77777777-7777-7777-7777-777777777777","role":"authenticated"}', true);
 
--- The app still writes the profile: the active language's row follows it.
-update public.profiles set level = 'B1', purpose = 'work', goal = 'riunioni', onboarded_at = now()
-where id = '77777777-7777-7777-7777-777777777777';
+insert into public.learner_languages (language, level, purpose, goal, onboarded_at) values ('en', 'B1', 'work', 'riunioni', now());
 select is(
   (select level::text || ' ' || purpose::text || ' ' || goal || ' ' || (onboarded_at is not null)::text
     from public.learner_languages where language = 'en'),
   'B1 work riunioni true',
-  'profile changes are copied to the active language'
+  'a learner keeps level, purpose and details per language'
 );
 
 select is((select count(*) from public.learner_languages)::int, 1, 'Gina sees only her languages');
@@ -48,17 +40,16 @@ select throws_ok(
 );
 
 -- The same spelling can be a word in two languages; within one language it is still unique.
-insert into public.vocab_items (en, it) values ('die', 'morire');
-insert into public.vocab_items (en, it, language) values ('die', 'il/la (articolo)', 'de');
+insert into public.vocab_items (term, translation, language) values ('die', 'morire', 'en');
+insert into public.vocab_items (term, translation, language) values ('die', 'il/la (articolo)', 'de');
 select is((select count(*) from public.vocab_items)::int, 2, 'the same word in two languages');
 select throws_ok(
-  $$ insert into public.vocab_items (en, it) values ('Die', 'dado') $$,
+  $$ insert into public.vocab_items (term, translation, language) values ('Die', 'dado', 'en') $$,
   '23505', null, 'a word is unique within a language'
 );
-select is(
-  (select language::text from public.vocab_items where it = 'morire'),
-  'en',
-  'rows without a language are English'
+select throws_ok(
+  $$ insert into public.vocab_items (term, translation) values ('cat', 'gatto') $$,
+  '23502', null, 'every word says its language'
 );
 
 select is(
@@ -69,8 +60,8 @@ select is(
 reset role;
 
 -- A placement test marks the language as placed.
-insert into public.placement_results (user_id, written_answers, written_correct, written_total, written_level, final_level)
-values ('77777777-7777-7777-7777-777777777777', '{}', 8, 16, 'A2', 'A2');
+insert into public.placement_results (user_id, written_answers, written_correct, written_total, written_level, final_level, language)
+values ('77777777-7777-7777-7777-777777777777', '{}', 8, 16, 'A2', 'A2', 'en');
 select ok(
   (select placement_done_at is not null from public.learner_languages
     where user_id = '77777777-7777-7777-7777-777777777777' and language = 'en'),
