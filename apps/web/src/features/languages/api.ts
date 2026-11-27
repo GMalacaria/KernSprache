@@ -18,7 +18,7 @@ export async function fetchLearnerLanguages(): Promise<LearnerLanguage[]> {
 }
 
 /**
- * Makes a language the active one: the profile takes its level and purpose. A language studied for the first time
+ * Makes a language the active one (its level and purpose are in its learner_languages row). A language studied for the first time
  * has no onboarding yet, so the app shows the first-access flow for it.
  */
 export async function setActiveLanguage(language: StudiedLanguage): Promise<void> {

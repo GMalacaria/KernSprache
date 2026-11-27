@@ -50,7 +50,7 @@ export async function loadLearnerSnapshot(
       .limit(RECENT_MISTAKES),
     db
       .from('vocab_items')
-      .select('en')
+      .select('term')
       .eq('user_id', userId)
       .eq('language', language)
       .lte('due', new Date().toISOString())
@@ -76,7 +76,7 @@ export async function loadLearnerSnapshot(
       }
       : null,
     recentMistakes: mistakes.data ?? [],
-    reviewWords: (vocab.data ?? []).map((v) => v.en),
+    reviewWords: (vocab.data ?? []).map((v) => v.term),
   }
 }
 

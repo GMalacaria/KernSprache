@@ -13,8 +13,8 @@ select 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-77777777
   '[{"id":"q1","prompt":"x","options":["a","b","c","d"],"answer":1}]', '[{"id":"o1","prompt_it":"x"}]', 'test'
 from public.chapters limit 1;
 
-insert into public.chapter_test_attempts (user_id, chapter_id, test_id, written_score, oral_score, score, passed, feedback)
-select '77777777-7777-7777-7777-777777777777', chapter_id, id, 80, 70, 75, true, '{}'
+insert into public.chapter_test_attempts (user_id, chapter_id, test_id, written_score, oral_score, score, passed, feedback, language)
+select '77777777-7777-7777-7777-777777777777', chapter_id, id, 80, 70, 75, true, '{}', 'en'
 from public.chapter_tests where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 
 set local role authenticated;
@@ -28,8 +28,8 @@ select throws_ok(
 );
 select is((select count(*) from public.chapter_test_attempts)::int, 1, 'learners can read their own attempts');
 select throws_ok(
-  $$ insert into public.chapter_test_attempts (user_id, chapter_id, test_id, written_score, oral_score, score, passed, feedback)
-     select user_id, chapter_id, test_id, 100, 100, 100, true, '{}' from public.chapter_test_attempts limit 1 $$,
+  $$ insert into public.chapter_test_attempts (user_id, chapter_id, test_id, written_score, oral_score, score, passed, feedback, language)
+     select user_id, chapter_id, test_id, 100, 100, 100, true, '{}', 'en' from public.chapter_test_attempts limit 1 $$,
   '42501', null, 'learners cannot write attempts (no self-declared pass)'
 );
 

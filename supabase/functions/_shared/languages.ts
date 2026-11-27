@@ -49,17 +49,13 @@ export interface Learner {
 }
 
 /**
- * The learner in `language` (by default the active one): level, purpose and details from learner_languages,
- * falling back to the profile for a learner who has no row yet. Runs under RLS.
+ * The learner in `language` (by default the active one): level, purpose and details from learner_languages. A
+ * language without a row yet counts as just started (A1, no purpose). Runs under RLS.
  */
-export async function loadLearner(
-  db: Db,
-  userId: string,
-  language?: LanguageCode,
-): Promise<Learner> {
+export async function loadLearner(db: Db, userId: string, language?: LanguageCode): Promise<Learner> {
   const { data: profile, error } = await db
     .from('profiles')
-    .select('native_language, active_language, level, purpose, goal')
+    .select('native_language, active_language')
     .eq('id', userId)
     .single()
   if (error) throw error
@@ -71,11 +67,10 @@ export async function loadLearner(
     .eq('language', target)
     .maybeSingle()
   if (rowError) throw rowError
-  const source = row ?? profile
   return {
     pair: { native: profile.native_language, target },
-    level: source.level,
-    purpose: source.purpose,
-    goal: source.goal,
+    level: row?.level ?? 'A1',
+    purpose: row?.purpose ?? null,
+    goal: row?.goal ?? null,
   }
 }

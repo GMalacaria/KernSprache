@@ -79,11 +79,11 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
     event.preventDefault()
     const answer = value.trim()
     if (!answer || flow.outcome || flow.check.isPending) return
-    const match = matchTranslation(item.it, answer)
+    const match = matchTranslation(item.translation, answer)
     if (match === 'exact') return flow.finish(true, true, null)
-    if (match === 'typo') return flow.finish(true, false, i18n.t('spelling', { ns: 'review', word: item.it }))
+    if (match === 'typo') return flow.finish(true, false, i18n.t('spelling', { ns: 'review', word: item.translation }))
     try {
-      const result = await flow.check.mutateAsync({ kind: 'translation', prompt: item.en, expected: item.it, answer })
+      const result = await flow.check.mutateAsync({ kind: 'translation', prompt: item.term, expected: item.translation, answer })
       if (result.correct) flow.finish(true, false, result.feedback)
       else flow.miss(result.feedback)
     } catch {
@@ -97,11 +97,11 @@ export function VocabCard({ item, onGraded }: CardProps<VocabItem>) {
         <p className="muted">{t('vocab.prompt')}</p>
         <div className="card-word">
           <p className="card-main" lang={lang}>
-            {item.en}
+            {item.term}
           </p>
-          <ListenButton text={item.en} className="listen-button" iconSize="1.4em" />
+          <ListenButton text={item.term} className="listen-button" iconSize="1.4em" />
         </div>
-        {flow.outcome && <p className="card-answer">{item.it}</p>}
+        {flow.outcome && <p className="card-answer">{item.translation}</p>}
       </article>
 
       {flow.outcome ? (
@@ -221,7 +221,7 @@ export function SentenceCard({ item, onGraded }: CardProps<MistakeItem>) {
               </p>
               <ListenButton text={item.corrected} className="listen-button" iconSize="1.4em" />
             </div>
-            <p className="muted">{item.explanation_it}</p>
+            <p className="muted">{item.explanation}</p>
           </>
         )}
       </article>
@@ -358,7 +358,7 @@ export function PronunciationCard({ item, onGraded, onSkip }: CardProps<MistakeI
           </p>
           <ListenButton text={item.original} className="listen-button" iconSize="1.4em" />
         </div>
-        <p className="muted">{item.explanation_it}</p>
+        <p className="muted">{item.explanation}</p>
       </article>
 
       {result ? (

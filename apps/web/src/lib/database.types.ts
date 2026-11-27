@@ -43,7 +43,7 @@ export type Database = {
                   }
                   ComputedFields: never
                   Insert: {
-                    "chapter_id": number,"created_at"?: string,"feedback": NonNullable<Json>,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"oral_score": number,"oral_transcripts"?: NonNullable<Json>,"passed": boolean,"score": number,"test_id": string,"user_id": string,"written_score": number
+                    "chapter_id": number,"created_at"?: string,"feedback": NonNullable<Json>,"id"?: string,"language": Database["public"]['Enums']["language_code"],"oral_score": number,"oral_transcripts"?: NonNullable<Json>,"passed": boolean,"score": number,"test_id": string,"user_id": string,"written_score": number
                   }
                   Update: {
                     "chapter_id"?: number,"created_at"?: string,"feedback"?: NonNullable<Json>,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"oral_score"?: number,"oral_transcripts"?: NonNullable<Json>,"passed"?: boolean,"score"?: number,"test_id"?: string,"user_id"?: string,"written_score"?: number
@@ -85,14 +85,14 @@ isOneToOne: false
                   ]
                 },"chapters": {
                   Row: {
-                    "description_it": string,"grammar_focus": string,"id": number,"language": Database["public"]['Enums']["language_code"],"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string
+                    "description": string,"grammar_focus": string,"id": number,"language": Database["public"]['Enums']["language_code"],"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "description_it"?: string,"grammar_focus"?: string,"id"?: never,"language"?: Database["public"]['Enums']["language_code"],"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string
+                    "description"?: string,"grammar_focus"?: string,"id"?: never,"language": Database["public"]['Enums']["language_code"],"level": Database["public"]['Enums']["cefr_level"],"slug": string,"sort_order": number,"title": string
                   }
                   Update: {
-                    "description_it"?: string,"grammar_focus"?: string,"id"?: never,"language"?: Database["public"]['Enums']["language_code"],"level"?: Database["public"]['Enums']["cefr_level"],"slug"?: string,"sort_order"?: number,"title"?: string
+                    "description"?: string,"grammar_focus"?: string,"id"?: never,"language"?: Database["public"]['Enums']["language_code"],"level"?: Database["public"]['Enums']["cefr_level"],"slug"?: string,"sort_order"?: number,"title"?: string
                   }
                   Relationships: [
                     
@@ -145,26 +145,6 @@ isOneToOne: false
                   Relationships: [
                     {
       foreignKeyName: "lesson_content_cache_lesson_id_fkey"
-      columns: ["lesson_id"]
-isOneToOne: false
-      referencedRelation: "lessons"
-      referencedColumns: ["id"]
-    }
-                  ]
-                },"lesson_contents": {
-                  Row: {
-                    "content": NonNullable<Json>,"created_at": string,"lesson_id": number,"prompt_version": string,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"user_id": string
-                  }
-                  ComputedFields: never
-                  Insert: {
-                    "content": NonNullable<Json>,"created_at"?: string,"lesson_id": number,"prompt_version": string,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"user_id": string
-                  }
-                  Update: {
-                    "content"?: NonNullable<Json>,"created_at"?: string,"lesson_id"?: number,"prompt_version"?: string,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"user_id"?: string
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "lesson_contents_lesson_id_fkey"
       columns: ["lesson_id"]
 isOneToOne: false
       referencedRelation: "lessons"
@@ -239,14 +219,14 @@ isOneToOne: false
                   ]
                 },"mistakes": {
                   Row: {
-                    "category": Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at": string,"difficulty": number,"due": string,"explanation_it": string,"id": string,"language": Database["public"]['Enums']["language_code"],"lapses": number,"last_review": string | null,"learning_steps": number,"original": string,"reps": number,"scheduled_days": number,"session_id": string | null,"stability": number,"state": number,"user_id": string
+                    "category": Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at": string,"difficulty": number,"due": string,"explanation": string,"id": string,"language": Database["public"]['Enums']["language_code"],"lapses": number,"last_review": string | null,"learning_steps": number,"original": string,"reps": number,"scheduled_days": number,"session_id": string | null,"stability": number,"state": number,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at"?: string,"difficulty"?: number,"due"?: string,"explanation_it": string,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original": string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
+                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected": string,"created_at"?: string,"difficulty"?: number,"due"?: string,"explanation": string,"id"?: string,"language": Database["public"]['Enums']["language_code"],"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original": string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
                   }
                   Update: {
-                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected"?: string,"created_at"?: string,"difficulty"?: number,"due"?: string,"explanation_it"?: string,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original"?: string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
+                    "category"?: Database["public"]['Enums']["mistake_category"],"corrected"?: string,"created_at"?: string,"difficulty"?: number,"due"?: string,"explanation"?: string,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"original"?: string,"reps"?: number,"scheduled_days"?: number,"session_id"?: string | null,"stability"?: number,"state"?: number,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -263,7 +243,7 @@ isOneToOne: false
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"final_level": Database["public"]['Enums']["cefr_level"],"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"oral_feedback"?: Json | null,"oral_level"?: Database["public"]['Enums']["cefr_level"] | null,"oral_transcripts"?: NonNullable<Json>,"user_id": string,"written_answers": NonNullable<Json>,"written_correct": number,"written_level": Database["public"]['Enums']["cefr_level"],"written_total": number
+                    "created_at"?: string,"final_level": Database["public"]['Enums']["cefr_level"],"id"?: string,"language": Database["public"]['Enums']["language_code"],"oral_feedback"?: Json | null,"oral_level"?: Database["public"]['Enums']["cefr_level"] | null,"oral_transcripts"?: NonNullable<Json>,"user_id": string,"written_answers": NonNullable<Json>,"written_correct": number,"written_level": Database["public"]['Enums']["cefr_level"],"written_total": number
                   }
                   Update: {
                     "created_at"?: string,"final_level"?: Database["public"]['Enums']["cefr_level"],"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"oral_feedback"?: Json | null,"oral_level"?: Database["public"]['Enums']["cefr_level"] | null,"oral_transcripts"?: NonNullable<Json>,"user_id"?: string,"written_answers"?: NonNullable<Json>,"written_correct"?: number,"written_level"?: Database["public"]['Enums']["cefr_level"],"written_total"?: number
@@ -273,14 +253,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "active_language": Database["public"]['Enums']["language_code"],"approved": boolean,"created_at": string,"daily_goal_minutes": number,"goal": string | null,"id": string,"level": Database["public"]['Enums']["cefr_level"],"native_language": Database["public"]['Enums']["language_code"],"onboarded_at": string | null,"purpose": Database["public"]['Enums']["learning_purpose"] | null,"reminder_time": string,"timezone": string,"updated_at": string
+                    "active_language": Database["public"]['Enums']["language_code"],"approved": boolean,"created_at": string,"daily_goal_minutes": number,"id": string,"native_language": Database["public"]['Enums']["language_code"],"reminder_time": string,"timezone": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "active_language"?: Database["public"]['Enums']["language_code"],"approved"?: boolean,"created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id": string,"level"?: Database["public"]['Enums']["cefr_level"],"native_language"?: Database["public"]['Enums']["language_code"],"onboarded_at"?: string | null,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
+                    "active_language"?: Database["public"]['Enums']["language_code"],"approved"?: boolean,"created_at"?: string,"daily_goal_minutes"?: number,"id": string,"native_language"?: Database["public"]['Enums']["language_code"],"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "active_language"?: Database["public"]['Enums']["language_code"],"approved"?: boolean,"created_at"?: string,"daily_goal_minutes"?: number,"goal"?: string | null,"id"?: string,"level"?: Database["public"]['Enums']["cefr_level"],"native_language"?: Database["public"]['Enums']["language_code"],"onboarded_at"?: string | null,"purpose"?: Database["public"]['Enums']["learning_purpose"] | null,"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
+                    "active_language"?: Database["public"]['Enums']["language_code"],"approved"?: boolean,"created_at"?: string,"daily_goal_minutes"?: number,"id"?: string,"native_language"?: Database["public"]['Enums']["language_code"],"reminder_time"?: string,"timezone"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -353,7 +333,7 @@ isOneToOne: false
                   }
                   ComputedFields: never
                   Insert: {
-                    "chapter_id"?: number | null,"ended_at"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["session_kind"],"language"?: Database["public"]['Enums']["language_code"],"lesson_id"?: number | null,"started_at"?: string,"user_id"?: string
+                    "chapter_id"?: number | null,"ended_at"?: string | null,"id"?: string,"kind": Database["public"]['Enums']["session_kind"],"language": Database["public"]['Enums']["language_code"],"lesson_id"?: number | null,"started_at"?: string,"user_id"?: string
                   }
                   Update: {
                     "chapter_id"?: number | null,"ended_at"?: string | null,"id"?: string,"kind"?: Database["public"]['Enums']["session_kind"],"language"?: Database["public"]['Enums']["language_code"],"lesson_id"?: number | null,"started_at"?: string,"user_id"?: string
@@ -393,7 +373,7 @@ isOneToOne: false
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"key": string,"language"?: Database["public"]['Enums']["language_code"],"path": string,"text": string,"voice": string
+                    "created_at"?: string,"key": string,"language": Database["public"]['Enums']["language_code"],"path": string,"text": string,"voice": string
                   }
                   Update: {
                     "created_at"?: string,"key"?: string,"language"?: Database["public"]['Enums']["language_code"],"path"?: string,"text"?: string,"voice"?: string
@@ -403,14 +383,14 @@ isOneToOne: false
                   ]
                 },"vocab_items": {
                   Row: {
-                    "created_at": string,"difficulty": number,"due": string,"en": string,"id": string,"it": string,"language": Database["public"]['Enums']["language_code"],"lapses": number,"last_review": string | null,"learning_steps": number,"reps": number,"scheduled_days": number,"stability": number,"state": number,"user_id": string
+                    "created_at": string,"difficulty": number,"due": string,"id": string,"language": Database["public"]['Enums']["language_code"],"lapses": number,"last_review": string | null,"learning_steps": number,"reps": number,"scheduled_days": number,"stability": number,"state": number,"term": string,"translation": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"difficulty"?: number,"due"?: string,"en": string,"id"?: string,"it": string,"language"?: Database["public"]['Enums']["language_code"],"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"reps"?: number,"scheduled_days"?: number,"stability"?: number,"state"?: number,"user_id"?: string
+                    "created_at"?: string,"difficulty"?: number,"due"?: string,"id"?: string,"language": Database["public"]['Enums']["language_code"],"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"reps"?: number,"scheduled_days"?: number,"stability"?: number,"state"?: number,"term": string,"translation": string,"user_id"?: string
                   }
                   Update: {
-                    "created_at"?: string,"difficulty"?: number,"due"?: string,"en"?: string,"id"?: string,"it"?: string,"language"?: Database["public"]['Enums']["language_code"],"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"reps"?: number,"scheduled_days"?: number,"stability"?: number,"state"?: number,"user_id"?: string
+                    "created_at"?: string,"difficulty"?: number,"due"?: string,"id"?: string,"language"?: Database["public"]['Enums']["language_code"],"lapses"?: number,"last_review"?: string | null,"learning_steps"?: number,"reps"?: number,"scheduled_days"?: number,"stability"?: number,"state"?: number,"term"?: string,"translation"?: string,"user_id"?: string
                   }
                   Relationships: [
                     

@@ -9,7 +9,7 @@ insert into auth.users (id, email) values
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","role":"authenticated"}', true);
 
-insert into public.sessions (id, kind) values ('cccccccc-0000-0000-0000-000000000001', 'dialogue');
+insert into public.sessions (id, kind, language) values ('cccccccc-0000-0000-0000-000000000001', 'dialogue', 'en');
 insert into public.session_messages (session_id, role, content, input) values
   ('cccccccc-0000-0000-0000-000000000001', 'learner', 'I go to the cinema yesterday.', 'voice'),
   ('cccccccc-0000-0000-0000-000000000001', 'tutor', 'Nice! What did you see?', null);

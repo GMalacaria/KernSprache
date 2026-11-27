@@ -163,7 +163,7 @@ async function saveMistakes(
       session_id: sessionId,
       original: c.original,
       corrected: c.corrected,
-      explanation_it: c.explanation,
+      explanation: c.explanation,
       category: c.category,
       language,
     })),
@@ -181,16 +181,15 @@ async function saveVocab(
   if (!reply.new_vocab.length) return
   // Also the lower-case spelling: the unique index is on lower(en), and German nouns keep their capital.
   const words = [...new Set(reply.new_vocab.flatMap((v) => [v.term, v.term.toLowerCase()]))]
-  const { data: existing, error } = await db.from('vocab_items').select('en')
+  const { data: existing, error } = await db.from('vocab_items').select('term')
     .eq('user_id', userId)
-    .eq('language', language).in('en', words)
+    .eq('language', language).in('term', words)
   if (error) throw error
-  const known = new Set((existing ?? []).map((v) => v.en.toLowerCase()))
+  const known = new Set((existing ?? []).map((v) => v.term.toLowerCase()))
   const fresh = reply.new_vocab.filter((v) => !known.has(v.term.toLowerCase()))
   if (!fresh.length) return
   const { error: insertError } = await db.from('vocab_items').insert(
-    // The table still has the single-language column names (renamed in a later step).
-    fresh.map((v) => ({ en: v.term, it: v.translation, language })),
+    fresh.map((v) => ({ ...v, language })),
   )
   // 23505: a concurrent request inserted the same word; nothing to do.
   if (insertError && insertError.code !== '23505') throw insertError

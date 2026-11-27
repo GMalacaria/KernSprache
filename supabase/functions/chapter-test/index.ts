@@ -25,6 +25,7 @@ import {
   testIsValid,
 } from '../_shared/schemas/chapter-test.ts'
 import { lessonContentSchema } from '../_shared/schemas/lesson.ts'
+import { LESSON_PROMPT_VERSION } from '../_shared/prompts/lesson.v3.ts'
 import { z } from '../_shared/deps.ts'
 import { adminClient, type Db, requireApprovedUser, userClient } from '../_shared/supabase.ts'
 
@@ -115,7 +116,7 @@ async function start(db: Db, userId: string, chapterId: number) {
   }
 
   const learner = await loadLearner(db, userId, chapter.language)
-  const generated = await generateTest(db, userId, chapter, learner)
+  const generated = await generateTest(userId, chapter, learner)
   const questions: StoredQuestion[] = generated.questions.map((q, i) => ({
     id: `q${i + 1}`,
     ...q,
@@ -157,16 +158,20 @@ function publicTest(
 }
 
 async function generateTest(
-  db: Db,
   userId: string,
   chapter: ChapterInfo,
   learner: Learner,
 ) {
-  const { data: contents, error } = await db
-    .from('lesson_contents')
+  // The lessons the learner saw: the shared ones for their native language, purpose and lesson prompt version.
+  let query = adminClient()
+    .from('lesson_content_cache')
     .select('content, lessons!inner (chapter_id, sort_order)')
     .eq('lessons.chapter_id', chapter.id)
-    .order('lessons(sort_order)')
+    .eq('native_language', learner.pair.native)
+    .eq('prompt_version', LESSON_PROMPT_VERSION)
+    .not('content', 'is', null)
+  query = learner.purpose === null ? query.is('purpose', null) : query.eq('purpose', learner.purpose)
+  const { data: contents, error } = await query.order('lessons(sort_order)')
   if (error) throw error
   const lessonLines = (contents ?? []).flatMap((row, i) => {
     const parsed = lessonContentSchema.safeParse(row.content)
@@ -298,10 +303,7 @@ async function submit(
   }
 }
 
-/**
- * After the last chapter of a level, moves the learner up in the chapter's language. Returns the (possibly new)
- * level. The profile keeps the level of the active language too, while the app still reads it from there.
- */
+/** After the last chapter of a level, moves the learner up in the chapter's language. Returns the (possibly new) level. */
 async function raiseLevel(
   db: Db,
   userId: string,
@@ -322,12 +324,6 @@ async function raiseLevel(
     .from('learner_languages')
     .upsert({ user_id: userId, language: chapter.language, level: next })
   if (rowError) throw rowError
-  const { error: profileError } = await db
-    .from('profiles')
-    .update({ level: next })
-    .eq('id', userId)
-    .eq('active_language', chapter.language)
-  if (profileError) throw profileError
   return next
 }
 

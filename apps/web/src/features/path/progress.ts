@@ -14,7 +14,7 @@ export interface ChapterRow {
   level: CefrLevel
   sort_order: number
   title: string
-  description_it: string
+  description: string
   lessons: LessonRow[]
 }
 
